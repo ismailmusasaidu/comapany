@@ -15,7 +15,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="bg-gradient-to-r from-emerald-900 via-teal-900 to-emerald-900 text-white sticky top-0 z-50 shadow-lg">
+      <nav className="bg-gradient-to-r from-blue-950 via-blue-900 to-slate-900 text-white sticky top-0 z-50 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20 md:h-28">
             <Link to="/" className="flex items-center" onClick={closeMobileMenu}>
@@ -52,7 +52,7 @@ export default function Layout({ children }: LayoutProps) {
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden bg-emerald-950 border-t border-emerald-800">
+          <div className="md:hidden bg-slate-950 border-t border-blue-800">
             <div className="px-4 py-4 space-y-3">
               <a href="/#home" className="block py-2 hover:text-orange-400 transition-colors font-medium" onClick={closeMobileMenu}>Home</a>
               <a href="/#logistics" className="block py-2 hover:text-orange-400 transition-colors font-medium" onClick={closeMobileMenu}>Logistics</a>
