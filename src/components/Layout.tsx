@@ -38,6 +38,10 @@ export default function Layout({ children }: LayoutProps) {
                 Marketplace
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
+              <a href="/#gallery" className="relative hover:text-orange-500 transition-all duration-300 font-medium group">
+                Gallery
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
+              </a>
               <a href="/#partners" className="relative hover:text-orange-500 transition-all duration-300 font-medium group">
                 Partners
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
@@ -75,6 +79,7 @@ export default function Layout({ children }: LayoutProps) {
               <a href="/#home" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Home</a>
               <a href="/#logistics" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Logistics</a>
               <Link to="/marketplace" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Marketplace</Link>
+              <a href="/#gallery" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Gallery</a>
               <a href="/#partners" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Partners</a>
               <a href="/#team" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Team</a>
               <a href="/#contact" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Contact</a>
@@ -122,8 +127,8 @@ export default function Layout({ children }: LayoutProps) {
               <h4 className="font-bold text-lg mb-4">Company</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><a href="/#about" className="hover:text-orange-400 transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-orange-400 transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-orange-400 transition-colors">Partners</a></li>
+                <li><a href="/#gallery" className="hover:text-orange-400 transition-colors">Gallery</a></li>
+                <li><a href="/#partners" className="hover:text-orange-400 transition-colors">Partners</a></li>
                 <li><a href="/#contact" className="hover:text-orange-400 transition-colors">Contact</a></li>
               </ul>
             </div>

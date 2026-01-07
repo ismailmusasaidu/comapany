@@ -281,6 +281,124 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section id="gallery" className="py-12 sm:py-16 lg:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 sm:mb-16">
+            <div className="inline-block bg-orange-100 text-orange-600 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 mb-3 sm:mb-4 font-semibold text-xs sm:text-sm">
+              OUR OPERATIONS
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 sm:mb-4 px-4">
+              Professional <span className="text-orange-500">Gallery</span>
+            </h2>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+              Take a look at our state-of-the-art facilities, modern fleet, and operations that power your deliveries.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp">
+              <img
+                src="https://images.pexels.com/photos/4393426/pexels-photo-4393426.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Modern Warehouse"
+                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-1">Modern Warehouse</h3>
+                  <p className="text-gray-300 text-sm">State-of-the-art storage facilities</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp delay-100">
+              <img
+                src="https://images.pexels.com/photos/4391470/pexels-photo-4391470.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Delivery Fleet"
+                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-1">Delivery Fleet</h3>
+                  <p className="text-gray-300 text-sm">Modern vehicles for fast delivery</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp delay-200">
+              <img
+                src="https://images.pexels.com/photos/4246120/pexels-photo-4246120.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Operations Center"
+                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-1">Operations Center</h3>
+                  <p className="text-gray-300 text-sm">24/7 logistics coordination</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp delay-100">
+              <img
+                src="https://images.pexels.com/photos/4393668/pexels-photo-4393668.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Package Sorting"
+                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-1">Package Sorting</h3>
+                  <p className="text-gray-300 text-sm">Automated sorting systems</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp delay-200">
+              <img
+                src="https://images.pexels.com/photos/4391466/pexels-photo-4391466.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Loading Dock"
+                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-1">Loading Dock</h3>
+                  <p className="text-gray-300 text-sm">Efficient cargo handling</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp delay-300">
+              <img
+                src="https://images.pexels.com/photos/4246167/pexels-photo-4246167.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Team at Work"
+                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-1">Team at Work</h3>
+                  <p className="text-gray-300 text-sm">Dedicated professionals</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 sm:mt-16 bg-gradient-to-br from-slate-900 to-blue-900 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center text-white relative overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-10 left-10 w-40 h-40 bg-orange-500 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-10 right-10 w-60 h-60 bg-red-500 rounded-full blur-3xl"></div>
+            </div>
+            <div className="relative z-10">
+              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">Visit Our Facilities</h3>
+              <p className="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8 max-w-2xl mx-auto">
+                Interested in seeing our operations firsthand? Schedule a tour of our facilities and experience our commitment to excellence.
+              </p>
+              <a href="#contact" className="inline-block bg-orange-500 hover:bg-orange-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all transform hover:scale-105 shadow-lg">
+                Schedule a Tour
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="partners" className="py-12 sm:py-16 lg:py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-16">
