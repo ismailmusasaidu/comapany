@@ -25,32 +25,32 @@ export default function Layout({ children }: LayoutProps) {
                 className="h-16 sm:h-20 md:h-24 w-auto"
               />
             </Link>
-            <div className="hidden lg:flex space-x-6">
-              <a href="/#home" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
+            <div className="hidden md:flex space-x-4 lg:space-x-6">
+              <a href="/#home" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
                 Home
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#logistics" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
+              <a href="/#logistics" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
                 Logistics
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <Link to="/marketplace" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
+              <Link to="/marketplace" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
                 Marketplace
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <a href="/#gallery" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
+              <a href="/#gallery" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
                 Gallery
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#partners" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
+              <a href="/#partners" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
                 Partners
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#team" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
+              <a href="/#team" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
                 Team
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#contact" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
+              <a href="/#contact" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
                 Contact
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
