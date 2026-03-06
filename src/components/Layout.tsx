@@ -25,40 +25,40 @@ export default function Layout({ children }: LayoutProps) {
                 className="h-16 sm:h-20 md:h-24 w-auto"
               />
             </Link>
-            <div className="hidden md:flex space-x-8">
-              <a href="/#home" className="relative hover:text-orange-500 transition-all duration-300 font-medium group">
+            <div className="hidden lg:flex space-x-6">
+              <a href="/#home" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
                 Home
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#logistics" className="relative hover:text-orange-500 transition-all duration-300 font-medium group">
+              <a href="/#logistics" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
                 Logistics
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <Link to="/marketplace" className="relative hover:text-orange-500 transition-all duration-300 font-medium group">
+              <Link to="/marketplace" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
                 Marketplace
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <a href="/#gallery" className="relative hover:text-orange-500 transition-all duration-300 font-medium group">
+              <a href="/#gallery" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
                 Gallery
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#partners" className="relative hover:text-orange-500 transition-all duration-300 font-medium group">
+              <a href="/#partners" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
                 Partners
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#team" className="relative hover:text-orange-500 transition-all duration-300 font-medium group">
+              <a href="/#team" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
                 Team
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#contact" className="relative hover:text-orange-500 transition-all duration-300 font-medium group">
+              <a href="/#contact" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-sm">
                 Contact
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4">
               <Link
                 to={isMarketplacePage ? "/#contact" : "/marketplace"}
-                className="hidden sm:block bg-orange-500 hover:bg-orange-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 text-sm sm:text-base"
+                className="hidden md:block bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 text-sm whitespace-nowrap"
                 onClick={closeMobileMenu}
               >
                 {isMarketplacePage ? "Contact Us" : "Get Started"}
