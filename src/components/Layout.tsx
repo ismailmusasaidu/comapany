@@ -20,7 +20,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex justify-between items-center h-20 md:h-28">
             <Link to="/" className="flex items-center" onClick={closeMobileMenu}>
               <img
-                src="/chatgpt_image_jan_6,_2026,_08_02_38_am.png"
+                src="/dist/chatgpt_image_jan_6,_2026,_08_02_38_am.png"
                 alt="Danhausa Logistics"
                 className="h-16 sm:h-20 md:h-24 w-auto"
               />
