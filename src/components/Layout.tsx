@@ -15,7 +15,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="fixed top-0 left-0 right-0 bg-white text-gray-900 z-50 shadow-lg border-b border-gray-200">
+      <nav className="fixed top-0 left-0 right-0 bg-gradient-to-r from-slate-900 to-blue-900 text-white z-50 shadow-xl border-b border-orange-500/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20 md:h-28">
             <Link to="/" className="flex items-center" onClick={closeMobileMenu}>
@@ -26,31 +26,31 @@ export default function Layout({ children }: LayoutProps) {
               />
             </Link>
             <div className="hidden md:flex space-x-4 lg:space-x-6">
-              <a href="/#home" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
+              <a href="/#home" className="relative hover:text-orange-400 transition-all duration-300 font-medium group text-xs md:text-sm text-gray-100">
                 Home
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#logistics" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
+              <a href="/#logistics" className="relative hover:text-orange-400 transition-all duration-300 font-medium group text-xs md:text-sm text-gray-100">
                 Logistics
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <Link to="/marketplace" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
+              <Link to="/marketplace" className="relative hover:text-orange-400 transition-all duration-300 font-medium group text-xs md:text-sm text-gray-100">
                 Marketplace
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <a href="/#gallery" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
+              <a href="/#gallery" className="relative hover:text-orange-400 transition-all duration-300 font-medium group text-xs md:text-sm text-gray-100">
                 Gallery
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#partners" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
+              <a href="/#partners" className="relative hover:text-orange-400 transition-all duration-300 font-medium group text-xs md:text-sm text-gray-100">
                 Partners
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#team" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
+              <a href="/#team" className="relative hover:text-orange-400 transition-all duration-300 font-medium group text-xs md:text-sm text-gray-100">
                 Team
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
-              <a href="/#contact" className="relative hover:text-orange-500 transition-all duration-300 font-medium group text-xs md:text-sm">
+              <a href="/#contact" className="relative hover:text-orange-400 transition-all duration-300 font-medium group text-xs md:text-sm text-gray-100">
                 Contact
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
               </a>
@@ -65,7 +65,7 @@ export default function Layout({ children }: LayoutProps) {
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden text-gray-900 hover:text-orange-500 transition-colors"
+                className="md:hidden text-gray-100 hover:text-orange-400 transition-colors"
               >
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
@@ -74,15 +74,15 @@ export default function Layout({ children }: LayoutProps) {
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden bg-gray-50 border-t border-gray-200">
+          <div className="md:hidden bg-slate-800 border-t border-orange-500/20">
             <div className="px-4 py-4 space-y-3">
-              <a href="/#home" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Home</a>
-              <a href="/#logistics" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Logistics</a>
-              <Link to="/marketplace" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Marketplace</Link>
-              <a href="/#gallery" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Gallery</a>
-              <a href="/#partners" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Partners</a>
-              <a href="/#team" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Team</a>
-              <a href="/#contact" className="block py-2 text-gray-900 hover:text-orange-500 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Contact</a>
+              <a href="/#home" className="block py-2 text-gray-100 hover:text-orange-400 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Home</a>
+              <a href="/#logistics" className="block py-2 text-gray-100 hover:text-orange-400 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Logistics</a>
+              <Link to="/marketplace" className="block py-2 text-gray-100 hover:text-orange-400 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Marketplace</Link>
+              <a href="/#gallery" className="block py-2 text-gray-100 hover:text-orange-400 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Gallery</a>
+              <a href="/#partners" className="block py-2 text-gray-100 hover:text-orange-400 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Partners</a>
+              <a href="/#team" className="block py-2 text-gray-100 hover:text-orange-400 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Team</a>
+              <a href="/#contact" className="block py-2 text-gray-100 hover:text-orange-400 transition-all duration-300 font-medium hover:translate-x-2" onClick={closeMobileMenu}>Contact</a>
               <Link
                 to={isMarketplacePage ? "/#contact" : "/marketplace"}
                 className="block sm:hidden bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-all text-center mt-2"
