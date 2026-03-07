@@ -1,7 +1,130 @@
 import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, CheckCircle2, Users, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+
+interface HeroData {
+  title: string;
+  subtitle: string;
+  cta_button_text: string;
+  cta_button_link: string;
+}
+
+interface Service {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+}
+
+interface TeamMember {
+  id: string;
+  name: string;
+  position: string;
+  bio: string;
+  image_url: string;
+}
+
+interface Partner {
+  id: string;
+  name: string;
+  logo_url: string;
+}
+
+interface GalleryItem {
+  id: string;
+  title: string;
+  description: string;
+  image_url: string;
+}
+
+interface ContactInfo {
+  email: string;
+  phone: string;
+  address: string;
+  hours: string;
+}
 
 export default function HomePage() {
+  const [heroData, setHeroData] = useState<HeroData>({
+    title: 'Seamless Logistics & Marketplace Solutions',
+    subtitle: 'Experience excellence in delivery services and discover quality products in one unified platform.',
+    cta_button_text: 'Explore Services',
+    cta_button_link: '#logistics',
+  });
+  const [services, setServices] = useState<Service[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+    email: 'info@danhausa.com',
+    phone: '+234 (0) 123 456 7890',
+    address: '123 Business District, Nigeria',
+    hours: 'Mon-Fri: 9AM-6PM',
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data: hero } = await supabase
+        .from('hero_section')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (hero) {
+        setHeroData(hero);
+      }
+
+      const { data: servicesData } = await supabase
+        .from('services')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (servicesData) {
+        setServices(servicesData);
+      }
+
+      const { data: teamData } = await supabase
+        .from('team_members')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (teamData) {
+        setTeamMembers(teamData);
+      }
+
+      const { data: partnersData } = await supabase
+        .from('partners')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (partnersData) {
+        setPartners(partnersData);
+      }
+
+      const { data: galleryData } = await supabase
+        .from('gallery_items')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (galleryData) {
+        setGalleryItems(galleryData);
+      }
+
+      const { data: contact } = await supabase
+        .from('contact_info')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (contact) {
+        setContactInfo(contact);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <>
       <section id="home" className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white py-16 sm:py-20 lg:py-32 overflow-hidden">
@@ -16,16 +139,15 @@ export default function HomePage() {
                 <span className="text-orange-400 font-semibold text-xs sm:text-sm">Your Trusted Partner</span>
               </div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight animate-slideInLeft delay-100">
-                Seamless <span className="text-orange-400">Logistics</span> &
-                <span className="text-orange-400"> Marketplace</span> Solutions
+                {heroData.title}
               </h2>
               <p className="text-base sm:text-lg lg:text-xl text-gray-300 mb-6 sm:mb-8 leading-relaxed animate-slideInLeft delay-200">
-                Experience excellence in delivery services and discover quality products in one unified platform. Danhausa connects your business to endless possibilities.
+                {heroData.subtitle}
               </p>
               <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 animate-slideInLeft delay-300">
-                <button className="bg-orange-500 hover:bg-orange-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all transform hover:scale-105 shadow-lg shadow-orange-500/50">
-                  Explore Services
-                </button>
+                <a href={heroData.cta_button_link} className="bg-orange-500 hover:bg-orange-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all transform hover:scale-105 shadow-lg shadow-orange-500/50 text-center">
+                  {heroData.cta_button_text}
+                </a>
                 <a href="#contact" className="bg-transparent border-2 border-white hover:bg-white hover:text-slate-900 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all text-center">
                   Contact Us
                 </a>
@@ -76,85 +198,41 @@ export default function HomePage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group border-t-4 border-orange-500 animate-slideUp">
-              <div className="bg-gradient-to-br from-orange-500 to-red-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Truck className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-4">Express Shipping</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                Lightning-fast delivery for time-sensitive packages. Your cargo reaches its destination when you need it.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle2 className="h-5 w-5 text-orange-500 mr-3" />
-                  Same-day delivery available
-                </li>
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle2 className="h-5 w-5 text-orange-500 mr-3" />
-                  Real-time tracking
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group border-t-4 border-blue-900 animate-slideUp delay-100">
-              <div className="bg-gradient-to-br from-blue-900 to-slate-900 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Package className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-4">Freight Services</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                Comprehensive freight solutions for businesses of all sizes. Handle bulk shipments with ease.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle2 className="h-5 w-5 text-blue-900 mr-3" />
-                  Air and sea freight
-                </li>
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle2 className="h-5 w-5 text-blue-900 mr-3" />
-                  Custom clearance
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group border-t-4 border-red-500 animate-slideUp delay-200">
-              <div className="bg-gradient-to-br from-red-500 to-orange-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Clock className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-4">24/7 Support</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                Round-the-clock customer service to address your logistics needs anytime, anywhere.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle2 className="h-5 w-5 text-red-500 mr-3" />
-                  Always available
-                </li>
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle2 className="h-5 w-5 text-red-500 mr-3" />
-                  Expert guidance
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group border-t-4 border-orange-500 animate-slideUp delay-300">
-              <div className="bg-gradient-to-br from-orange-500 to-blue-900 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Users className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-4">Corporate Logistics</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                Tailored logistics solutions designed for enterprise clients. Streamline supply chains with dedicated support.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle2 className="h-5 w-5 text-orange-500 mr-3" />
-                  Custom supply chain management
-                </li>
-                <li className="flex items-center text-gray-700">
-                  <CheckCircle2 className="h-5 w-5 text-orange-500 mr-3" />
-                  Dedicated account managers
-                </li>
-              </ul>
-            </div>
+            {services.length > 0 ? (
+              services.map((service, index) => (
+                <div key={service.id} className={`bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group border-t-4 border-orange-500 animate-slideUp delay-${index * 100}`}>
+                  <div className="bg-gradient-to-br from-orange-500 to-red-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    {service.icon === 'truck' && <Truck className="h-8 w-8 text-white" />}
+                    {service.icon === 'package' && <Package className="h-8 w-8 text-white" />}
+                    {service.icon === 'clock' && <Clock className="h-8 w-8 text-white" />}
+                    {service.icon === 'users' && <Users className="h-8 w-8 text-white" />}
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-4">{service.title}</h3>
+                  <p className="text-gray-600 mb-6 leading-relaxed">{service.description}</p>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group border-t-4 border-orange-500 animate-slideUp">
+                  <div className="bg-gradient-to-br from-orange-500 to-red-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Truck className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-4">Express Shipping</h3>
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    Lightning-fast delivery for time-sensitive packages.
+                  </p>
+                </div>
+                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group border-t-4 border-blue-900 animate-slideUp delay-100">
+                  <div className="bg-gradient-to-br from-blue-900 to-slate-900 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Package className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-4">Freight Services</h3>
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    Comprehensive freight solutions for businesses of all sizes.
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -296,89 +374,52 @@ export default function HomePage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp">
-              <img
-                src="https://images.pexels.com/photos/4393426/pexels-photo-4393426.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Modern Warehouse"
-                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Modern Warehouse</h3>
-                  <p className="text-gray-300 text-sm">State-of-the-art storage facilities</p>
+            {galleryItems.length > 0 ? (
+              galleryItems.map((item, index) => (
+                <div key={item.id} className={`group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp delay-${index * 100}`}>
+                  <img
+                    src={item.image_url}
+                    alt={item.title}
+                    className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-1">{item.title}</h3>
+                      <p className="text-gray-300 text-sm">{item.description}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp delay-100">
-              <img
-                src="https://images.pexels.com/photos/4391470/pexels-photo-4391470.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Delivery Fleet"
-                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Delivery Fleet</h3>
-                  <p className="text-gray-300 text-sm">Modern vehicles for fast delivery</p>
+              ))
+            ) : (
+              <>
+                <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp">
+                  <img
+                    src="https://images.pexels.com/photos/4393426/pexels-photo-4393426.jpeg?auto=compress&cs=tinysrgb&w=800"
+                    alt="Modern Warehouse"
+                    className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-1">Modern Warehouse</h3>
+                      <p className="text-gray-300 text-sm">State-of-the-art storage facilities</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp delay-200">
-              <img
-                src="https://images.pexels.com/photos/4246120/pexels-photo-4246120.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Operations Center"
-                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Operations Center</h3>
-                  <p className="text-gray-300 text-sm">24/7 logistics coordination</p>
+                <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp delay-100">
+                  <img
+                    src="https://images.pexels.com/photos/4391470/pexels-photo-4391470.jpeg?auto=compress&cs=tinysrgb&w=800"
+                    alt="Delivery Fleet"
+                    className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-1">Delivery Fleet</h3>
+                      <p className="text-gray-300 text-sm">Modern vehicles for fast delivery</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp delay-100">
-              <img
-                src="https://images.pexels.com/photos/4393668/pexels-photo-4393668.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Package Sorting"
-                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Package Sorting</h3>
-                  <p className="text-gray-300 text-sm">Automated sorting systems</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp delay-200">
-              <img
-                src="https://images.pexels.com/photos/4391466/pexels-photo-4391466.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Loading Dock"
-                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Loading Dock</h3>
-                  <p className="text-gray-300 text-sm">Efficient cargo handling</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-slideUp delay-300">
-              <img
-                src="https://images.pexels.com/photos/4246167/pexels-photo-4246167.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Team at Work"
-                className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Team at Work</h3>
-                  <p className="text-gray-300 text-sm">Dedicated professionals</p>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           <div className="mt-10 sm:mt-16 bg-gradient-to-br from-slate-900 to-blue-900 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center text-white relative overflow-hidden">
@@ -414,95 +455,33 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 mb-12">
-            <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all group border border-gray-200 flex items-center justify-center animate-slideUp">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-white text-2xl font-bold">NT</span>
+            {partners.length > 0 ? (
+              partners.map((partner, index) => (
+                <div key={partner.id} className={`bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all group border border-gray-200 flex items-center justify-center animate-slideUp delay-${index * 100}`}>
+                  <div className="text-center">
+                    {partner.logo_url ? (
+                      <img src={partner.logo_url} alt={partner.name} className="w-20 h-20 mx-auto mb-4 object-contain group-hover:scale-110 transition-transform" />
+                    ) : (
+                      <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <span className="text-white text-2xl font-bold">{partner.name.substring(0, 2).toUpperCase()}</span>
+                      </div>
+                    )}
+                    <p className="text-slate-900 font-semibold text-sm">{partner.name}</p>
+                  </div>
                 </div>
-                <p className="text-slate-900 font-semibold text-sm">Nile Trading</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all group border border-gray-200 flex items-center justify-center animate-slideUp delay-100">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-900 to-slate-900 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-white text-2xl font-bold">SE</span>
+              ))
+            ) : (
+              <>
+                <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all group border border-gray-200 flex items-center justify-center animate-slideUp">
+                  <div className="text-center">
+                    <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <span className="text-white text-2xl font-bold">NT</span>
+                    </div>
+                    <p className="text-slate-900 font-semibold text-sm">Nile Trading</p>
+                  </div>
                 </div>
-                <p className="text-slate-900 font-semibold text-sm">Sahara Express</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all group border border-gray-200 flex items-center justify-center animate-slideUp delay-200">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-white text-2xl font-bold">AG</span>
-                </div>
-                <p className="text-slate-900 font-semibold text-sm">Atlas Group</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all group border border-gray-200 flex items-center justify-center animate-slideUp delay-300">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-orange-500 to-blue-900 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-white text-2xl font-bold">ZC</span>
-                </div>
-                <p className="text-slate-900 font-semibold text-sm">Zenith Corp</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all group border border-gray-200 flex items-center justify-center animate-slideUp delay-400">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-white text-2xl font-bold">MI</span>
-                </div>
-                <p className="text-slate-900 font-semibold text-sm">Metro Industries</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all group border border-gray-200 flex items-center justify-center animate-slideUp delay-100">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-900 to-red-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-white text-2xl font-bold">PE</span>
-                </div>
-                <p className="text-slate-900 font-semibold text-sm">Pinnacle Enterprises</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all group border border-gray-200 flex items-center justify-center animate-slideUp delay-200">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-orange-500 to-slate-900 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-white text-2xl font-bold">HS</span>
-                </div>
-                <p className="text-slate-900 font-semibold text-sm">Horizon Solutions</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all group border border-gray-200 flex items-center justify-center animate-slideUp delay-300">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-red-500 to-blue-900 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-white text-2xl font-bold">VG</span>
-                </div>
-                <p className="text-slate-900 font-semibold text-sm">Victory Global</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all group border border-gray-200 flex items-center justify-center animate-slideUp delay-400">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-white text-2xl font-bold">EC</span>
-                </div>
-                <p className="text-slate-900 font-semibold text-sm">Eagle Commerce</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all group border border-gray-200 flex items-center justify-center animate-slideUp">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-900 to-orange-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-white text-2xl font-bold">SM</span>
-                </div>
-                <p className="text-slate-900 font-semibold text-sm">Summit Markets</p>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl p-8 sm:p-12 border border-gray-200">
@@ -539,69 +518,45 @@ export default function HomePage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            <div className="bg-gradient-to-br from-slate-50 to-gray-100 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group text-center border border-gray-200 animate-slideUp">
-              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="text-white text-3xl font-bold">AH</span>
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Aminu Hassan</h3>
-              <p className="text-orange-500 font-semibold mb-3">Chief Executive Officer</p>
-              <p className="text-gray-600 text-sm mb-4">
-                Visionary leader with 15+ years in logistics and supply chain management.
-              </p>
-              <div className="flex justify-center space-x-3">
-                <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
-                  <Globe className="h-5 w-5" />
-                </a>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-slate-50 to-gray-100 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group text-center border border-gray-200 animate-slideUp delay-100">
-              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-900 to-slate-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="text-white text-3xl font-bold">FA</span>
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Fatima Ahmed</h3>
-              <p className="text-blue-900 font-semibold mb-3">Head of Operations</p>
-              <p className="text-gray-600 text-sm mb-4">
-                Expert in streamlining operations and optimizing delivery networks.
-              </p>
-              <div className="flex justify-center space-x-3">
-                <a href="#" className="text-gray-400 hover:text-blue-900 transition-colors">
-                  <Globe className="h-5 w-5" />
-                </a>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-slate-50 to-gray-100 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group text-center border border-gray-200 animate-slideUp delay-200">
-              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="text-white text-3xl font-bold">IK</span>
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Ibrahim Karim</h3>
-              <p className="text-red-500 font-semibold mb-3">Technology Director</p>
-              <p className="text-gray-600 text-sm mb-4">
-                Technology innovator building scalable marketplace and tracking solutions.
-              </p>
-              <div className="flex justify-center space-x-3">
-                <a href="#" className="text-gray-400 hover:text-red-500 transition-colors">
-                  <Globe className="h-5 w-5" />
-                </a>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-slate-50 to-gray-100 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group text-center border border-gray-200 animate-slideUp delay-300">
-              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-blue-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="text-white text-3xl font-bold">ZA</span>
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Zainab Akram</h3>
-              <p className="text-orange-600 font-semibold mb-3">Customer Success Lead</p>
-              <p className="text-gray-600 text-sm mb-4">
-                Passionate about building strong customer relationships and satisfaction.
-              </p>
-              <div className="flex justify-center space-x-3">
-                <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
-                  <Globe className="h-5 w-5" />
-                </a>
-              </div>
-            </div>
+            {teamMembers.length > 0 ? (
+              teamMembers.map((member, index) => (
+                <div key={member.id} className={`bg-gradient-to-br from-slate-50 to-gray-100 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group text-center border border-gray-200 animate-slideUp delay-${index * 100}`}>
+                  {member.image_url ? (
+                    <img src={member.image_url} alt={member.name} className="w-24 h-24 mx-auto mb-6 rounded-full object-cover group-hover:scale-110 transition-transform" />
+                  ) : (
+                    <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <span className="text-white text-3xl font-bold">{member.name.split(' ').map(n => n[0]).join('')}</span>
+                    </div>
+                  )}
+                  <h3 className="text-xl font-bold text-slate-900 mb-1">{member.name}</h3>
+                  <p className="text-orange-500 font-semibold mb-3">{member.position}</p>
+                  <p className="text-gray-600 text-sm mb-4">{member.bio}</p>
+                  <div className="flex justify-center space-x-3">
+                    <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
+                      <Globe className="h-5 w-5" />
+                    </a>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="bg-gradient-to-br from-slate-50 to-gray-100 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all group text-center border border-gray-200 animate-slideUp">
+                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-white text-3xl font-bold">AH</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-1">Aminu Hassan</h3>
+                  <p className="text-orange-500 font-semibold mb-3">Chief Executive Officer</p>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Visionary leader with 15+ years in logistics and supply chain management.
+                  </p>
+                  <div className="flex justify-center space-x-3">
+                    <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
+                      <Globe className="h-5 w-5" />
+                    </a>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -624,7 +579,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 mb-1">Phone</h3>
-                    <p className="text-gray-600">+234 (0) 123 456 7890</p>
+                    <p className="text-gray-600">{contactInfo.phone}</p>
                   </div>
                 </div>
 
@@ -634,7 +589,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 mb-1">Email</h3>
-                    <p className="text-gray-600">info@danhausa.com</p>
+                    <p className="text-gray-600">{contactInfo.email}</p>
                   </div>
                 </div>
 
@@ -644,7 +599,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 mb-1">Location</h3>
-                    <p className="text-gray-600">123 Business District, Nigeria</p>
+                    <p className="text-gray-600">{contactInfo.address}</p>
                   </div>
                 </div>
               </div>
