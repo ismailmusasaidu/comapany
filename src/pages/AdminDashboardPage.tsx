@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Settings, Users, Package, Image, MessageSquare, Home } from 'lucide-react';
+import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { user, signOut } = useAuth();
@@ -20,7 +20,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const menuItems = [
+  const websiteItems = [
     { icon: Home, label: 'Hero Section', path: '/admin/hero' },
     { icon: Package, label: 'Services', path: '/admin/services' },
     { icon: Users, label: 'Team Members', path: '/admin/team' },
@@ -28,6 +28,13 @@ export default function AdminDashboardPage() {
     { icon: Image, label: 'Gallery', path: '/admin/gallery' },
     { icon: MessageSquare, label: 'Contact Info', path: '/admin/contact' },
     { icon: Settings, label: 'About Section', path: '/admin/about' },
+  ];
+
+  const marketplaceItems = [
+    { icon: ShoppingCart, label: 'Marketplace Hero', path: '/admin/marketplace-hero' },
+    { icon: Package, label: 'Categories (What We Offer)', path: '/admin/marketplace-categories' },
+    { icon: Star, label: 'Featured Products', path: '/admin/marketplace-featured' },
+    { icon: Building2, label: 'Marketplace Partners', path: '/admin/marketplace-partners' },
   ];
 
   return (
@@ -50,20 +57,42 @@ export default function AdminDashboardPage() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {menuItems.map((item) => (
-            <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
-            >
-              <div className="flex items-center space-x-3 mb-2">
-                <item.icon className="h-6 w-6 text-orange-500" />
-                <h3 className="text-lg font-semibold text-slate-900">{item.label}</h3>
-              </div>
-              <p className="text-gray-600 text-sm">Manage {item.label.toLowerCase()}</p>
-            </button>
-          ))}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-slate-900 mb-4">Website Content</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {websiteItems.map((item) => (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+              >
+                <div className="flex items-center space-x-3 mb-2">
+                  <item.icon className="h-6 w-6 text-orange-500" />
+                  <h3 className="text-lg font-semibold text-slate-900">{item.label}</h3>
+                </div>
+                <p className="text-gray-600 text-sm">Manage {item.label.toLowerCase()}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-xl font-bold text-slate-900 mb-4">Marketplace Content</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {marketplaceItems.map((item) => (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+              >
+                <div className="flex items-center space-x-3 mb-2">
+                  <item.icon className="h-6 w-6 text-blue-900" />
+                  <h3 className="text-lg font-semibold text-slate-900">{item.label}</h3>
+                </div>
+                <p className="text-gray-600 text-sm">Manage {item.label.toLowerCase()}</p>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -3,51 +3,93 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
-interface GalleryItem {
+interface Category {
   id: string;
   title: string;
   description: string;
   image_url: string;
-  category: string;
 }
 
-const partners = [
-  { id: 1, name: 'TechPro', logo: 'https://images.pexels.com/photos/788946/pexels-photo-788946.jpeg?auto=compress&cs=tinysrgb&w=600' },
-  { id: 2, name: 'StyleHub', logo: 'https://images.pexels.com/photos/1055691/pexels-photo-1055691.jpeg?auto=compress&cs=tinysrgb&w=600' },
-  { id: 3, name: 'HomeNest', logo: 'https://images.pexels.com/photos/1799500/pexels-photo-1799500.jpeg?auto=compress&cs=tinysrgb&w=600' },
-  { id: 4, name: 'BeautyGlow', logo: 'https://images.pexels.com/photos/2246476/pexels-photo-2246476.jpeg?auto=compress&cs=tinysrgb&w=600' },
-  { id: 5, name: 'FitnessMax', logo: 'https://images.pexels.com/photos/1092444/pexels-photo-1092444.jpeg?auto=compress&cs=tinysrgb&w=600' },
-  { id: 6, name: 'EcoLife', logo: 'https://images.pexels.com/photos/1308882/pexels-photo-1308882.jpeg?auto=compress&cs=tinysrgb&w=600' },
-];
+interface FeaturedProduct {
+  id: string;
+  title: string;
+  description: string;
+  image_url: string;
+  rating: number;
+}
+
+interface MarketplacePartner {
+  id: string;
+  name: string;
+  logo_url: string;
+}
+
+interface HeroData {
+  title: string;
+  subtitle: string;
+  download_url: string;
+}
 
 export default function MarketplacePage() {
   const [partnerIndex, setPartnerIndex] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(3);
-  const [categoryItems, setCategoryItems] = useState<GalleryItem[]>([]);
-  const [featuredItems, setFeaturedItems] = useState<GalleryItem[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
+  const [partners, setPartners] = useState<MarketplacePartner[]>([]);
+  const [heroData, setHeroData] = useState<HeroData>({
+    title: 'Shop Smart, Shop Danhausa',
+    subtitle: 'Your trusted online marketplace for quality products at unbeatable prices. Download our app today and start shopping!',
+    download_url: 'https://play.google.com/store',
+  });
 
   useEffect(() => {
-    const fetchGalleryItems = async () => {
-      const { data } = await supabase
-        .from('gallery_items')
+    const fetchData = async () => {
+      const { data: heroResult } = await supabase
+        .from('marketplace_hero')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (heroResult) {
+        setHeroData(heroResult);
+      }
+
+      const { data: categoriesData } = await supabase
+        .from('marketplace_categories')
         .select('*')
         .order('order_index', { ascending: true });
 
-      if (data) {
-        setCategoryItems(data.filter(item => item.category === 'category'));
-        setFeaturedItems(data.filter(item => item.category === 'featured'));
+      if (categoriesData) {
+        setCategories(categoriesData);
+      }
+
+      const { data: productsData } = await supabase
+        .from('marketplace_featured_products')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (productsData) {
+        setFeaturedProducts(productsData);
+      }
+
+      const { data: partnersData } = await supabase
+        .from('marketplace_partners')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (partnersData) {
+        setPartners(partnersData);
       }
     };
 
-    fetchGalleryItems();
+    fetchData();
   }, []);
 
   const handlePrevPartner = () => {
-    setPartnerIndex((prev) => (prev === 0 ? Math.max(0, partners.length - itemsPerPage) : prev - 1));
+    setPartnerIndex((prev) => (prev === 0 ? Math.max(0, partners.length - 3) : prev - 1));
   };
 
   const handleNextPartner = () => {
-    setPartnerIndex((prev) => (prev >= partners.length - itemsPerPage ? 0 : prev + 1));
+    setPartnerIndex((prev) => (prev >= partners.length - 3 ? 0 : prev + 1));
   };
 
   return (
@@ -68,13 +110,13 @@ export default function MarketplacePage() {
               <span className="text-orange-400 font-semibold text-xs sm:text-sm">DANHAUSA MARKETPLACE</span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight px-4">
-              Shop Smart, Shop <span className="text-orange-400">Danhausa</span>
+              {heroData.title}
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed px-4">
-              Your trusted online marketplace for quality products at unbeatable prices. Download our app today and start shopping!
+              {heroData.subtitle}
             </p>
             <a
-              href="https://play.google.com/store"
+              href={heroData.download_url}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all transform hover:scale-105 shadow-lg shadow-orange-500/50"
@@ -122,17 +164,17 @@ export default function MarketplacePage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-10 sm:mb-16">
-            {categoryItems.map((item) => (
-              <div key={item.id} className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all">
+            {categories.map((category) => (
+              <div key={category.id} className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all">
                 <img
-                  src={item.image_url}
-                  alt={item.title}
+                  src={category.image_url}
+                  alt={category.title}
                   className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent flex items-end p-6">
                   <div>
-                    <h3 className="text-2xl font-bold text-white mb-1">{item.title}</h3>
-                    <p className="text-gray-300 text-sm">{item.description}</p>
+                    <h3 className="text-2xl font-bold text-white mb-1">{category.title}</h3>
+                    <p className="text-gray-300 text-sm">{category.description}</p>
                   </div>
                 </div>
               </div>
@@ -214,25 +256,26 @@ export default function MarketplacePage() {
           </div>
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-            {featuredItems.map((item) => (
-              <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all group">
+            {featuredProducts.map((product) => (
+              <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all group">
                 <div className="relative overflow-hidden">
                   <img
-                    src={item.image_url}
-                    alt={item.title}
+                    src={product.image_url}
+                    alt={product.title}
                     className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
                 <div className="p-6">
                   <div className="flex items-center mb-2">
-                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                    {Array.from({ length: Math.floor(product.rating) }).map((_, i) => (
+                      <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                    ))}
+                    {product.rating % 1 !== 0 && (
+                      <Star className="h-5 w-5 text-yellow-400 fill-current opacity-50" />
+                    )}
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">{item.title}</h3>
-                  <p className="text-gray-600 mb-4">{item.description}</p>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">{product.title}</h3>
+                  <p className="text-gray-600 mb-4">{product.description}</p>
                 </div>
               </div>
             ))}
@@ -253,21 +296,23 @@ export default function MarketplacePage() {
 
           <div className="relative px-12 sm:px-16">
             <div className="flex gap-4 sm:gap-6 overflow-hidden">
-              <div className="flex-1 min-w-0 block md:hidden">
-                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow h-40 sm:h-48 flex items-center justify-center overflow-hidden">
-                  <img
-                    src={partners[partnerIndex].logo}
-                    alt={partners[partnerIndex].name}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
+              {partners.length > 0 && (
+                <div className="flex-1 min-w-0 block md:hidden">
+                  <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow h-40 sm:h-48 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={partners[partnerIndex]?.logo_url}
+                      alt={partners[partnerIndex]?.name}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                  <p className="text-center mt-4 font-semibold text-slate-900">{partners[partnerIndex]?.name}</p>
                 </div>
-                <p className="text-center mt-4 font-semibold text-slate-900">{partners[partnerIndex].name}</p>
-              </div>
+              )}
               {partners.slice(partnerIndex, partnerIndex + 3).map((partner) => (
                 <div key={partner.id} className="flex-1 min-w-0 hidden md:block">
                   <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow h-48 flex items-center justify-center overflow-hidden">
                     <img
-                      src={partner.logo}
+                      src={partner.logo_url}
                       alt={partner.name}
                       className="w-full h-full object-cover rounded-lg"
                     />
@@ -325,7 +370,7 @@ export default function MarketplacePage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
                 <a
-                  href="https://play.google.com/store"
+                  href={heroData.download_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full sm:w-auto inline-flex items-center justify-center bg-white text-orange-500 hover:bg-gray-100 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all transform hover:scale-105 shadow-lg"
