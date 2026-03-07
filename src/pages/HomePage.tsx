@@ -45,6 +45,13 @@ interface ContactInfo {
   hours: string;
 }
 
+interface AboutData {
+  title: string;
+  description: string;
+  mission: string;
+  vision: string;
+}
+
 export default function HomePage() {
   const [heroData, setHeroData] = useState<HeroData>({
     title: 'Seamless Logistics & Marketplace Solutions',
@@ -61,6 +68,12 @@ export default function HomePage() {
     phone: '+234 (0) 123 456 7890',
     address: '123 Business District, Nigeria',
     hours: 'Mon-Fri: 9AM-6PM',
+  });
+  const [aboutData, setAboutData] = useState<AboutData>({
+    title: 'Why Choose Danhausa?',
+    description: 'We combine decades of logistics expertise with modern marketplace technology to deliver unparalleled service.',
+    mission: 'Your security is our priority. We use cutting-edge technology to protect your data and transactions.',
+    vision: 'Punctuality is our promise. We pride ourselves on meeting deadlines and exceeding expectations.',
   });
 
   useEffect(() => {
@@ -119,6 +132,16 @@ export default function HomePage() {
 
       if (contact) {
         setContactInfo(contact);
+      }
+
+      const { data: about } = await supabase
+        .from('about_section')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (about) {
+        setAboutData(about);
       }
     };
 
@@ -318,10 +341,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-16">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 px-4">
-              Why Choose <span className="text-orange-400">Danhausa</span>?
+              {aboutData.title}
             </h2>
             <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-3xl mx-auto px-4">
-              We combine decades of logistics expertise with modern marketplace technology to deliver unparalleled service.
+              {aboutData.description}
             </p>
           </div>
 
@@ -330,19 +353,19 @@ export default function HomePage() {
               <div className="bg-gradient-to-br from-orange-500 to-red-500 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transform hover:scale-110 transition-transform">
                 <Shield className="h-10 w-10 text-white" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Trusted & Secure</h3>
+              <h3 className="text-2xl font-bold mb-4">Our Mission</h3>
               <p className="text-gray-300 leading-relaxed">
-                Your security is our priority. We use cutting-edge technology to protect your data and transactions.
+                {aboutData.mission}
               </p>
             </div>
 
             <div className="text-center animate-slideUp delay-100">
               <div className="bg-gradient-to-br from-orange-500 to-red-500 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transform hover:scale-110 transition-transform">
-                <Clock className="h-10 w-10 text-white" />
+                <TrendingUp className="h-10 w-10 text-white" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Always On Time</h3>
+              <h3 className="text-2xl font-bold mb-4">Our Vision</h3>
               <p className="text-gray-300 leading-relaxed">
-                Punctuality is our promise. We pride ourselves on meeting deadlines and exceeding expectations.
+                {aboutData.vision}
               </p>
             </div>
 
@@ -350,7 +373,7 @@ export default function HomePage() {
               <div className="bg-gradient-to-br from-orange-500 to-red-500 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transform hover:scale-110 transition-transform">
                 <Users className="h-10 w-10 text-white" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Customer First</h3>
+              <h3 className="text-2xl font-bold mb-4">Our Values</h3>
               <p className="text-gray-300 leading-relaxed">
                 Our dedicated team is committed to providing exceptional service and support at every step.
               </p>
