@@ -1,6 +1,15 @@
 import { ShoppingCart, Smartphone, Shield, Star, TrendingUp, Package, Heart, Download, ArrowRight, CheckCircle2, Users, Globe, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+
+interface GalleryItem {
+  id: string;
+  title: string;
+  description: string;
+  image_url: string;
+  category: string;
+}
 
 const partners = [
   { id: 1, name: 'TechPro', logo: 'https://images.pexels.com/photos/788946/pexels-photo-788946.jpeg?auto=compress&cs=tinysrgb&w=600' },
@@ -14,6 +23,24 @@ const partners = [
 export default function MarketplacePage() {
   const [partnerIndex, setPartnerIndex] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [categoryItems, setCategoryItems] = useState<GalleryItem[]>([]);
+  const [featuredItems, setFeaturedItems] = useState<GalleryItem[]>([]);
+
+  useEffect(() => {
+    const fetchGalleryItems = async () => {
+      const { data } = await supabase
+        .from('gallery_items')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (data) {
+        setCategoryItems(data.filter(item => item.category === 'category'));
+        setFeaturedItems(data.filter(item => item.category === 'featured'));
+      }
+    };
+
+    fetchGalleryItems();
+  }, []);
 
   const handlePrevPartner = () => {
     setPartnerIndex((prev) => (prev === 0 ? Math.max(0, partners.length - itemsPerPage) : prev - 1));
@@ -95,61 +122,21 @@ export default function MarketplacePage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-10 sm:mb-16">
-            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all">
-              <img
-                src="https://images.pexels.com/photos/1927259/pexels-photo-1927259.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Electronics"
-                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent flex items-end p-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Electronics</h3>
-                  <p className="text-gray-300 text-sm">Latest gadgets & devices</p>
+            {categoryItems.map((item) => (
+              <div key={item.id} className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all">
+                <img
+                  src={item.image_url}
+                  alt={item.title}
+                  className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent flex items-end p-6">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white mb-1">{item.title}</h3>
+                    <p className="text-gray-300 text-sm">{item.description}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all">
-              <img
-                src="https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Fashion"
-                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent flex items-end p-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Fashion</h3>
-                  <p className="text-gray-300 text-sm">Trendy clothing & accessories</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all">
-              <img
-                src="https://images.pexels.com/photos/1599791/pexels-photo-1599791.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Home & Living"
-                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent flex items-end p-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Home & Living</h3>
-                  <p className="text-gray-300 text-sm">Quality furniture & decor</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all">
-              <img
-                src="https://images.pexels.com/photos/2292953/pexels-photo-2292953.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Beauty & Health"
-                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent flex items-end p-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Beauty & Health</h3>
-                  <p className="text-gray-300 text-sm">Premium care products</p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -227,96 +214,28 @@ export default function MarketplacePage() {
           </div>
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-            <div className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all group">
-              <div className="relative overflow-hidden">
-                <img
-                  src="https://images.pexels.com/photos/788946/pexels-photo-788946.jpeg?auto=compress&cs=tinysrgb&w=600"
-                  alt="Wireless Headphones"
-                  className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                  20% OFF
+            {featuredItems.map((item) => (
+              <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all group">
+                <div className="relative overflow-hidden">
+                  <img
+                    src={item.image_url}
+                    alt={item.title}
+                    className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
                 </div>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center mb-2">
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span className="text-sm text-gray-600 ml-2">(245 reviews)</span>
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Premium Wireless Headphones</h3>
-                <p className="text-gray-600 mb-4">High-quality sound with noise cancellation</p>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-2xl font-bold text-orange-500">$79.99</span>
-                    <span className="text-sm text-gray-500 line-through ml-2">$99.99</span>
+                <div className="p-6">
+                  <div className="flex items-center mb-2">
+                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
                   </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">{item.title}</h3>
+                  <p className="text-gray-600 mb-4">{item.description}</p>
                 </div>
               </div>
-            </div>
-
-            <div className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all group">
-              <div className="relative overflow-hidden">
-                <img
-                  src="https://images.pexels.com/photos/1805053/pexels-photo-1805053.jpeg?auto=compress&cs=tinysrgb&w=600"
-                  alt="Smart Watch"
-                  className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                  NEW
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center mb-2">
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-gray-300" />
-                  <span className="text-sm text-gray-600 ml-2">(128 reviews)</span>
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Fitness Smart Watch</h3>
-                <p className="text-gray-600 mb-4">Track your health and fitness goals</p>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-2xl font-bold text-orange-500">$149.99</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all group">
-              <div className="relative overflow-hidden">
-                <img
-                  src="https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?auto=compress&cs=tinysrgb&w=600"
-                  alt="Camera"
-                  className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute top-4 right-4 bg-blue-900 text-white px-3 py-1 rounded-full text-sm font-bold">
-                  TRENDING
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center mb-2">
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span className="text-sm text-gray-600 ml-2">(532 reviews)</span>
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Professional DSLR Camera</h3>
-                <p className="text-gray-600 mb-4">Capture stunning photos and videos</p>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-2xl font-bold text-orange-500">$899.99</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
