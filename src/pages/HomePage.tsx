@@ -233,7 +233,9 @@ export default function HomePage() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
-            <span className="section-badge bg-orange-100 text-orange-600 mb-4">Logistics Solutions</span>
+            <div className="flex justify-center">
+              <span className="section-badge bg-orange-100 text-orange-600">Logistics Solutions</span>
+            </div>
             <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
               Reliable Delivery <span className="text-gradient">Everywhere</span>
             </h2>
@@ -267,7 +269,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="animate-slideInLeft">
-              <span className="section-badge bg-blue-100 text-blue-800 mb-4">Marketplace</span>
+              <span className="section-badge bg-blue-100 text-blue-800">Marketplace</span>
               <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-6 leading-tight">
                 Your One-Stop <span className="text-gradient">Shopping</span> Destination
               </h2>
@@ -326,12 +328,14 @@ export default function HomePage() {
         <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '50px 50px'}}></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
-            <span className="section-badge bg-white/10 text-orange-300 border border-orange-500/20 mb-4">About Us</span>
-            <h2 className="text-4xl lg:text-5xl font-bold mb-4">{aboutData.title}</h2>
-            <p className="text-lg text-gray-400 max-w-2xl mx-auto">{aboutData.description}</p>
+            <div className="flex justify-center mb-4">
+              <span className="section-badge bg-white/10 text-orange-300 border border-orange-500/20">About Us</span>
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-bold mb-5">{aboutData.title}</h2>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">{aboutData.description}</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 items-stretch">
             {[
               { icon: <Shield className="h-8 w-8 text-white" />, title: 'Our Mission', text: aboutData.mission },
               { icon: <TrendingUp className="h-8 w-8 text-white" />, title: 'Our Vision', text: aboutData.vision },
@@ -339,13 +343,13 @@ export default function HomePage() {
             ].map((card, i) => (
               <div
                 key={card.title}
-                className={`group glass rounded-2xl p-8 hover:bg-white/20 transition-all duration-300 hover:-translate-y-2 animate-slideUp delay-${i * 100}`}
+                className={`group glass rounded-2xl p-8 flex flex-col hover:bg-white/20 transition-all duration-300 hover:-translate-y-2 animate-slideUp delay-${i * 100}`}
               >
-                <div className="bg-gradient-to-br from-orange-500 to-red-500 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-orange-500/30">
+                <div className="bg-gradient-to-br from-orange-500 to-red-500 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg shadow-orange-500/30">
                   {card.icon}
                 </div>
                 <h3 className="text-2xl font-bold mb-4">{card.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{card.text}</p>
+                <p className="text-gray-400 leading-relaxed flex-1">{card.text}</p>
               </div>
             ))}
           </div>
@@ -356,7 +360,9 @@ export default function HomePage() {
       <section id="gallery" className="py-20 lg:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="section-badge bg-orange-100 text-orange-600 mb-4">Our Operations</span>
+            <div className="flex justify-center">
+              <span className="section-badge bg-orange-100 text-orange-600">Our Operations</span>
+            </div>
             <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
               Professional <span className="text-gradient">Gallery</span>
             </h2>
@@ -412,7 +418,9 @@ export default function HomePage() {
       <section id="partners" className="py-20 lg:py-28 bg-gray-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="section-badge bg-blue-100 text-blue-800 mb-4">Trusted By Industry Leaders</span>
+            <div className="flex justify-center">
+              <span className="section-badge bg-blue-100 text-blue-800">Trusted By Industry Leaders</span>
+            </div>
             <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
               Our <span className="text-gradient">Corporate Partners</span>
             </h2>
@@ -462,7 +470,9 @@ export default function HomePage() {
       <section id="team" className="py-20 lg:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="section-badge bg-orange-100 text-orange-600 mb-4">Our Team</span>
+            <div className="flex justify-center">
+              <span className="section-badge bg-orange-100 text-orange-600">Our Team</span>
+            </div>
             <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
               Meet Our <span className="text-gradient">Expert Team</span>
             </h2>
@@ -503,7 +513,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
             <div className="animate-slideInLeft">
-              <span className="section-badge bg-orange-100 text-orange-600 mb-4">Get In Touch</span>
+              <span className="section-badge bg-orange-100 text-orange-600">Get In Touch</span>
               <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
                 Let's <span className="text-gradient">Talk</span>
               </h2>

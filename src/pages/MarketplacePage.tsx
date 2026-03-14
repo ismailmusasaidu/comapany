@@ -143,7 +143,9 @@ export default function MarketplacePage() {
       <section className="py-20 lg:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="section-badge bg-orange-100 text-orange-600 mb-4">Browse Categories</span>
+            <div className="flex justify-center">
+              <span className="section-badge bg-orange-100 text-orange-600">Browse Categories</span>
+            </div>
             <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
               What We <span className="text-gradient">Offer</span>
             </h2>
@@ -183,7 +185,7 @@ export default function MarketplacePage() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="space-y-8 animate-slideInLeft">
               <div>
-                <span className="section-badge bg-orange-100 text-orange-600 mb-4">App Features</span>
+                <span className="section-badge bg-orange-100 text-orange-600">App Features</span>
                 <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mt-4">
                   Why Choose <span className="text-gradient">Our App?</span>
                 </h2>
@@ -224,7 +226,9 @@ export default function MarketplacePage() {
         <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '50px 50px'}}></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
-            <span className="section-badge bg-white/10 text-orange-300 border border-orange-500/20 mb-4">Top Picks</span>
+            <div className="flex justify-center">
+              <span className="section-badge bg-white/10 text-orange-300 border border-orange-500/20">Top Picks</span>
+            </div>
             <h2 className="text-4xl lg:text-5xl font-bold mb-4">
               Featured <span className="text-gradient">Products</span>
             </h2>
@@ -277,7 +281,9 @@ export default function MarketplacePage() {
         <section className="py-20 lg:py-28 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <span className="section-badge bg-blue-100 text-blue-800 mb-4">Brand Partners</span>
+            <div className="flex justify-center">
+              <span className="section-badge bg-blue-100 text-blue-800">Brand Partners</span>
+            </div>
               <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
                 Trusted by <span className="text-gradient">Leading Brands</span>
               </h2>
