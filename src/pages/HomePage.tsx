@@ -1,6 +1,6 @@
-import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, Users, TrendingUp, ArrowRight, Star, Zap, CheckCircle } from 'lucide-react';
+import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, Users, TrendingUp, ArrowRight, Star, Zap, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 
 interface HeroData {
@@ -147,6 +147,39 @@ export default function HomePage() {
   ];
 
   const displayTeam = teamMembers.length > 0 ? teamMembers : defaultTeam;
+
+  const [teamIndex, setTeamIndex] = useState(0);
+  const teamSlideRef = useRef<HTMLDivElement>(null);
+  const teamAutoRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const visibleCount = 4;
+  const maxIndex = Math.max(0, displayTeam.length - visibleCount);
+
+  const stopAuto = useCallback(() => {
+    if (teamAutoRef.current) clearInterval(teamAutoRef.current);
+  }, []);
+
+  const startAuto = useCallback(() => {
+    stopAuto();
+    teamAutoRef.current = setInterval(() => {
+      setTeamIndex(prev => (prev >= maxIndex ? 0 : prev + 1));
+    }, 3500);
+  }, [maxIndex, stopAuto]);
+
+  useEffect(() => {
+    startAuto();
+    return stopAuto;
+  }, [startAuto, stopAuto]);
+
+  const teamPrev = () => {
+    setTeamIndex(prev => Math.max(0, prev - 1));
+    startAuto();
+  };
+
+  const teamNext = () => {
+    setTeamIndex(prev => (prev >= maxIndex ? 0 : prev + 1));
+    startAuto();
+  };
 
   return (
     <>
@@ -481,28 +514,68 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {displayTeam.map((member, index) => (
+          <div className="relative">
+            <div className="overflow-hidden" ref={teamSlideRef}>
               <div
-                key={member.id}
-                className={`group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 animate-slideUp delay-${(index % 4) * 100}`}
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(-${teamIndex * (100 / visibleCount)}%)` }}
               >
-                <div className="bg-gradient-to-br from-slate-800 to-blue-900 p-8 flex items-center justify-center">
-                  {member.image_url ? (
-                    <img src={member.image_url} alt={member.name} className="w-24 h-24 rounded-full object-cover ring-4 ring-white/20 group-hover:ring-orange-400/50 transition-all" />
-                  ) : (
-                    <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center ring-4 ring-white/20 group-hover:ring-orange-400/50 transition-all shadow-lg">
-                      <span className="text-white text-2xl font-bold">{member.name.split(' ').map((n: string) => n[0]).join('')}</span>
+                {displayTeam.map((member) => (
+                  <div
+                    key={member.id}
+                    className="flex-shrink-0 w-1/2 sm:w-1/3 lg:w-1/4 px-3"
+                  >
+                    <div className="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full">
+                      <div className="bg-gradient-to-br from-slate-800 to-blue-900 p-8 flex items-center justify-center">
+                        {member.image_url ? (
+                          <img src={member.image_url} alt={member.name} className="w-24 h-24 rounded-full object-cover ring-4 ring-white/20 group-hover:ring-orange-400/50 transition-all" />
+                        ) : (
+                          <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center ring-4 ring-white/20 group-hover:ring-orange-400/50 transition-all shadow-lg">
+                            <span className="text-white text-2xl font-bold">{member.name.split(' ').map((n: string) => n[0]).join('')}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-6 text-center">
+                        <h3 className="text-lg font-bold text-slate-900 mb-1">{member.name}</h3>
+                        <p className="text-orange-500 font-semibold text-sm mb-3">{member.position}</p>
+                        <p className="text-gray-500 text-sm leading-relaxed">{member.bio}</p>
+                      </div>
                     </div>
-                  )}
-                </div>
-                <div className="p-6 text-center">
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">{member.name}</h3>
-                  <p className="text-orange-500 font-semibold text-sm mb-3">{member.position}</p>
-                  <p className="text-gray-500 text-sm leading-relaxed">{member.bio}</p>
-                </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            {displayTeam.length > visibleCount && (
+              <>
+                <button
+                  onClick={teamPrev}
+                  disabled={teamIndex === 0}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed z-10"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={teamNext}
+                  disabled={teamIndex >= maxIndex}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed z-10"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </>
+            )}
+
+            {displayTeam.length > visibleCount && (
+              <div className="flex justify-center gap-2 mt-8">
+                {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setTeamIndex(i); startAuto(); }}
+                    className={`h-2 rounded-full transition-all duration-300 ${i === teamIndex ? 'bg-orange-500 w-6' : 'bg-gray-300 w-2 hover:bg-orange-300'}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
