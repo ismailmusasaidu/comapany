@@ -33,6 +33,7 @@ export default function Layout({ children }: LayoutProps) {
     { label: 'Gallery', href: '/#gallery', isLink: false },
     { label: 'Partners', href: '/#partners', isLink: false },
     { label: 'Team', href: '/#team', isLink: false },
+    { label: 'Join Us', href: '/#onboarding', isLink: false },
     { label: 'Contact', href: '/#contact', isLink: false },
   ];
 

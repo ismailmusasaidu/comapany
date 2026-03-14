@@ -1,4 +1,4 @@
-import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, Users, TrendingUp, ArrowRight, Star, Zap, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, Users, TrendingUp, ArrowRight, Star, Zap, CheckCircle, ChevronLeft, ChevronRight, Bike, Store, FileText, CreditCard, BadgeCheck, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
@@ -171,6 +171,8 @@ export default function HomePage() {
 
   const partnerPrev = () => { setPartnerIndex(prev => Math.max(0, prev - 1)); startPartnerAuto(); };
   const partnerNext = () => { setPartnerIndex(prev => (prev >= partnerMaxIndex ? 0 : prev + 1)); startPartnerAuto(); };
+
+  const [onboardingTab, setOnboardingTab] = useState<'rider' | 'vendor'>('rider');
 
   const [teamIndex, setTeamIndex] = useState(0);
   const teamSlideRef = useRef<HTMLDivElement>(null);
@@ -641,6 +643,189 @@ export default function HomePage() {
               </div>
             )}
           </div>
+        </div>
+      </section>
+
+      {/* ── ONBOARDING ── */}
+      <section id="onboarding" className="py-20 lg:py-28 bg-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-orange-50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3 pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-14">
+            <div className="flex justify-center mb-4">
+              <span className="section-badge bg-orange-100 text-orange-700">Join Our Network</span>
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+              Get <span className="text-gradient">Onboard</span> Today
+            </h2>
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+              Whether you want to deliver or sell, joining Danhausa is fast and straightforward.
+            </p>
+          </div>
+
+          {/* Tab Toggle */}
+          <div className="flex justify-center mb-12">
+            <div className="bg-gray-100 p-1.5 rounded-2xl flex gap-1 shadow-inner">
+              <button
+                onClick={() => setOnboardingTab('rider')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                  onboardingTab === 'rider'
+                    ? 'bg-white text-orange-600 shadow-md shadow-orange-100'
+                    : 'text-gray-500 hover:text-slate-700'
+                }`}
+              >
+                <Bike className="h-4 w-4" />
+                Become a Rider
+              </button>
+              <button
+                onClick={() => setOnboardingTab('vendor')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                  onboardingTab === 'vendor'
+                    ? 'bg-white text-blue-600 shadow-md shadow-blue-100'
+                    : 'text-gray-500 hover:text-slate-700'
+                }`}
+              >
+                <Store className="h-4 w-4" />
+                Become a Vendor
+              </button>
+            </div>
+          </div>
+
+          {/* Rider Content */}
+          {onboardingTab === 'rider' && (
+            <div className="grid lg:grid-cols-2 gap-12 items-start">
+              {/* Steps */}
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">How to Join as a Rider</h3>
+                <p className="text-gray-500 mb-8">Start earning on your own schedule. Follow these simple steps to get approved and start delivering.</p>
+                <div className="space-y-5">
+                  {[
+                    { step: '01', icon: <FileText className="h-5 w-5" />, title: 'Submit Application', desc: 'Fill out our online rider application form with your personal details and preferred delivery zones.' },
+                    { step: '02', icon: <Upload className="h-5 w-5" />, title: 'Upload Documents', desc: 'Provide a valid government-issued ID, proof of address, and a recent passport photograph.' },
+                    { step: '03', icon: <BadgeCheck className="h-5 w-5" />, title: 'Background Verification', desc: 'Our team reviews your application and runs a quick background check — usually within 24–48 hours.' },
+                    { step: '04', icon: <CreditCard className="h-5 w-5" />, title: 'Training & Activation', desc: 'Attend a short onboarding briefing, set up your wallet for payouts, and go live!' },
+                  ].map((item) => (
+                    <div key={item.step} className="flex gap-4 group">
+                      <div className="flex-shrink-0 w-12 h-12 bg-orange-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:scale-110 transition-transform duration-300">
+                        {item.icon}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-bold text-orange-500 uppercase tracking-wider">Step {item.step}</span>
+                        </div>
+                        <h4 className="font-bold text-slate-800 mb-1">{item.title}</h4>
+                        <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Requirements */}
+              <div>
+                <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl p-8 text-white mb-6 shadow-2xl shadow-orange-500/25">
+                  <h3 className="text-xl font-bold mb-6 flex items-center gap-2"><Bike className="h-5 w-5" /> Rider Requirements</h3>
+                  <ul className="space-y-3">
+                    {[
+                      'Minimum age of 18 years',
+                      'Valid government-issued ID (NIN, Voters Card, or Passport)',
+                      'Proof of address (utility bill or bank statement)',
+                      'Passport photograph (white background)',
+                      'Functional smartphone with internet access',
+                      'Personal delivery motorcycle or bicycle in good condition',
+                      'Proof of vehicle ownership or lease agreement',
+                      'Valid vehicle registration and insurance',
+                      'Good knowledge of local delivery routes',
+                      'Ability to carry packages up to 15 kg',
+                    ].map((req) => (
+                      <li key={req} className="flex items-start gap-3 text-sm">
+                        <CheckCircle className="h-4 w-4 text-orange-200 flex-shrink-0 mt-0.5" />
+                        <span className="text-orange-50">{req}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5">
+                  <p className="text-sm text-orange-800 font-medium">Ready to start earning?</p>
+                  <p className="text-xs text-orange-600 mt-1 mb-4">Applications are reviewed within 1-2 business days.</p>
+                  <a
+                    href="#contact"
+                    className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-orange-500/30"
+                  >
+                    Apply as Rider <ArrowRight className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Vendor Content */}
+          {onboardingTab === 'vendor' && (
+            <div className="grid lg:grid-cols-2 gap-12 items-start">
+              {/* Steps */}
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">How to Join as a Vendor</h3>
+                <p className="text-gray-500 mb-8">List your products on our marketplace and reach thousands of customers across the region.</p>
+                <div className="space-y-5">
+                  {[
+                    { step: '01', icon: <FileText className="h-5 w-5" />, title: 'Register Your Business', desc: 'Complete the vendor registration form with your business name, category, and contact details.' },
+                    { step: '02', icon: <Upload className="h-5 w-5" />, title: 'Submit Documents', desc: 'Upload your CAC registration, tax ID (TIN), and a valid ID of the business owner or director.' },
+                    { step: '03', icon: <BadgeCheck className="h-5 w-5" />, title: 'Account Verification', desc: 'Our compliance team verifies your documents and activates your vendor dashboard within 48–72 hours.' },
+                    { step: '04', icon: <Store className="h-5 w-5" />, title: 'List Products & Go Live', desc: 'Upload your product catalogue, configure pricing and delivery options, and start receiving orders.' },
+                  ].map((item) => (
+                    <div key={item.step} className="flex gap-4 group">
+                      <div className="flex-shrink-0 w-12 h-12 bg-blue-700 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-700/30 group-hover:scale-110 transition-transform duration-300">
+                        {item.icon}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">Step {item.step}</span>
+                        </div>
+                        <h4 className="font-bold text-slate-800 mb-1">{item.title}</h4>
+                        <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Requirements */}
+              <div>
+                <div className="bg-gradient-to-br from-blue-700 to-slate-900 rounded-3xl p-8 text-white mb-6 shadow-2xl shadow-blue-700/25">
+                  <h3 className="text-xl font-bold mb-6 flex items-center gap-2"><Store className="h-5 w-5" /> Vendor Requirements</h3>
+                  <ul className="space-y-3">
+                    {[
+                      'Registered business entity (sole proprietor, LLC, or corporation)',
+                      'CAC certificate or business registration document',
+                      'Valid Tax Identification Number (TIN)',
+                      'Valid government-issued ID of owner or director',
+                      'Active business bank account',
+                      'Business address and proof of location',
+                      'Product catalogue or list of items to be sold',
+                      'High-quality product images (min 800×800px)',
+                      'Agreed delivery lead times per product category',
+                      'Compliance with Danhausa marketplace policies',
+                    ].map((req) => (
+                      <li key={req} className="flex items-start gap-3 text-sm">
+                        <CheckCircle className="h-4 w-4 text-blue-300 flex-shrink-0 mt-0.5" />
+                        <span className="text-blue-50">{req}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
+                  <p className="text-sm text-blue-900 font-medium">Ready to grow your business?</p>
+                  <p className="text-xs text-blue-600 mt-1 mb-4">Our vendor support team will guide you through every step.</p>
+                  <a
+                    href="#contact"
+                    className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-blue-700/30"
+                  >
+                    Apply as Vendor <ArrowRight className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
