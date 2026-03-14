@@ -1,4 +1,4 @@
-import { ShoppingCart, Smartphone, Shield, Star, TrendingUp, Package, Heart, Download, ArrowRight, CheckCircle2, Users, Globe, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingCart, Smartphone, Shield, Star, TrendingUp, Package, Heart, Download, ArrowRight, CheckCircle, Users, Globe, ChevronLeft, ChevronRight, Zap, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
@@ -43,44 +43,18 @@ export default function MarketplacePage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: heroResult } = await supabase
-        .from('marketplace_hero')
-        .select('*')
-        .limit(1)
-        .maybeSingle();
+      const { data: heroResult } = await supabase.from('marketplace_hero').select('*').limit(1).maybeSingle();
+      if (heroResult) setHeroData(heroResult);
 
-      if (heroResult) {
-        setHeroData(heroResult);
-      }
+      const { data: categoriesData } = await supabase.from('marketplace_categories').select('*').order('order_index', { ascending: true });
+      if (categoriesData) setCategories(categoriesData);
 
-      const { data: categoriesData } = await supabase
-        .from('marketplace_categories')
-        .select('*')
-        .order('order_index', { ascending: true });
+      const { data: productsData } = await supabase.from('marketplace_featured_products').select('*').order('order_index', { ascending: true });
+      if (productsData) setFeaturedProducts(productsData);
 
-      if (categoriesData) {
-        setCategories(categoriesData);
-      }
-
-      const { data: productsData } = await supabase
-        .from('marketplace_featured_products')
-        .select('*')
-        .order('order_index', { ascending: true });
-
-      if (productsData) {
-        setFeaturedProducts(productsData);
-      }
-
-      const { data: partnersData } = await supabase
-        .from('marketplace_partners')
-        .select('*')
-        .order('order_index', { ascending: true });
-
-      if (partnersData) {
-        setPartners(partnersData);
-      }
+      const { data: partnersData } = await supabase.from('marketplace_partners').select('*').order('order_index', { ascending: true });
+      if (partnersData) setPartners(partnersData);
     };
-
     fetchData();
   }, []);
 
@@ -92,89 +66,109 @@ export default function MarketplacePage() {
     setPartnerIndex((prev) => (prev >= partners.length - 3 ? 0 : prev + 1));
   };
 
+  const defaultCategories = [
+    { id: '1', title: 'Electronics', description: 'Latest gadgets & devices', image_url: 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=800' },
+    { id: '2', title: 'Fashion', description: 'Trendy apparel & accessories', image_url: 'https://images.pexels.com/photos/934063/pexels-photo-934063.jpeg?auto=compress&cs=tinysrgb&w=800' },
+    { id: '3', title: 'Home & Living', description: 'Furniture, decor & more', image_url: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=800' },
+    { id: '4', title: 'Food & Groceries', description: 'Fresh produce & pantry staples', image_url: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800' },
+  ];
+
+  const defaultProducts = [
+    { id: '1', title: 'Premium Smartphone', description: 'Latest flagship device with stunning camera and long battery life.', image_url: 'https://images.pexels.com/photos/788946/pexels-photo-788946.jpeg?auto=compress&cs=tinysrgb&w=800', rating: 4.8 },
+    { id: '2', title: 'Designer Handbag', description: 'Elegant leather handbag crafted with premium materials.', image_url: 'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=800', rating: 4.6 },
+    { id: '3', title: 'Smart Home Speaker', description: 'Voice-controlled smart speaker with rich, room-filling sound.', image_url: 'https://images.pexels.com/photos/4790253/pexels-photo-4790253.jpeg?auto=compress&cs=tinysrgb&w=800', rating: 4.7 },
+  ];
+
+  const displayCategories = categories.length > 0 ? categories : defaultCategories;
+  const displayProducts = featuredProducts.length > 0 ? featuredProducts : defaultProducts;
+
   return (
     <div className="min-h-screen bg-white">
-      <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white py-12 sm:py-16 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-orange-500 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-500 rounded-full blur-3xl"></div>
+      {/* ── HERO ── */}
+      <section className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-20 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/6 w-80 h-80 bg-orange-500/15 rounded-full blur-3xl animate-floatSlow"></div>
+          <div className="absolute bottom-1/4 right-1/6 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-floatSlow" style={{animationDelay: '2s'}}></div>
         </div>
+        <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px'}}></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <Link to="/" className="inline-flex items-center text-orange-400 hover:text-orange-300 mb-6 sm:mb-8 transition-colors text-sm sm:text-base">
-            <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 mr-2 rotate-180" />
+          <Link to="/" className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 mb-8 transition-colors text-sm font-medium group">
+            <ArrowRight className="h-4 w-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
             Back to Home
           </Link>
-          <div className="text-center mb-8 sm:mb-12">
-            <div className="inline-block bg-orange-500/20 border border-orange-500 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 mb-4 sm:mb-6">
-              <span className="text-orange-400 font-semibold text-xs sm:text-sm">DANHAUSA MARKETPLACE</span>
+
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-orange-500/15 border border-orange-500/40 rounded-full px-4 py-2 mb-6">
+              <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+              <span className="text-orange-300 font-semibold text-xs tracking-widest uppercase">Danhausa Marketplace</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight px-4">
-              {heroData.title}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight tracking-tight animate-slideUp">
+              {heroData.title.split(' ').slice(0, 2).join(' ')}{' '}
+              <span className="text-gradient">{heroData.title.split(' ').slice(2).join(' ')}</span>
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed px-4">
+            <p className="text-lg lg:text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed animate-slideUp delay-100">
               {heroData.subtitle}
             </p>
             <a
               href={heroData.download_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all transform hover:scale-105 shadow-lg shadow-orange-500/50"
+              className="inline-flex items-center gap-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/30 animate-slideUp delay-200"
             >
-              <Download className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+              <Download className="h-5 w-5" />
               Download on Play Store
             </a>
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mt-10 sm:mt-16">
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-6 rounded-2xl hover:bg-white/20 transition-all">
-              <div className="bg-gradient-to-br from-orange-500 to-red-500 w-14 h-14 rounded-xl flex items-center justify-center mb-4">
-                <Package className="h-7 w-7 text-white" />
+          <div className="grid sm:grid-cols-3 gap-5 mt-16 animate-slideUp delay-300">
+            {[
+              { icon: <Package className="h-6 w-6 text-white" />, value: '50,000+', label: 'Products' },
+              { icon: <Users className="h-6 w-6 text-white" />, value: '10,000+', label: 'Active Users' },
+              { icon: <Star className="h-6 w-6 text-white" />, value: '4.8/5', label: 'App Rating' },
+            ].map((stat) => (
+              <div key={stat.label} className="glass rounded-2xl p-6 hover:bg-white/20 transition-all group">
+                <div className="bg-gradient-to-br from-orange-500 to-red-500 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-md shadow-orange-500/30">
+                  {stat.icon}
+                </div>
+                <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
+                <p className="text-gray-400 text-sm">{stat.label}</p>
               </div>
-              <h3 className="text-2xl font-bold mb-2">50,000+ Products</h3>
-              <p className="text-gray-300">Extensive catalog across all categories</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-6 rounded-2xl hover:bg-white/20 transition-all">
-              <div className="bg-gradient-to-br from-orange-500 to-red-500 w-14 h-14 rounded-xl flex items-center justify-center mb-4">
-                <Users className="h-7 w-7 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-2">10,000+ Users</h3>
-              <p className="text-gray-300">Trusted by thousands daily</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-6 rounded-2xl hover:bg-white/20 transition-all">
-              <div className="bg-gradient-to-br from-orange-500 to-red-500 w-14 h-14 rounded-xl flex items-center justify-center mb-4">
-                <Star className="h-7 w-7 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-2">4.8/5 Rating</h3>
-              <p className="text-gray-300">Highly rated on Play Store</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      {/* ── CATEGORIES ── */}
+      <section className="py-20 lg:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 sm:mb-4 px-4">
-              What We <span className="text-orange-500">Offer</span>
+          <div className="text-center mb-16">
+            <span className="section-badge bg-orange-100 text-orange-600 mb-4">Browse Categories</span>
+            <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+              What We <span className="text-gradient">Offer</span>
             </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto">
               Discover a world of possibilities with our diverse product categories
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-10 sm:mb-16">
-            {categories.map((category) => (
-              <div key={category.id} className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {displayCategories.map((category, index) => (
+              <div
+                key={category.id}
+                className={`group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer animate-slideUp delay-${(index % 4) * 100}`}
+              >
                 <img
                   src={category.image_url}
                   alt={category.title}
-                  className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent flex items-end p-6">
-                  <div>
-                    <h3 className="text-2xl font-bold text-white mb-1">{category.title}</h3>
-                    <p className="text-gray-300 text-sm">{category.description}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h3 className="text-xl font-bold text-white mb-1">{category.title}</h3>
+                  <p className="text-gray-300 text-sm group-hover:text-orange-300 transition-colors">{category.description}</p>
+                  <div className="mt-3 flex items-center gap-1 text-orange-400 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    Shop now <ArrowRight className="h-3 w-3" />
                   </div>
                 </div>
               </div>
@@ -183,57 +177,38 @@ export default function MarketplacePage() {
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+      {/* ── WHY OUR APP ── */}
+      <section className="py-20 lg:py-28 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div className="space-y-6 sm:space-y-8">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
-                Why Choose <span className="text-orange-500">Our App?</span>
-              </h2>
-
-              <div className="flex items-start space-x-4">
-                <div className="bg-orange-100 p-3 rounded-lg flex-shrink-0">
-                  <Shield className="h-6 w-6 text-orange-500" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">Secure Payments</h3>
-                  <p className="text-gray-600">Shop with confidence using our encrypted payment gateway. Your financial data is always protected.</p>
-                </div>
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div className="space-y-8 animate-slideInLeft">
+              <div>
+                <span className="section-badge bg-orange-100 text-orange-600 mb-4">App Features</span>
+                <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mt-4">
+                  Why Choose <span className="text-gradient">Our App?</span>
+                </h2>
               </div>
 
-              <div className="flex items-start space-x-4">
-                <div className="bg-blue-100 p-3 rounded-lg flex-shrink-0">
-                  <TrendingUp className="h-6 w-6 text-blue-900" />
+              {[
+                { icon: <Shield className="h-5 w-5 text-orange-500" />, bg: 'bg-orange-50', title: 'Secure Payments', desc: 'Shop with confidence using our encrypted payment gateway. Your financial data is always protected.' },
+                { icon: <TrendingUp className="h-5 w-5 text-blue-700" />, bg: 'bg-blue-50', title: 'Best Deals Daily', desc: 'Exclusive app-only discounts and flash sales. Save more on your favorite products every day.' },
+                { icon: <Heart className="h-5 w-5 text-red-500" />, bg: 'bg-red-50', title: 'Wishlist & Favorites', desc: 'Save products for later and get notified when they go on sale.' },
+                { icon: <CheckCircle className="h-5 w-5 text-green-600" />, bg: 'bg-green-50', title: 'Easy Returns', desc: 'Not satisfied? Return within 30 days for a full refund, no questions asked.' },
+              ].map((item) => (
+                <div key={item.title} className="flex items-start gap-4 group">
+                  <div className={`${item.bg} p-3 rounded-xl flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-1">{item.title}</h3>
+                    <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">Best Deals Daily</h3>
-                  <p className="text-gray-600">Exclusive app-only discounts and flash sales. Save more on your favorite products.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="bg-red-100 p-3 rounded-lg flex-shrink-0">
-                  <Heart className="h-6 w-6 text-red-500" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">Wishlist & Favorites</h3>
-                  <p className="text-gray-600">Save products for later and get notified when they go on sale.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="bg-green-100 p-3 rounded-lg flex-shrink-0">
-                  <CheckCircle2 className="h-6 w-6 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">Easy Returns</h3>
-                  <p className="text-gray-600">Not satisfied? Return within 30 days for a full refund, no questions asked.</p>
-                </div>
-              </div>
+              ))}
             </div>
 
-            <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl opacity-20 blur-2xl"></div>
+            <div className="relative animate-slideInRight">
+              <div className="absolute -inset-6 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-3xl blur-3xl"></div>
               <img
                 src="https://images.pexels.com/photos/5632402/pexels-photo-5632402.jpeg?auto=compress&cs=tinysrgb&w=800"
                 alt="Shopping on mobile"
@@ -244,38 +219,52 @@ export default function MarketplacePage() {
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 px-4">
-              Featured <span className="text-orange-400">Products</span>
+      {/* ── FEATURED PRODUCTS ── */}
+      <section className="py-20 lg:py-28 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '50px 50px'}}></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <span className="section-badge bg-white/10 text-orange-300 border border-orange-500/20 mb-4">Top Picks</span>
+            <h2 className="text-4xl lg:text-5xl font-bold mb-4">
+              Featured <span className="text-gradient">Products</span>
             </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-3xl mx-auto px-4">
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
               Explore our most popular items loved by thousands of customers
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-            {featuredProducts.map((product) => (
-              <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all group">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {displayProducts.map((product, index) => (
+              <div
+                key={product.id}
+                className={`group bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 animate-slideUp delay-${(index % 3) * 100}`}
+              >
                 <div className="relative overflow-hidden">
                   <img
                     src={product.image_url}
                     alt={product.title}
-                    className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center mb-2">
-                    {Array.from({ length: Math.floor(product.rating) }).map((_, i) => (
-                      <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                    ))}
-                    {product.rating % 1 !== 0 && (
-                      <Star className="h-5 w-5 text-yellow-400 fill-current opacity-50" />
-                    )}
+                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-1.5 rounded-lg">
+                    <Heart className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors cursor-pointer" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">{product.title}</h3>
-                  <p className="text-gray-600 mb-4">{product.description}</p>
+                  <div className="absolute top-3 left-3 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                    <Tag className="h-3 w-3" /> New
+                  </div>
+                </div>
+                <div className="p-5">
+                  <div className="flex items-center gap-1 mb-2">
+                    {Array.from({ length: Math.floor(product.rating) }).map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                    ))}
+                    <span className="text-xs text-gray-500 ml-1">{product.rating}</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2">{product.title}</h3>
+                  <p className="text-gray-500 text-sm mb-4 leading-relaxed">{product.description}</p>
+                  <button className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-2.5 rounded-xl text-sm font-bold transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20">
+                    <ShoppingCart className="h-4 w-4" />
+                    Add to Cart
+                  </button>
                 </div>
               </div>
             ))}
@@ -283,147 +272,112 @@ export default function MarketplacePage() {
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 sm:mb-4 px-4">
-              Trusted by <span className="text-orange-500">Leading Brands</span>
-            </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-              Partner with the brands that millions love
-            </p>
-          </div>
-
-          <div className="relative px-12 sm:px-16">
-            <div className="flex gap-4 sm:gap-6 overflow-hidden">
-              {partners.length > 0 && (
-                <div className="flex-1 min-w-0 block md:hidden">
-                  <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow h-40 sm:h-48 flex items-center justify-center overflow-hidden">
-                    <img
-                      src={partners[partnerIndex]?.logo_url}
-                      alt={partners[partnerIndex]?.name}
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                  <p className="text-center mt-4 font-semibold text-slate-900">{partners[partnerIndex]?.name}</p>
-                </div>
-              )}
-              {partners.slice(partnerIndex, partnerIndex + 3).map((partner) => (
-                <div key={partner.id} className="flex-1 min-w-0 hidden md:block">
-                  <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow h-48 flex items-center justify-center overflow-hidden">
-                    <img
-                      src={partner.logo_url}
-                      alt={partner.name}
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                  <p className="text-center mt-4 font-semibold text-slate-900">{partner.name}</p>
-                </div>
-              ))}
+      {/* ── BRAND PARTNERS ── */}
+      {partners.length > 0 && (
+        <section className="py-20 lg:py-28 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <span className="section-badge bg-blue-100 text-blue-800 mb-4">Brand Partners</span>
+              <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+                Trusted by <span className="text-gradient">Leading Brands</span>
+              </h2>
+              <p className="text-lg text-gray-500 max-w-2xl mx-auto">Partner with the brands that millions love</p>
             </div>
 
-            <button
-              onClick={handlePrevPartner}
-              className="absolute left-0 top-1/3 sm:top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-600 text-white p-2 sm:p-3 rounded-full transition-all transform hover:scale-110 z-10 shadow-lg"
-              aria-label="Previous partner"
-            >
-              <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
-            </button>
-            <button
-              onClick={handleNextPartner}
-              className="absolute right-0 top-1/3 sm:top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-600 text-white p-2 sm:p-3 rounded-full transition-all transform hover:scale-110 z-10 shadow-lg"
-              aria-label="Next partner"
-            >
-              <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
-            </button>
+            <div className="relative px-14">
+              <div className="flex gap-5 overflow-hidden">
+                {partners.length > 0 && (
+                  <div className="flex-1 min-w-0 block md:hidden">
+                    <div className="bg-white rounded-2xl p-6 shadow-md h-40 flex items-center justify-center overflow-hidden">
+                      <img src={partners[partnerIndex]?.logo_url} alt={partners[partnerIndex]?.name} className="w-full h-full object-cover rounded-lg" />
+                    </div>
+                    <p className="text-center mt-4 font-semibold text-slate-900 text-sm">{partners[partnerIndex]?.name}</p>
+                  </div>
+                )}
+                {partners.slice(partnerIndex, partnerIndex + 3).map((partner) => (
+                  <div key={partner.id} className="flex-1 min-w-0 hidden md:block">
+                    <div className="bg-white rounded-2xl p-8 shadow-md hover:shadow-xl transition-shadow h-48 flex items-center justify-center overflow-hidden">
+                      <img src={partner.logo_url} alt={partner.name} className="w-full h-full object-cover rounded-lg" />
+                    </div>
+                    <p className="text-center mt-4 font-semibold text-slate-900 text-sm">{partner.name}</p>
+                  </div>
+                ))}
+              </div>
 
-            <div className="flex justify-center gap-2 mt-6 sm:mt-8">
-              {Array.from({ length: partners.length }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPartnerIndex(i)}
-                  className={`h-2 rounded-full transition-all ${
-                    i === partnerIndex ? 'bg-orange-500 w-8' : 'bg-gray-300 w-2'
-                  }`}
-                  aria-label={`Go to partner ${i + 1}`}
-                />
-              ))}
+              <button onClick={handlePrevPartner} className="absolute left-0 top-1/3 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white p-2.5 rounded-xl transition-all hover:scale-110 shadow-md" aria-label="Previous partner">
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button onClick={handleNextPartner} className="absolute right-0 top-1/3 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white p-2.5 rounded-xl transition-all hover:scale-110 shadow-md" aria-label="Next partner">
+                <ChevronRight className="h-5 w-5" />
+              </button>
+
+              <div className="flex justify-center gap-2 mt-8">
+                {Array.from({ length: partners.length }).map((_, i) => (
+                  <button key={i} onClick={() => setPartnerIndex(i)} className={`h-2 rounded-full transition-all ${i === partnerIndex ? 'bg-orange-500 w-8' : 'bg-gray-300 w-2'}`} aria-label={`Go to partner ${i + 1}`} />
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      {/* ── DOWNLOAD CTA ── */}
+      <section className="py-20 lg:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center text-white relative overflow-hidden">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-10 left-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
-              <div className="absolute bottom-10 right-10 w-60 h-60 bg-white rounded-full blur-3xl"></div>
+          <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-3xl p-10 lg:p-16 text-center text-white relative overflow-hidden">
+            <div className="absolute inset-0">
+              <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
             </div>
             <div className="relative z-10">
-              <Smartphone className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 sm:mb-6" />
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
-                Ready to Start Shopping?
-              </h2>
-              <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto opacity-90">
+              <div className="bg-white/20 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <Smartphone className="h-10 w-10 text-white" />
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold mb-5">Ready to Start Shopping?</h2>
+              <p className="text-lg text-orange-50 mb-10 max-w-2xl mx-auto leading-relaxed">
                 Download the Danhausa Marketplace app now and enjoy exclusive deals, fast checkout, and seamless shopping experience.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
                   href={heroData.download_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto inline-flex items-center justify-center bg-white text-orange-500 hover:bg-gray-100 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all transform hover:scale-105 shadow-lg"
+                  className="inline-flex items-center justify-center gap-2 bg-white text-orange-600 hover:bg-orange-50 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 hover:scale-105 shadow-xl"
                 >
-                  <Download className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+                  <Download className="h-5 w-5" />
                   Download on Play Store
                 </a>
                 <Link
                   to="/#contact"
-                  className="w-full sm:w-auto inline-flex items-center justify-center bg-transparent border-2 border-white hover:bg-white hover:text-orange-500 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all"
+                  className="inline-flex items-center justify-center gap-2 border-2 border-white/60 hover:border-white hover:bg-white hover:text-orange-600 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300"
                 >
                   Contact Us
                 </Link>
               </div>
-              <p className="mt-4 sm:mt-6 text-xs sm:text-sm opacity-75">
-                Available on Android - Coming soon to iOS
-              </p>
+              <p className="mt-6 text-sm text-orange-100">Available on Android &middot; Coming soon to iOS</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-10 sm:py-12 lg:py-16 bg-gray-50">
+      {/* ── TRUST BADGES ── */}
+      <section className="py-16 bg-gray-50 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
-            <div>
-              <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-8 w-8 text-orange-500" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            {[
+              { icon: <Shield className="h-7 w-7 text-orange-500" />, bg: 'bg-orange-100', title: 'Buyer Protection', desc: '100% secure transactions' },
+              { icon: <Package className="h-7 w-7 text-blue-700" />, bg: 'bg-blue-100', title: 'Fast Delivery', desc: 'Quick shipping nationwide' },
+              { icon: <Globe className="h-7 w-7 text-red-500" />, bg: 'bg-red-100', title: 'Wide Selection', desc: 'Thousands of products' },
+              { icon: <Zap className="h-7 w-7 text-green-600" />, bg: 'bg-green-100', title: 'Quality Guarantee', desc: 'Verified sellers only' },
+            ].map((badge) => (
+              <div key={badge.title} className="group">
+                <div className={`${badge.bg} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
+                  {badge.icon}
+                </div>
+                <h3 className="font-bold text-slate-900 mb-1">{badge.title}</h3>
+                <p className="text-gray-500 text-sm">{badge.desc}</p>
               </div>
-              <h3 className="font-bold text-lg text-slate-900 mb-2">Buyer Protection</h3>
-              <p className="text-gray-600 text-sm">100% secure transactions</p>
-            </div>
-            <div>
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Package className="h-8 w-8 text-blue-900" />
-              </div>
-              <h3 className="font-bold text-lg text-slate-900 mb-2">Fast Delivery</h3>
-              <p className="text-gray-600 text-sm">Quick shipping nationwide</p>
-            </div>
-            <div>
-              <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Globe className="h-8 w-8 text-red-500" />
-              </div>
-              <h3 className="font-bold text-lg text-slate-900 mb-2">Wide Selection</h3>
-              <p className="text-gray-600 text-sm">Thousands of products</p>
-            </div>
-            <div>
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="h-8 w-8 text-green-600" />
-              </div>
-              <h3 className="font-bold text-lg text-slate-900 mb-2">Quality Guarantee</h3>
-              <p className="text-gray-600 text-sm">Verified sellers only</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
