@@ -174,6 +174,27 @@ export default function HomePage() {
 
   const [onboardingTab, setOnboardingTab] = useState<'rider' | 'vendor'>('rider');
 
+  const [contactForm, setContactForm] = useState({ full_name: '', email: '', service_interest: 'Logistics Services', message: '' });
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+  const [contactSuccess, setContactSuccess] = useState(false);
+  const [contactError, setContactError] = useState('');
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setContactSubmitting(true);
+    setContactError('');
+    try {
+      const { error } = await supabase.from('contact_messages').insert([contactForm]);
+      if (error) throw error;
+      setContactSuccess(true);
+      setContactForm({ full_name: '', email: '', service_interest: 'Logistics Services', message: '' });
+    } catch (err) {
+      setContactError(err instanceof Error ? err.message : 'Failed to send message. Please try again.');
+    } finally {
+      setContactSubmitting(false);
+    }
+  };
+
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const galleryAutoRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -995,48 +1016,83 @@ export default function HomePage() {
             <div className="animate-slideInRight">
               <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 lg:p-10">
                 <h3 className="text-2xl font-bold text-slate-900 mb-6">Send us a Message</h3>
-                <form className="space-y-5">
-                  <div className="grid sm:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">Full Name</label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 focus:outline-none transition-all text-slate-800 placeholder-gray-400"
-                        placeholder="John Doe"
-                      />
+                {contactSuccess ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="bg-green-100 rounded-full p-4 mb-4">
+                      <CheckCircle className="h-10 w-10 text-green-500" />
+                    </div>
+                    <h4 className="text-xl font-bold text-slate-900 mb-2">Message Sent!</h4>
+                    <p className="text-gray-500 mb-6">Thanks for reaching out. We'll get back to you shortly.</p>
+                    <button
+                      onClick={() => setContactSuccess(false)}
+                      className="text-orange-500 font-semibold hover:underline"
+                    >
+                      Send another message
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleContactSubmit} className="space-y-5">
+                    {contactError && (
+                      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                        {contactError}
+                      </div>
+                    )}
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">Full Name</label>
+                        <input
+                          type="text"
+                          required
+                          value={contactForm.full_name}
+                          onChange={(e) => setContactForm(f => ({ ...f, full_name: e.target.value }))}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 focus:outline-none transition-all text-slate-800 placeholder-gray-400"
+                          placeholder="John Doe"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+                        <input
+                          type="email"
+                          required
+                          value={contactForm.email}
+                          onChange={(e) => setContactForm(f => ({ ...f, email: e.target.value }))}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 focus:outline-none transition-all text-slate-800 placeholder-gray-400"
+                          placeholder="john@example.com"
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
-                      <input
-                        type="email"
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 focus:outline-none transition-all text-slate-800 placeholder-gray-400"
-                        placeholder="john@example.com"
-                      />
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Service Interest</label>
+                      <select
+                        value={contactForm.service_interest}
+                        onChange={(e) => setContactForm(f => ({ ...f, service_interest: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 focus:outline-none transition-all text-slate-800 bg-white"
+                      >
+                        <option>Logistics Services</option>
+                        <option>Marketplace</option>
+                        <option>Both</option>
+                      </select>
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Service Interest</label>
-                    <select className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 focus:outline-none transition-all text-slate-800 bg-white">
-                      <option>Logistics Services</option>
-                      <option>Marketplace</option>
-                      <option>Both</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Message</label>
-                    <textarea
-                      rows={4}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 focus:outline-none transition-all text-slate-800 placeholder-gray-400 resize-none"
-                      placeholder="Tell us about your needs..."
-                    ></textarea>
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-4 rounded-xl font-bold text-base transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-orange-500/25"
-                  >
-                    Send Message
-                  </button>
-                </form>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Message</label>
+                      <textarea
+                        rows={4}
+                        required
+                        value={contactForm.message}
+                        onChange={(e) => setContactForm(f => ({ ...f, message: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 focus:outline-none transition-all text-slate-800 placeholder-gray-400 resize-none"
+                        placeholder="Tell us about your needs..."
+                      ></textarea>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={contactSubmitting}
+                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:opacity-60 text-white py-4 rounded-xl font-bold text-base transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-orange-500/25"
+                    >
+                      {contactSubmitting ? 'Sending...' : 'Send Message'}
+                    </button>
+                  </form>
+                )}
               </div>
             </div>
           </div>

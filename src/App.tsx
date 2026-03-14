@@ -16,6 +16,7 @@ import AdminMarketplaceHeroPage from './pages/AdminMarketplaceHeroPage';
 import AdminMarketplaceCategoriesPage from './pages/AdminMarketplaceCategoriesPage';
 import AdminMarketplaceFeaturedPage from './pages/AdminMarketplaceFeaturedPage';
 import AdminMarketplacePartnersPage from './pages/AdminMarketplacePartnersPage';
+import AdminContactMessagesPage from './pages/AdminContactMessagesPage';
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -47,6 +48,7 @@ function App() {
         <Route path="/admin/marketplace-categories" element={<ProtectedRoute element={<AdminMarketplaceCategoriesPage />} />} />
         <Route path="/admin/marketplace-featured" element={<ProtectedRoute element={<AdminMarketplaceFeaturedPage />} />} />
         <Route path="/admin/marketplace-partners" element={<ProtectedRoute element={<AdminMarketplacePartnersPage />} />} />
+        <Route path="/admin/messages" element={<ProtectedRoute element={<AdminContactMessagesPage />} />} />
 
         <Route
           path="/*"
