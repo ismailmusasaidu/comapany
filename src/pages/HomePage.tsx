@@ -174,7 +174,7 @@ export default function HomePage() {
 
   const [onboardingTab, setOnboardingTab] = useState<'rider' | 'vendor'>('rider');
 
-  const [contactForm, setContactForm] = useState({ full_name: '', email: '', service_interest: 'Logistics Services', message: '' });
+  const [contactForm, setContactForm] = useState({ name: '', email: '', service_interest: 'Logistics Services', message: '' });
   const [contactSubmitting, setContactSubmitting] = useState(false);
   const [contactSuccess, setContactSuccess] = useState(false);
   const [contactError, setContactError] = useState('');
@@ -187,7 +187,7 @@ export default function HomePage() {
       const { error } = await supabase.from('contact_messages').insert([contactForm]);
       if (error) throw error;
       setContactSuccess(true);
-      setContactForm({ full_name: '', email: '', service_interest: 'Logistics Services', message: '' });
+      setContactForm({ name: '', email: '', service_interest: 'Logistics Services', message: '' });
     } catch (err) {
       setContactError(err instanceof Error ? err.message : 'Failed to send message. Please try again.');
     } finally {
@@ -1043,8 +1043,8 @@ export default function HomePage() {
                         <input
                           type="text"
                           required
-                          value={contactForm.full_name}
-                          onChange={(e) => setContactForm(f => ({ ...f, full_name: e.target.value }))}
+                          value={contactForm.name}
+                          onChange={(e) => setContactForm(f => ({ ...f, name: e.target.value }))}
                           className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-orange-400 focus:ring-4 focus:ring-orange-500/10 focus:outline-none transition-all text-slate-800 placeholder-gray-400"
                           placeholder="John Doe"
                         />
