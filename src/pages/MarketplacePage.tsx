@@ -1,6 +1,6 @@
-import { ShoppingCart, Smartphone, Shield, Star, TrendingUp, Package, Heart, Download, ArrowRight, CheckCircle, Users, Globe, ChevronLeft, ChevronRight, Zap, Tag } from 'lucide-react';
+import { ShoppingCart, Smartphone, Shield, Star, TrendingUp, Package, Heart, Download, ArrowRight, CheckCircle, Users, Globe, ChevronLeft, ChevronRight, Zap, Tag, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 
 interface Category {
@@ -31,6 +31,9 @@ interface HeroData {
 }
 
 export default function MarketplacePage() {
+  const [categoryIndex, setCategoryIndex] = useState(0);
+  const [lightboxCategory, setLightboxCategory] = useState<Category | null>(null);
+  const categoryAutoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [partnerIndex, setPartnerIndex] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
@@ -57,6 +60,39 @@ export default function MarketplacePage() {
     };
     fetchData();
   }, []);
+
+  const startCategoryAuto = useCallback((cats: Category[]) => {
+    if (categoryAutoRef.current) clearInterval(categoryAutoRef.current);
+    categoryAutoRef.current = setInterval(() => {
+      setCategoryIndex(prev => (prev >= cats.length - 1 ? 0 : prev + 1));
+    }, 3500);
+  }, []);
+
+  useEffect(() => {
+    const cats = categories.length > 0 ? categories : defaultCategories;
+    startCategoryAuto(cats);
+    return () => { if (categoryAutoRef.current) clearInterval(categoryAutoRef.current); };
+  }, [categories, startCategoryAuto]);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxCategory(null);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
+
+  const handlePrevCategory = (cats: Category[]) => {
+    if (categoryAutoRef.current) clearInterval(categoryAutoRef.current);
+    setCategoryIndex(prev => (prev === 0 ? cats.length - 1 : prev - 1));
+    startCategoryAuto(cats);
+  };
+
+  const handleNextCategory = (cats: Category[]) => {
+    if (categoryAutoRef.current) clearInterval(categoryAutoRef.current);
+    setCategoryIndex(prev => (prev >= cats.length - 1 ? 0 : prev + 1));
+    startCategoryAuto(cats);
+  };
 
   const handlePrevPartner = () => {
     setPartnerIndex((prev) => (prev === 0 ? Math.max(0, partners.length - 3) : prev - 1));
@@ -154,30 +190,120 @@ export default function MarketplacePage() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {displayCategories.map((category, index) => (
+          {/* Slider */}
+          <div className="relative">
+            <div className="overflow-hidden rounded-3xl shadow-2xl">
               <div
-                key={category.id}
-                className={`group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer animate-slideUp delay-${(index % 4) * 100}`}
+                className="flex transition-transform duration-700 ease-in-out"
+                style={{ transform: `translateX(-${categoryIndex * 100}%)` }}
               >
-                <img
-                  src={category.image_url}
-                  alt={category.title}
-                  className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="text-xl font-bold text-white mb-1">{category.title}</h3>
-                  <p className="text-gray-300 text-sm group-hover:text-orange-300 transition-colors">{category.description}</p>
-                  <div className="mt-3 flex items-center gap-1 text-orange-400 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    Shop now <ArrowRight className="h-3 w-3" />
+                {displayCategories.map((category) => (
+                  <div
+                    key={category.id}
+                    className="min-w-full relative cursor-pointer group"
+                    onClick={() => setLightboxCategory(category)}
+                  >
+                    <img
+                      src={category.image_url}
+                      alt={category.title}
+                      className="w-full h-[480px] object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-10">
+                      <h3 className="text-3xl font-bold text-white mb-2">{category.title}</h3>
+                      <p className="text-gray-300 text-base mb-4">{category.description}</p>
+                      <span className="inline-flex items-center gap-2 bg-orange-500/90 hover:bg-orange-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">
+                        View Details <ArrowRight className="h-4 w-4" />
+                      </span>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            {/* Prev / Next */}
+            <button
+              onClick={() => handlePrevCategory(displayCategories)}
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-900 p-3 rounded-xl shadow-lg transition-all hover:scale-110"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => handleNextCategory(displayCategories)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-900 p-3 rounded-xl shadow-lg transition-all hover:scale-110"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+
+            {/* Dots */}
+            <div className="flex justify-center gap-2 mt-6">
+              {displayCategories.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => { if (categoryAutoRef.current) clearInterval(categoryAutoRef.current); setCategoryIndex(i); startCategoryAuto(displayCategories); }}
+                  className={`h-2 rounded-full transition-all duration-300 ${i === categoryIndex ? 'bg-orange-500 w-8' : 'bg-gray-300 w-2'}`}
+                />
+              ))}
+            </div>
+
+            {/* Thumbnail strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+              {displayCategories.map((category, i) => (
+                <button
+                  key={category.id}
+                  onClick={() => { if (categoryAutoRef.current) clearInterval(categoryAutoRef.current); setCategoryIndex(i); startCategoryAuto(displayCategories); }}
+                  className={`relative overflow-hidden rounded-xl transition-all duration-300 ${i === categoryIndex ? 'ring-2 ring-orange-500 shadow-lg scale-[1.02]' : 'opacity-60 hover:opacity-90'}`}
+                >
+                  <img src={category.image_url} alt={category.title} className="w-full h-20 object-cover" />
+                  <div className="absolute inset-0 bg-slate-900/40"></div>
+                  <span className="absolute bottom-1.5 left-2 text-white text-xs font-semibold truncate">{category.title}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </section>
+
+      {/* ── CATEGORY LIGHTBOX ── */}
+      {lightboxCategory && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setLightboxCategory(null)}
+        >
+          <div
+            className="bg-white rounded-3xl overflow-hidden max-w-2xl w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative">
+              <img
+                src={lightboxCategory.image_url}
+                alt={lightboxCategory.title}
+                className="w-full h-72 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 to-transparent"></div>
+              <button
+                onClick={() => setLightboxCategory(null)}
+                className="absolute top-4 right-4 bg-white/90 hover:bg-white text-slate-900 p-2 rounded-xl transition-colors shadow-lg"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <div className="absolute bottom-4 left-6">
+                <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">Category</span>
+              </div>
+            </div>
+            <div className="p-8">
+              <h3 className="text-3xl font-bold text-slate-900 mb-3">{lightboxCategory.title}</h3>
+              <p className="text-gray-500 text-base leading-relaxed mb-6">{lightboxCategory.description}</p>
+              <button
+                onClick={() => setLightboxCategory(null)}
+                className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3.5 rounded-xl font-bold transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/25"
+              >
+                Browse {lightboxCategory.title}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── WHY OUR APP ── */}
       <section className="py-20 lg:py-28 bg-gray-50">
