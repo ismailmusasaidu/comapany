@@ -148,6 +148,30 @@ export default function HomePage() {
 
   const displayTeam = teamMembers.length > 0 ? teamMembers : defaultTeam;
 
+  const [partnerIndex, setPartnerIndex] = useState(0);
+  const partnerAutoRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const partnerVisibleCount = 5;
+  const partnerMaxIndex = Math.max(0, displayPartners.length - partnerVisibleCount);
+
+  const stopPartnerAuto = useCallback(() => {
+    if (partnerAutoRef.current) clearInterval(partnerAutoRef.current);
+  }, []);
+
+  const startPartnerAuto = useCallback(() => {
+    stopPartnerAuto();
+    partnerAutoRef.current = setInterval(() => {
+      setPartnerIndex(prev => (prev >= partnerMaxIndex ? 0 : prev + 1));
+    }, 2800);
+  }, [partnerMaxIndex, stopPartnerAuto]);
+
+  useEffect(() => {
+    startPartnerAuto();
+    return stopPartnerAuto;
+  }, [startPartnerAuto, stopPartnerAuto]);
+
+  const partnerPrev = () => { setPartnerIndex(prev => Math.max(0, prev - 1)); startPartnerAuto(); };
+  const partnerNext = () => { setPartnerIndex(prev => (prev >= partnerMaxIndex ? 0 : prev + 1)); startPartnerAuto(); };
+
   const [teamIndex, setTeamIndex] = useState(0);
   const teamSlideRef = useRef<HTMLDivElement>(null);
   const teamAutoRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -462,24 +486,64 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-16">
-            {displayPartners.map((partner, index) => (
+          <div className="relative mb-16">
+            <div className="overflow-hidden">
               <div
-                key={partner.id}
-                className={`group bg-white p-6 rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 hover:border-orange-100 flex items-center justify-center transition-all duration-300 hover:-translate-y-1 animate-slideUp delay-${(index % 5) * 100}`}
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(-${partnerIndex * (100 / partnerVisibleCount)}%)` }}
               >
-                <div className="text-center">
-                  {partner.logo_url ? (
-                    <img src={partner.logo_url} alt={partner.name} className="w-16 h-16 mx-auto mb-3 object-contain group-hover:scale-110 transition-transform" />
-                  ) : (
-                    <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md shadow-orange-500/20">
-                      <span className="text-white text-lg font-bold">{partner.name.substring(0, 2).toUpperCase()}</span>
+                {displayPartners.map((partner) => (
+                  <div
+                    key={partner.id}
+                    className="flex-shrink-0 w-1/2 sm:w-1/3 lg:w-1/5 px-2.5"
+                  >
+                    <div className="group bg-white p-6 rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 hover:border-orange-100 flex items-center justify-center transition-all duration-300 hover:-translate-y-1 h-full">
+                      <div className="text-center">
+                        {partner.logo_url ? (
+                          <img src={partner.logo_url} alt={partner.name} className="w-16 h-16 mx-auto mb-3 object-contain group-hover:scale-110 transition-transform" />
+                        ) : (
+                          <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md shadow-orange-500/20">
+                            <span className="text-white text-lg font-bold">{partner.name.substring(0, 2).toUpperCase()}</span>
+                          </div>
+                        )}
+                        <p className="text-slate-700 font-semibold text-xs">{partner.name}</p>
+                      </div>
                     </div>
-                  )}
-                  <p className="text-slate-700 font-semibold text-xs">{partner.name}</p>
-                </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            {displayPartners.length > partnerVisibleCount && (
+              <>
+                <button
+                  onClick={partnerPrev}
+                  disabled={partnerIndex === 0}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed z-10"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={partnerNext}
+                  disabled={partnerIndex >= partnerMaxIndex}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed z-10"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </>
+            )}
+
+            {displayPartners.length > partnerVisibleCount && (
+              <div className="flex justify-center gap-2 mt-6">
+                {Array.from({ length: partnerMaxIndex + 1 }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setPartnerIndex(i); startPartnerAuto(); }}
+                    className={`h-2 rounded-full transition-all duration-300 ${i === partnerIndex ? 'bg-orange-500 w-6' : 'bg-gray-300 w-2 hover:bg-orange-300'}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 lg:p-12">
