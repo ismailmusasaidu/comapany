@@ -755,7 +755,7 @@ export default function HomePage() {
                     <div className="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full">
                       <div className="bg-gradient-to-br from-slate-800 to-blue-900 p-8 flex items-center justify-center">
                         {member.image_url ? (
-                          <img src={member.image_url} alt={member.name} className="w-23 h-24 rounded-full object-cover ring-4 ring-white/20 group-hover:ring-orange-400/50 transition-all" />
+                          <img src={member.image_url} alt={member.name} className="w-24 h-23 rounded-full object-cover ring-4 ring-white/20 group-hover:ring-orange-400/50 transition-all" />
                         ) : (
                           <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center ring-4 ring-white/20 group-hover:ring-orange-400/50 transition-all shadow-lg">
                             <span className="text-white text-2xl font-bold">{member.name.split(' ').map((n: string) => n[0]).join('')}</span>
