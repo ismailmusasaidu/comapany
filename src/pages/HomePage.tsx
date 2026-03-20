@@ -227,9 +227,26 @@ export default function HomePage() {
   const [teamIndex, setTeamIndex] = useState(0);
   const teamSlideRef = useRef<HTMLDivElement>(null);
   const teamAutoRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [teamVisibleCount, setTeamVisibleCount] = useState(4);
 
-  const visibleCount = 4;
-  const maxIndex = Math.max(0, displayTeam.length - visibleCount);
+  useEffect(() => {
+    const updateVisible = () => {
+      const w = window.innerWidth;
+      if (w < 640) setTeamVisibleCount(1);
+      else if (w < 768) setTeamVisibleCount(2);
+      else if (w < 1024) setTeamVisibleCount(3);
+      else setTeamVisibleCount(4);
+    };
+    updateVisible();
+    window.addEventListener('resize', updateVisible);
+    return () => window.removeEventListener('resize', updateVisible);
+  }, []);
+
+  const maxIndex = Math.max(0, displayTeam.length - teamVisibleCount);
+
+  useEffect(() => {
+    setTeamIndex(prev => Math.min(prev, maxIndex));
+  }, [maxIndex]);
 
   const stopAuto = useCallback(() => {
     if (teamAutoRef.current) clearInterval(teamAutoRef.current);
@@ -727,12 +744,13 @@ export default function HomePage() {
             <div className="overflow-hidden" ref={teamSlideRef}>
               <div
                 className="flex transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(-${teamIndex * (100 / visibleCount)}%)` }}
+                style={{ transform: `translateX(-${teamIndex * (100 / teamVisibleCount)}%)` }}
               >
                 {displayTeam.map((member) => (
                   <div
                     key={member.id}
-                    className="flex-shrink-0 w-1/2 sm:w-1/3 lg:w-1/4 px-3"
+                    className="flex-shrink-0 px-3"
+                    style={{ width: `${100 / teamVisibleCount}%` }}
                   >
                     <div className="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full">
                       <div className="bg-gradient-to-br from-slate-800 to-blue-900 p-8 flex items-center justify-center">
@@ -755,7 +773,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {displayTeam.length > visibleCount && (
+            {displayTeam.length > teamVisibleCount && (
               <>
                 <button
                   onClick={teamPrev}
@@ -774,7 +792,7 @@ export default function HomePage() {
               </>
             )}
 
-            {displayTeam.length > visibleCount && (
+            {displayTeam.length > teamVisibleCount && (
               <div className="flex justify-center gap-2 mt-8">
                 {Array.from({ length: maxIndex + 1 }).map((_, i) => (
                   <button
