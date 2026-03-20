@@ -32,8 +32,9 @@ export default function AdminTeamPage() {
 
       if (err) throw err;
       setMembers(data || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch team members');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(`Failed to fetch team members: ${message}`);
     } finally {
       setIsLoading(false);
     }
