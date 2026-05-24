@@ -2,23 +2,25 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox } from 'lucide-react';
+import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingAgents, setPendingAgents] = useState(0);
 
   useEffect(() => {
-    const fetchUnread = async () => {
-      const { count } = await supabase
-        .from('contact_messages')
-        .select('id', { count: 'exact', head: true })
-        .eq('is_read', false);
-      setUnreadCount(count || 0);
+    const fetchCounts = async () => {
+      const [{ count: unread }, { count: pending }] = await Promise.all([
+        supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('is_read', false),
+        supabase.from('agent_profiles').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      ]);
+      setUnreadCount(unread || 0);
+      setPendingAgents(pending || 0);
     };
-    fetchUnread();
+    fetchCounts();
   }, []);
 
   const handleLogout = async () => {
@@ -70,24 +72,53 @@ export default function AdminDashboardPage() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Customer Messages */}
+        {/* Customer Messages + Agents */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">Customer Inbox</h2>
-          <button
-            onClick={() => navigate('/admin/messages')}
-            className="relative bg-white p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left w-full md:w-auto min-w-[260px]"
-          >
-            {unreadCount > 0 && (
-              <span className="absolute top-4 right-4 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                {unreadCount} new
-              </span>
-            )}
-            <div className="flex items-center space-x-3 mb-2">
-              <Inbox className="h-6 w-6 text-orange-500" />
-              <h3 className="text-lg font-semibold text-slate-900">Contact Messages</h3>
-            </div>
-            <p className="text-gray-600 text-sm">View and manage customer messages from the contact form</p>
-          </button>
+          <h2 className="text-xl font-bold text-slate-900 mb-4">Operations</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <button
+              onClick={() => navigate('/admin/messages')}
+              className="relative bg-white p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              {unreadCount > 0 && (
+                <span className="absolute top-4 right-4 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                  {unreadCount} new
+                </span>
+              )}
+              <div className="flex items-center space-x-3 mb-2">
+                <Inbox className="h-6 w-6 text-orange-500" />
+                <h3 className="text-lg font-semibold text-slate-900">Contact Messages</h3>
+              </div>
+              <p className="text-gray-600 text-sm">View and manage customer messages from the contact form</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/agents')}
+              className="relative bg-white p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              {pendingAgents > 0 && (
+                <span className="absolute top-4 right-4 bg-yellow-500 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <Clock className="h-3 w-3" /> {pendingAgents} pending
+                </span>
+              )}
+              <div className="flex items-center space-x-3 mb-2">
+                <Users className="h-6 w-6 text-blue-600" />
+                <h3 className="text-lg font-semibold text-slate-900">Agent Management</h3>
+              </div>
+              <p className="text-gray-600 text-sm">Approve agents, manage delivery bookings & logistics requests</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/agents')}
+              className="relative bg-white p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <Truck className="h-6 w-6 text-green-600" />
+                <h3 className="text-lg font-semibold text-slate-900">Logistics Requests</h3>
+              </div>
+              <p className="text-gray-600 text-sm">Review and process agent logistics service requests</p>
+            </button>
+          </div>
         </div>
 
         <div className="mb-8">

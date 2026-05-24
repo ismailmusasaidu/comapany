@@ -18,6 +18,12 @@ import AdminMarketplaceFeaturedPage from './pages/AdminMarketplaceFeaturedPage';
 import AdminMarketplacePartnersPage from './pages/AdminMarketplacePartnersPage';
 import AdminContactMessagesPage from './pages/AdminContactMessagesPage';
 import OrderTrackingPage from './pages/OrderTrackingPage';
+import AgentRegisterPage from './pages/AgentRegisterPage';
+import AgentLoginPage from './pages/AgentLoginPage';
+import AgentDashboardPage from './pages/AgentDashboardPage';
+import AgentDeliveryBookingPage from './pages/AgentDeliveryBookingPage';
+import AgentLogisticsPage from './pages/AgentLogisticsPage';
+import AdminAgentsPage from './pages/AdminAgentsPage';
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -50,6 +56,13 @@ function App() {
         <Route path="/admin/marketplace-featured" element={<ProtectedRoute element={<AdminMarketplaceFeaturedPage />} />} />
         <Route path="/admin/marketplace-partners" element={<ProtectedRoute element={<AdminMarketplacePartnersPage />} />} />
         <Route path="/admin/messages" element={<ProtectedRoute element={<AdminContactMessagesPage />} />} />
+        <Route path="/admin/agents" element={<ProtectedRoute element={<AdminAgentsPage />} />} />
+
+        <Route path="/agent/register" element={<AgentRegisterPage />} />
+        <Route path="/agent/login" element={<AgentLoginPage />} />
+        <Route path="/agent/dashboard" element={<AgentDashboardPage />} />
+        <Route path="/agent/booking/new" element={<AgentDeliveryBookingPage />} />
+        <Route path="/agent/logistics/new" element={<AgentLogisticsPage />} />
 
         <Route
           path="/*"
