@@ -1,6 +1,6 @@
-import { Menu, X, Truck, ArrowUp } from 'lucide-react';
+import { Menu, X, Truck, ArrowUp, ChevronDown, Package, MapPin, Users, Building2, UserCheck } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,6 +12,10 @@ export default function Layout({ children }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [portalsOpen, setPortalsOpen] = useState(false);
+  const [companyOpen, setCompanyOpen] = useState(false);
+  const portalsRef = useRef<HTMLDivElement>(null);
+  const companyRef = useRef<HTMLDivElement>(null);
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
@@ -24,64 +28,165 @@ export default function Layout({ children }: LayoutProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (portalsRef.current && !portalsRef.current.contains(e.target as Node)) setPortalsOpen(false);
+      if (companyRef.current && !companyRef.current.contains(e.target as Node)) setCompanyOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  const navLinks = [
-    { label: 'Home', href: '/#home', isLink: false },
-    { label: 'Logistics', href: '/#logistics', isLink: false },
-    { label: 'Marketplace', href: '/marketplace', isLink: true },
-    { label: 'Track Order', href: '/track', isLink: true },
-    { label: 'Agent Portal', href: '/agent/login', isLink: true },
-    { label: 'Business Portal', href: '/business/login', isLink: true },
-    { label: 'Gallery', href: '/#gallery', isLink: false },
-    { label: 'Partners', href: '/#partners', isLink: false },
-    { label: 'Team', href: '/#team', isLink: false },
-    { label: 'Join Us', href: '/#onboarding', isLink: false },
-    { label: 'Contact', href: '/#contact', isLink: false },
-  ];
+  const NavLink = ({ href, label, isRouter = false, onClick }: { href: string; label: string; isRouter?: boolean; onClick?: () => void }) => {
+    const cls = "relative px-3 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200 group whitespace-nowrap";
+    const underline = <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-gradient-to-r from-orange-500 to-red-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-full origin-left" />;
+    return isRouter
+      ? <Link to={href} className={cls} onClick={onClick}>{label}{underline}</Link>
+      : <a href={href} className={cls} onClick={onClick}>{label}{underline}</a>;
+  };
 
   return (
     <div className="min-h-screen bg-white">
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? 'bg-slate-900/95 backdrop-blur-xl shadow-2xl shadow-black/20 border-b border-orange-500/10'
-          : 'bg-gradient-to-r from-slate-900 to-blue-900 border-b border-orange-500/10'
+          ? 'bg-slate-900/98 backdrop-blur-xl shadow-2xl shadow-black/30'
+          : 'bg-gradient-to-r from-slate-900 via-slate-900 to-blue-950'
       }`}>
+
+        {/* ── Top utility bar ── */}
+        <div className="hidden lg:block border-b border-white/5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-9">
+              <p className="text-gray-500 text-xs flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse inline-block" />
+                All services operational — Nigeria & beyond
+              </p>
+              <div className="flex items-center gap-4 text-xs text-gray-400">
+                <Link to="/track" className="hover:text-orange-400 transition-colors flex items-center gap-1">
+                  <MapPin className="h-3 w-3" /> Track Order
+                </Link>
+                <span className="text-gray-700">|</span>
+                <Link to="/agent/login" className="hover:text-orange-400 transition-colors flex items-center gap-1">
+                  <UserCheck className="h-3 w-3" /> Agent Portal
+                </Link>
+                <span className="text-gray-700">|</span>
+                <Link to="/business/login" className="hover:text-orange-400 transition-colors flex items-center gap-1">
+                  <Building2 className="h-3 w-3" /> Business Portal
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Main nav bar ── */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20 md:h-24">
-            <Link to="/" className="flex items-center group" onClick={closeMobileMenu}>
+          <div className="flex items-center justify-between h-16 md:h-18">
+
+            {/* Logo */}
+            <Link to="/" className="flex items-center group flex-shrink-0" onClick={closeMobileMenu}>
               <img
                 src="/ChatGPT_Image_Mar_6,_2026,_06_30_55_PM.png"
                 alt="Danhausa Logistics"
-                className="h-14 sm:h-16 md:h-20 w-auto transition-transform duration-300 group-hover:scale-105"
+                className="h-12 sm:h-14 w-auto transition-transform duration-300 group-hover:scale-105"
               />
             </Link>
 
-            <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
-              {navLinks.map((link) =>
-                link.isLink ? (
-                  <Link
-                    key={link.label}
-                    to={link.href}
-                    className="relative px-3 py-2 text-sm font-medium text-gray-200 hover:text-white transition-colors duration-200 group"
-                  >
-                    {link.label}
-                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-400 transition-all duration-300 group-hover:w-full rounded-full"></span>
-                  </Link>
-                ) : (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    className="relative px-3 py-2 text-sm font-medium text-gray-200 hover:text-white transition-colors duration-200 group"
-                  >
-                    {link.label}
-                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-400 transition-all duration-300 group-hover:w-full rounded-full"></span>
-                  </a>
-                )
-              )}
+            {/* Desktop nav */}
+            <div className="hidden md:flex items-center gap-0.5">
+              <NavLink href="/#home" label="Home" />
+              <NavLink href="/#logistics" label="Services" />
+              <NavLink href="/marketplace" label="Marketplace" isRouter />
+
+              {/* Company dropdown */}
+              <div className="relative" ref={companyRef}>
+                <button
+                  onClick={() => { setCompanyOpen(p => !p); setPortalsOpen(false); }}
+                  className="relative flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200 group whitespace-nowrap"
+                >
+                  Company
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${companyOpen ? 'rotate-180' : ''}`} />
+                  <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-gradient-to-r from-orange-500 to-red-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-full origin-left" />
+                </button>
+                {companyOpen && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl shadow-black/40 overflow-hidden z-50">
+                    <div className="p-1.5 space-y-0.5">
+                      {[
+                        { href: '/#about', label: 'About Us', icon: Users },
+                        { href: '/#gallery', label: 'Gallery', icon: Package },
+                        { href: '/#partners', label: 'Partners', icon: Building2 },
+                        { href: '/#team', label: 'Our Team', icon: UserCheck },
+                        { href: '/#onboarding', label: 'Join Us', icon: Truck },
+                        { href: '/#contact', label: 'Contact', icon: MapPin },
+                      ].map(item => (
+                        <a key={item.label} href={item.href}
+                          onClick={() => setCompanyOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all group">
+                          <item.icon className="h-4 w-4 text-orange-400 group-hover:text-orange-300" />
+                          {item.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Portals dropdown */}
+              <div className="relative" ref={portalsRef}>
+                <button
+                  onClick={() => { setPortalsOpen(p => !p); setCompanyOpen(false); }}
+                  className="relative flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200 group whitespace-nowrap"
+                >
+                  Portals
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${portalsOpen ? 'rotate-180' : ''}`} />
+                  <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-gradient-to-r from-orange-500 to-red-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-full origin-left" />
+                </button>
+                {portalsOpen && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl shadow-black/40 overflow-hidden z-50">
+                    <div className="p-3 border-b border-white/5">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Partner Access</p>
+                    </div>
+                    <div className="p-1.5 space-y-0.5">
+                      <Link to="/agent/login" onClick={() => setPortalsOpen(false)}
+                        className="flex items-start gap-3 px-3 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all group">
+                        <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/30 transition-colors">
+                          <UserCheck className="h-4 w-4 text-orange-400" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">Agent Portal</p>
+                          <p className="text-xs text-gray-500">Delivery agents & couriers</p>
+                        </div>
+                      </Link>
+                      <Link to="/business/login" onClick={() => setPortalsOpen(false)}
+                        className="flex items-start gap-3 px-3 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all group">
+                        <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/30 transition-colors">
+                          <Building2 className="h-4 w-4 text-orange-400" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">Business Portal</p>
+                          <p className="text-xs text-gray-500">Companies & enterprises</p>
+                        </div>
+                      </Link>
+                      <Link to="/track" onClick={() => setPortalsOpen(false)}
+                        className="flex items-start gap-3 px-3 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all group">
+                        <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/30 transition-colors">
+                          <MapPin className="h-4 w-4 text-orange-400" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">Track Order</p>
+                          <p className="text-xs text-gray-500">Real-time shipment tracking</p>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="flex items-center space-x-3">
+            {/* CTA + mobile toggle */}
+            <div className="flex items-center gap-3">
               <Link
                 to={isMarketplacePage ? '/#contact' : '/marketplace'}
                 className="hidden md:inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30"
@@ -91,43 +196,83 @@ export default function Layout({ children }: LayoutProps) {
                 {isMarketplacePage ? 'Contact Us' : 'Get Started'}
               </Link>
               <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 text-gray-200 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                onClick={() => setMobileMenuOpen(p => !p)}
+                className="md:hidden p-2.5 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                aria-label="Toggle menu"
               >
-                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
             </div>
           </div>
         </div>
 
-        <div className={`md:hidden overflow-hidden transition-all duration-300 ${mobileMenuOpen ? 'max-h-screen' : 'max-h-0'}`}>
-          <div className="bg-slate-800/95 backdrop-blur-xl border-t border-white/5 px-4 py-4 space-y-1">
-            {navLinks.map((link) =>
-              link.isLink ? (
-                <Link
-                  key={link.label}
-                  to={link.href}
-                  className="flex items-center px-4 py-3 text-gray-200 hover:text-white hover:bg-white/10 rounded-lg transition-all font-medium"
-                  onClick={closeMobileMenu}
-                >
-                  {link.label}
+        {/* ── Mobile drawer ── */}
+        <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${mobileMenuOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}>
+          <div className="bg-slate-800/98 backdrop-blur-xl border-t border-white/5">
+            {/* Main links */}
+            <div className="px-4 pt-3 pb-1 space-y-0.5">
+              {[
+                { href: '/#home', label: 'Home', isRouter: false },
+                { href: '/#logistics', label: 'Services', isRouter: false },
+                { href: '/marketplace', label: 'Marketplace', isRouter: true },
+                { href: '/#about', label: 'About Us', isRouter: false },
+                { href: '/#gallery', label: 'Gallery', isRouter: false },
+                { href: '/#partners', label: 'Partners', isRouter: false },
+                { href: '/#team', label: 'Our Team', isRouter: false },
+                { href: '/#onboarding', label: 'Join Us', isRouter: false },
+                { href: '/#contact', label: 'Contact', isRouter: false },
+              ].map(link =>
+                link.isRouter ? (
+                  <Link key={link.label} to={link.href} onClick={closeMobileMenu}
+                    className="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-white/8 rounded-xl transition-all text-sm font-medium">
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a key={link.label} href={link.href} onClick={closeMobileMenu}
+                    className="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-white/8 rounded-xl transition-all text-sm font-medium">
+                    {link.label}
+                  </a>
+                )
+              )}
+            </div>
+
+            {/* Portals section */}
+            <div className="px-4 pt-2 pb-2 border-t border-white/5 mt-1">
+              <p className="text-xs font-bold text-gray-600 uppercase tracking-wider px-4 mb-2">Partner Portals</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Link to="/agent/login" onClick={closeMobileMenu}
+                  className="flex flex-col items-center gap-2 p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-center">
+                  <div className="w-9 h-9 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                    <UserCheck className="h-4.5 w-4.5 text-orange-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Agent Portal</p>
+                    <p className="text-xs text-gray-500">Agents & couriers</p>
+                  </div>
                 </Link>
-              ) : (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="flex items-center px-4 py-3 text-gray-200 hover:text-white hover:bg-white/10 rounded-lg transition-all font-medium"
-                  onClick={closeMobileMenu}
-                >
-                  {link.label}
-                </a>
-              )
-            )}
-            <div className="pt-2 border-t border-white/10">
+                <Link to="/business/login" onClick={closeMobileMenu}
+                  className="flex flex-col items-center gap-2 p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-center">
+                  <div className="w-9 h-9 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                    <Building2 className="h-4.5 w-4.5 text-orange-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Business Portal</p>
+                    <p className="text-xs text-gray-500">Companies & enterprise</p>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Bottom CTA */}
+            <div className="px-4 pt-2 pb-4 border-t border-white/5 mt-1 flex gap-2">
+              <Link to="/track" onClick={closeMobileMenu}
+                className="flex-1 flex items-center justify-center gap-2 border border-orange-500/40 text-orange-400 px-4 py-3 rounded-xl font-semibold text-sm transition-all hover:bg-orange-500/10">
+                <MapPin className="h-4 w-4" /> Track Order
+              </Link>
               <Link
                 to={isMarketplacePage ? '/#contact' : '/marketplace'}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl font-semibold transition-all"
                 onClick={closeMobileMenu}
+                className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl font-semibold text-sm transition-all"
               >
                 <Truck className="h-4 w-4" />
                 {isMarketplacePage ? 'Contact Us' : 'Get Started'}
@@ -137,7 +282,7 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </nav>
 
-      <div className="pt-20 md:pt-24">
+      <div className="pt-16 md:pt-[4.5rem] lg:pt-[6.25rem]">
         {children}
       </div>
 
