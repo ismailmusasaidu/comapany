@@ -58,7 +58,7 @@ export default function BusinessLogisticsPage() {
           <Truck className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <h2 className="font-bold text-gray-800 text-xl mb-2">Access Restricted</h2>
           <p className="text-gray-500 text-sm mb-6">Your business account must be approved before you can submit logistics requests.</p>
-          <Link to="/business/dashboard" className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700">
+          <Link to="/business/dashboard" className="inline-flex items-center gap-2 text-orange-500 font-semibold hover:text-orange-600">
             <ArrowLeft className="h-4 w-4" /> Back to Dashboard
           </Link>
         </div>
@@ -115,9 +115,9 @@ export default function BusinessLogisticsPage() {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Request Submitted!</h2>
           <p className="text-gray-500 mb-2">Your logistics request has been submitted. Our team will review and respond shortly.</p>
-          <div className="bg-blue-50 border border-blue-100 rounded-xl px-6 py-3 inline-block mb-8">
-            <p className="text-xs text-blue-600 font-medium">Request Reference</p>
-            <p className="text-xl font-bold text-blue-700">{createdRef}</p>
+          <div className="bg-orange-50 border border-orange-100 rounded-xl px-6 py-3 inline-block mb-8">
+            <p className="text-xs text-orange-600 font-medium">Request Reference</p>
+            <p className="text-xl font-bold text-orange-700">{createdRef}</p>
           </div>
           <div className="flex gap-3 justify-center">
             <button onClick={() => { setSuccess(false); setForm(EMPTY); }}
@@ -125,7 +125,7 @@ export default function BusinessLogisticsPage() {
               <Truck className="h-4 w-4" /> New Request
             </button>
             <Link to="/business/dashboard"
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-blue-800 transition-all">
+              className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-red-600 transition-all">
               Dashboard <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -164,10 +164,10 @@ export default function BusinessLogisticsPage() {
               {SERVICE_TYPES.map(st => (
                 <button key={st.value} type="button" onClick={() => setForm(p => ({ ...p, service_type: st.value }))}
                   className={`p-4 rounded-xl border-2 text-left transition-all ${
-                    form.service_type === st.value ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300 bg-white'
+                    form.service_type === st.value ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300 bg-white'
                   }`}>
                   <p className="text-xl mb-1.5">{st.icon}</p>
-                  <p className={`font-semibold text-sm ${form.service_type === st.value ? 'text-blue-700' : 'text-gray-800'}`}>{st.label}</p>
+                  <p className={`font-semibold text-sm ${form.service_type === st.value ? 'text-orange-700' : 'text-gray-800'}`}>{st.label}</p>
                   <p className="text-xs text-gray-400 mt-0.5 leading-tight">{st.desc}</p>
                 </button>
               ))}
@@ -184,7 +184,7 @@ export default function BusinessLogisticsPage() {
                   <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input type="text" required value={form.title} onChange={set('title')}
                     placeholder="e.g. Monthly product distribution — Lagos to Kano"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                   />
                 </div>
               </div>
@@ -194,7 +194,7 @@ export default function BusinessLogisticsPage() {
                 <textarea required value={form.description} onChange={set('description')}
                   placeholder="Describe your logistics needs in detail..."
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all resize-none"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all resize-none"
                 />
               </div>
 
@@ -205,7 +205,7 @@ export default function BusinessLogisticsPage() {
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input type="text" required value={form.origin} onChange={set('origin')}
                       placeholder="City or address"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                     />
                   </div>
                 </div>
@@ -215,7 +215,7 @@ export default function BusinessLogisticsPage() {
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input type="text" required value={form.destination} onChange={set('destination')}
                       placeholder="City or address"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                     />
                   </div>
                 </div>
@@ -228,7 +228,7 @@ export default function BusinessLogisticsPage() {
                     <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input type="text" value={form.quantity} onChange={set('quantity')}
                       placeholder="e.g. 500 cartons"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                     />
                   </div>
                 </div>
@@ -238,7 +238,7 @@ export default function BusinessLogisticsPage() {
                     <Weight className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input type="text" value={form.weight} onChange={set('weight')}
                       placeholder="e.g. 2 tonnes"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                     />
                   </div>
                 </div>
@@ -249,7 +249,7 @@ export default function BusinessLogisticsPage() {
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input type="date" value={form.preferred_date} onChange={set('preferred_date')}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                   />
                 </div>
               </div>
@@ -264,8 +264,8 @@ export default function BusinessLogisticsPage() {
                     <button key={b} type="button" onClick={() => setForm(p => ({ ...p, budget_range: b }))}
                       className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
                         form.budget_range === b
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600'
+                          ? 'bg-orange-500 text-white border-orange-500'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:text-orange-500'
                       }`}>
                       {b}
                     </button>
@@ -281,7 +281,7 @@ export default function BusinessLogisticsPage() {
               <ArrowLeft className="h-4 w-4" /> Cancel
             </Link>
             <button type="submit" disabled={loading}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-xl font-bold text-sm hover:from-blue-700 hover:to-blue-800 transition-all hover:shadow-md hover:shadow-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed">
+              className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 rounded-xl font-bold text-sm hover:from-orange-600 hover:to-red-600 transition-all hover:shadow-md hover:shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed">
               {loading ? (
                 <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Submitting...</>
               ) : (

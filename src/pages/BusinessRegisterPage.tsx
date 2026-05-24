@@ -111,7 +111,7 @@ export default function BusinessRegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center px-4">
         <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center">
           <div className="w-20 h-20 bg-green-50 border-2 border-green-200 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="h-10 w-10 text-green-500" />
@@ -120,9 +120,9 @@ export default function BusinessRegisterPage() {
           <p className="text-gray-500 mb-8 leading-relaxed">
             Your business registration has been received. Our team will review your application and notify you by email once approved.
           </p>
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-8 text-left">
-            <p className="text-sm text-blue-700 font-medium">What happens next?</p>
-            <ul className="mt-2 space-y-1 text-sm text-blue-600 list-disc list-inside">
+          <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-8 text-left">
+            <p className="text-sm text-orange-700 font-medium">What happens next?</p>
+            <ul className="mt-2 space-y-1 text-sm text-orange-600 list-disc list-inside">
               <li>Admin reviews your business profile</li>
               <li>You receive approval notification</li>
               <li>Log in to access your business dashboard</li>
@@ -131,7 +131,7 @@ export default function BusinessRegisterPage() {
           </div>
           <Link
             to="/business/login"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all hover:scale-105"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all hover:scale-105"
           >
             Go to Login <ArrowRight className="h-4 w-4" />
           </Link>
@@ -141,11 +141,11 @@ export default function BusinessRegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-2.5 rounded-xl">
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 p-2.5 rounded-xl">
               <Truck className="h-6 w-6 text-white" />
             </div>
             <span className="text-white text-xl font-bold">Danhausa Logistics</span>
@@ -155,9 +155,9 @@ export default function BusinessRegisterPage() {
         </div>
 
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-8 py-5">
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 px-8 py-5">
             <p className="text-white font-semibold">Complete your company profile</p>
-            <p className="text-blue-200 text-sm">All fields are required for business verification</p>
+            <p className="text-orange-100 text-sm">All fields are required for business verification</p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
@@ -180,7 +180,7 @@ export default function BusinessRegisterPage() {
                     <input
                       type="text" required value={form.company_name} onChange={set('company_name')}
                       placeholder="Acme Nigeria Ltd."
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                     />
                   </div>
                 </div>
@@ -191,7 +191,7 @@ export default function BusinessRegisterPage() {
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                       <select
                         required value={form.industry} onChange={set('industry')}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all bg-white appearance-none"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all bg-white appearance-none"
                       >
                         <option value="">Select industry</option>
                         {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
@@ -205,7 +205,7 @@ export default function BusinessRegisterPage() {
                       <input
                         type="text" required value={form.city} onChange={set('city')}
                         placeholder="Lagos"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                       />
                     </div>
                   </div>
@@ -218,12 +218,12 @@ export default function BusinessRegisterPage() {
                       <button key={s.value} type="button" onClick={() => setForm(p => ({ ...p, company_size: s.value }))}
                         className={`p-3 rounded-xl border-2 text-left transition-all ${
                           form.company_size === s.value
-                            ? 'border-blue-500 bg-blue-50'
+                            ? 'border-orange-500 bg-orange-50'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}>
                         <div className="flex items-center gap-1.5 mb-1">
-                          <Users className={`h-3.5 w-3.5 ${form.company_size === s.value ? 'text-blue-600' : 'text-gray-400'}`} />
-                          <p className={`font-semibold text-xs ${form.company_size === s.value ? 'text-blue-700' : 'text-gray-800'}`}>{s.label}</p>
+                          <Users className={`h-3.5 w-3.5 ${form.company_size === s.value ? 'text-orange-500' : 'text-gray-400'}`} />
+                          <p className={`font-semibold text-xs ${form.company_size === s.value ? 'text-orange-700' : 'text-gray-800'}`}>{s.label}</p>
                         </div>
                         <p className="text-xs text-gray-400">{s.desc}</p>
                       </button>
@@ -238,7 +238,7 @@ export default function BusinessRegisterPage() {
                     <input
                       type="text" required value={form.address} onChange={set('address')}
                       placeholder="12 Commerce Street, Lagos Island"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                     />
                   </div>
                 </div>
@@ -251,7 +251,7 @@ export default function BusinessRegisterPage() {
                       <input
                         type="text" required value={form.registration_number} onChange={set('registration_number')}
                         placeholder="RC123456"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                       />
                     </div>
                   </div>
@@ -262,7 +262,7 @@ export default function BusinessRegisterPage() {
                       <input
                         type="text" value={form.tax_id} onChange={set('tax_id')}
                         placeholder="TIN number"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                       />
                     </div>
                   </div>
@@ -281,7 +281,7 @@ export default function BusinessRegisterPage() {
                   <input
                     type="text" required value={form.contact_person} onChange={set('contact_person')}
                     placeholder="John Doe"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                   />
                 </div>
                 <div>
@@ -291,7 +291,7 @@ export default function BusinessRegisterPage() {
                     <input
                       type="tel" required value={form.phone} onChange={set('phone')}
                       placeholder="+234 800 000 0000"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                     />
                   </div>
                 </div>
@@ -311,7 +311,7 @@ export default function BusinessRegisterPage() {
                     <input
                       type="email" required value={form.email} onChange={set('email')}
                       placeholder="logistics@company.com"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                     />
                   </div>
                 </div>
@@ -323,7 +323,7 @@ export default function BusinessRegisterPage() {
                       <input
                         type={showPassword ? 'text' : 'password'} required value={form.password} onChange={set('password')}
                         placeholder="Min. 8 characters"
-                        className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                        className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                       />
                       <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -337,7 +337,7 @@ export default function BusinessRegisterPage() {
                       <input
                         type={showConfirm ? 'text' : 'password'} required value={form.confirm_password} onChange={set('confirm_password')}
                         placeholder="Repeat password"
-                        className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                        className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                       />
                       <button type="button" onClick={() => setShowConfirm(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                         {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -350,7 +350,7 @@ export default function BusinessRegisterPage() {
 
             <button
               type="submit" disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white py-4 rounded-xl font-bold text-base transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-4 rounded-xl font-bold text-base transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/30 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Submitting Application...</>
@@ -361,7 +361,7 @@ export default function BusinessRegisterPage() {
 
             <p className="text-center text-sm text-gray-500">
               Already have an account?{' '}
-              <Link to="/business/login" className="text-blue-600 hover:text-blue-700 font-semibold">
+              <Link to="/business/login" className="text-orange-500 hover:text-orange-600 font-semibold">
                 Sign in here
               </Link>
             </p>

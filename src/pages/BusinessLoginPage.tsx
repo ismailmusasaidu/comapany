@@ -27,26 +27,26 @@ export default function BusinessLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-2.5 rounded-xl">
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 p-2.5 rounded-xl">
               <Truck className="h-6 w-6 text-white" />
             </div>
             <span className="text-white text-xl font-bold">Danhausa Logistics</span>
           </Link>
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Building2 className="h-6 w-6 text-blue-400" />
+            <Building2 className="h-6 w-6 text-orange-400" />
             <h1 className="text-2xl font-bold text-white">Business Portal</h1>
           </div>
           <p className="text-gray-400 text-sm">Sign in to your business account</p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-8 py-5">
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 px-8 py-5">
             <p className="text-white font-semibold">Welcome back</p>
-            <p className="text-blue-200 text-sm">Enter your business credentials to continue</p>
+            <p className="text-orange-100 text-sm">Enter your business credentials to continue</p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-8 space-y-5">
@@ -63,7 +63,7 @@ export default function BusinessLoginPage() {
                 <input
                   type="email" required value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="logistics@company.com"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                 />
               </div>
             </div>
@@ -75,7 +75,7 @@ export default function BusinessLoginPage() {
                 <input
                   type={showPassword ? 'text' : 'password'} required value={password} onChange={e => setPassword(e.target.value)}
                   placeholder="Your password"
-                  className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                  className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
                 />
                 <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -85,7 +85,7 @@ export default function BusinessLoginPage() {
 
             <button
               type="submit" disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white py-3.5 rounded-xl font-bold text-sm transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3.5 rounded-xl font-bold text-sm transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/30 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Signing in...</>
@@ -95,7 +95,7 @@ export default function BusinessLoginPage() {
             <div className="space-y-2 text-center text-sm text-gray-500">
               <p>
                 New business?{' '}
-                <Link to="/business/register" className="text-blue-600 hover:text-blue-700 font-semibold">
+                <Link to="/business/register" className="text-orange-500 hover:text-orange-600 font-semibold">
                   Register here
                 </Link>
               </p>

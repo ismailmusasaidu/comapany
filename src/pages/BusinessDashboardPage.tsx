@@ -246,7 +246,7 @@ export default function BusinessDashboardPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-500">Loading your profile...</p>
         </div>
       </div>
@@ -265,7 +265,7 @@ export default function BusinessDashboardPage() {
         <aside className="w-64 bg-slate-900 text-white flex flex-col fixed h-full z-30 hidden lg:flex">
           <div className="p-6 border-b border-white/10">
             <Link to="/" className="flex items-center gap-3">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-2 rounded-xl">
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-xl">
                 <Truck className="h-5 w-5 text-white" />
               </div>
               <span className="font-bold text-sm">Danhausa Logistics</span>
@@ -275,7 +275,7 @@ export default function BusinessDashboardPage() {
           <div className="p-4 border-b border-white/10">
             <div className="bg-white/5 rounded-xl p-4">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
                   {profile.company_name.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
@@ -355,7 +355,7 @@ export default function BusinessDashboardPage() {
               </button>
               {profile.status === 'approved' && (
                 <Link to="/business/booking/new"
-                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-blue-800 transition-all hover:shadow-md hover:shadow-blue-500/20">
+                  className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-red-600 transition-all hover:shadow-md hover:shadow-orange-500/20">
                   <Plus className="h-4 w-4" /> New Booking
                 </Link>
               )}
@@ -402,8 +402,8 @@ export default function BusinessDashboardPage() {
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bg-white rounded-2xl border border-gray-100 p-5">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                        <Package className="h-5 w-5 text-blue-600" />
+                      <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                        <Package className="h-5 w-5 text-orange-500" />
                       </div>
                       <TrendBadge value={bTrend} />
                     </div>
@@ -467,7 +467,7 @@ export default function BusinessDashboardPage() {
                         <h3 className="font-bold text-gray-900">Booking Pipeline</h3>
                         <p className="text-gray-400 text-xs mt-0.5">Status distribution across all bookings</p>
                       </div>
-                      <div className="flex items-center gap-1.5 bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1.5 rounded-full">
+                      <div className="flex items-center gap-1.5 bg-orange-50 text-orange-600 text-xs font-semibold px-3 py-1.5 rounded-full">
                         <Activity className="h-3.5 w-3.5" /> Live
                       </div>
                     </div>
@@ -615,13 +615,13 @@ export default function BusinessDashboardPage() {
                 {/* Quick Actions */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <Link to="/business/booking/new"
-                    className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 text-white group hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-0.5">
+                    className="bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl p-6 text-white group hover:shadow-xl hover:shadow-orange-500/20 transition-all duration-300 hover:-translate-y-0.5">
                     <div className="flex items-center justify-between mb-4">
                       <div className="bg-white/20 p-3 rounded-xl"><Package className="h-6 w-6" /></div>
                       <ChevronRight className="h-5 w-5 opacity-70 group-hover:translate-x-1 transition-transform" />
                     </div>
                     <h3 className="font-bold text-lg mb-1">New Delivery Booking</h3>
-                    <p className="text-blue-200 text-sm">Create a delivery order for your business shipment</p>
+                    <p className="text-orange-100 text-sm">Create a delivery order for your business shipment</p>
                   </Link>
                   <Link to="/business/logistics/new"
                     className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-white group hover:shadow-xl hover:shadow-slate-900/20 transition-all duration-300 hover:-translate-y-0.5">
@@ -642,7 +642,7 @@ export default function BusinessDashboardPage() {
                         <h3 className="font-bold text-gray-900">Recent Bookings</h3>
                         <p className="text-gray-400 text-xs">Latest delivery bookings</p>
                       </div>
-                      <Link to="/business/booking/new" className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1">
+                      <Link to="/business/booking/new" className="text-orange-500 hover:text-orange-600 text-sm font-medium flex items-center gap-1">
                         New <Plus className="h-3.5 w-3.5" />
                       </Link>
                     </div>
@@ -650,7 +650,7 @@ export default function BusinessDashboardPage() {
                       <div className="p-8 text-center">
                         <Package className="h-10 w-10 text-gray-200 mx-auto mb-3" />
                         <p className="text-gray-400 text-sm">No bookings yet</p>
-                        <Link to="/business/booking/new" className="text-blue-600 text-sm font-medium hover:underline mt-2 inline-block">Create your first booking</Link>
+                        <Link to="/business/booking/new" className="text-orange-500 text-sm font-medium hover:underline mt-2 inline-block">Create your first booking</Link>
                       </div>
                     ) : (
                       <div className="divide-y divide-gray-50">
@@ -678,7 +678,7 @@ export default function BusinessDashboardPage() {
                         <h3 className="font-bold text-gray-900">Recent Requests</h3>
                         <p className="text-gray-400 text-xs">Latest logistics service requests</p>
                       </div>
-                      <Link to="/business/logistics/new" className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1">
+                      <Link to="/business/logistics/new" className="text-orange-500 hover:text-orange-600 text-sm font-medium flex items-center gap-1">
                         New <Plus className="h-3.5 w-3.5" />
                       </Link>
                     </div>
@@ -686,7 +686,7 @@ export default function BusinessDashboardPage() {
                       <div className="p-8 text-center">
                         <Truck className="h-10 w-10 text-gray-200 mx-auto mb-3" />
                         <p className="text-gray-400 text-sm">No requests yet</p>
-                        <Link to="/business/logistics/new" className="text-blue-600 text-sm font-medium hover:underline mt-2 inline-block">Submit your first request</Link>
+                        <Link to="/business/logistics/new" className="text-orange-500 text-sm font-medium hover:underline mt-2 inline-block">Submit your first request</Link>
                       </div>
                     ) : (
                       <div className="divide-y divide-gray-50">

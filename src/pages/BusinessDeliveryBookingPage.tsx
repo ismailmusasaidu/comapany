@@ -58,7 +58,7 @@ export default function BusinessDeliveryBookingPage() {
           <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <h2 className="font-bold text-gray-800 text-xl mb-2">Access Restricted</h2>
           <p className="text-gray-500 text-sm mb-6">Your business account must be approved by admin before you can create bookings.</p>
-          <Link to="/business/dashboard" className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700">
+          <Link to="/business/dashboard" className="inline-flex items-center gap-2 text-orange-500 font-semibold hover:text-orange-600">
             <ArrowLeft className="h-4 w-4" /> Back to Dashboard
           </Link>
         </div>
@@ -114,9 +114,9 @@ export default function BusinessDeliveryBookingPage() {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Booking Created!</h2>
           <p className="text-gray-500 mb-2">Your delivery booking has been submitted successfully.</p>
-          <div className="bg-blue-50 border border-blue-100 rounded-xl px-6 py-3 inline-block mb-8">
-            <p className="text-xs text-blue-600 font-medium">Booking Reference</p>
-            <p className="text-xl font-bold text-blue-700">{createdRef}</p>
+          <div className="bg-orange-50 border border-orange-100 rounded-xl px-6 py-3 inline-block mb-8">
+            <p className="text-xs text-orange-600 font-medium">Booking Reference</p>
+            <p className="text-xl font-bold text-orange-700">{createdRef}</p>
           </div>
           <div className="flex gap-3 justify-center">
             <button
@@ -127,7 +127,7 @@ export default function BusinessDeliveryBookingPage() {
             </button>
             <Link
               to="/business/dashboard"
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-blue-800 transition-all"
+              className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-red-600 transition-all"
             >
               Dashboard <ArrowRight className="h-4 w-4" />
             </Link>
@@ -165,12 +165,12 @@ export default function BusinessDeliveryBookingPage() {
                   <div className="flex flex-col items-center">
                     <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
                       done ? 'bg-green-500 border-green-500 text-white' :
-                      active ? 'bg-blue-600 border-blue-600 text-white' :
+                      active ? 'bg-orange-500 border-orange-500 text-white' :
                       'bg-white border-gray-200 text-gray-400'
                     }`}>
                       {done ? <CheckCircle className="h-4 w-4" /> : num}
                     </div>
-                    <p className={`text-xs mt-1 font-medium hidden sm:block ${active ? 'text-blue-600' : done ? 'text-green-600' : 'text-gray-400'}`}>{label}</p>
+                    <p className={`text-xs mt-1 font-medium hidden sm:block ${active ? 'text-orange-500' : done ? 'text-green-600' : 'text-gray-400'}`}>{label}</p>
                   </div>
                   {idx < steps.length - 1 && (
                     <div className={`flex-1 h-0.5 mx-2 ${done ? 'bg-green-400' : 'bg-gray-200'}`} />
@@ -191,7 +191,7 @@ export default function BusinessDeliveryBookingPage() {
           {step === 1 && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
-                <div className="bg-blue-50 p-2.5 rounded-xl"><User className="h-5 w-5 text-blue-600" /></div>
+                <div className="bg-orange-50 p-2.5 rounded-xl"><User className="h-5 w-5 text-orange-500" /></div>
                 <div><h2 className="font-bold text-gray-900">Sender Information</h2><p className="text-gray-500 text-sm">Who is sending the package?</p></div>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
@@ -230,9 +230,9 @@ export default function BusinessDeliveryBookingPage() {
                   {PACKAGE_TYPES.map(pt => (
                     <button key={pt.value} type="button" onClick={() => setForm(p => ({ ...p, package_type: pt.value }))}
                       className={`p-4 rounded-xl border-2 text-left transition-all ${
-                        form.package_type === pt.value ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300 bg-white'
+                        form.package_type === pt.value ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300 bg-white'
                       }`}>
-                      <p className={`font-semibold text-sm ${form.package_type === pt.value ? 'text-blue-700' : 'text-gray-800'}`}>{pt.label}</p>
+                      <p className={`font-semibold text-sm ${form.package_type === pt.value ? 'text-orange-700' : 'text-gray-800'}`}>{pt.label}</p>
                       <p className="text-xs text-gray-500 mt-0.5">{pt.desc}</p>
                     </button>
                   ))}
@@ -248,7 +248,7 @@ export default function BusinessDeliveryBookingPage() {
                 <textarea value={form.special_instructions} onChange={set('special_instructions')}
                   placeholder="Handle with care, call before delivery..."
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all resize-none"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all resize-none"
                 />
               </div>
             </div>
@@ -307,12 +307,12 @@ export default function BusinessDeliveryBookingPage() {
                   }
                   setError(''); setStep(s => s + 1);
                 }}
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:from-blue-700 hover:to-blue-800 transition-all hover:shadow-md hover:shadow-blue-500/20">
+                className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:from-orange-600 hover:to-red-600 transition-all hover:shadow-md hover:shadow-orange-500/20">
                 Continue <ChevronRight className="h-4 w-4" />
               </button>
             ) : (
               <button type="button" onClick={handleSubmit} disabled={loading}
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-2.5 rounded-xl font-bold text-sm hover:from-blue-700 hover:to-blue-800 transition-all hover:shadow-md hover:shadow-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed">
+                className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-2.5 rounded-xl font-bold text-sm hover:from-orange-600 hover:to-red-600 transition-all hover:shadow-md hover:shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed">
                 {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Submitting...</> : <><CheckCircle className="h-4 w-4" /> Confirm Booking</>}
               </button>
             )}
@@ -334,7 +334,7 @@ function Field({ label, icon: Icon, placeholder, value, onChange, required = fal
       <div className="relative">
         <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <input type={type} required={required} value={value} onChange={onChange} placeholder={placeholder}
-          className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+          className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all"
         />
       </div>
     </div>
