@@ -32,6 +32,7 @@ export default function Layout({ children }: LayoutProps) {
     { label: 'Marketplace', href: '/marketplace', isLink: true },
     { label: 'Track Order', href: '/track', isLink: true },
     { label: 'Agent Portal', href: '/agent/login', isLink: true },
+    { label: 'Business Portal', href: '/business/login', isLink: true },
     { label: 'Gallery', href: '/#gallery', isLink: false },
     { label: 'Partners', href: '/#partners', isLink: false },
     { label: 'Team', href: '/#team', isLink: false },

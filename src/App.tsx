@@ -24,6 +24,12 @@ import AgentDashboardPage from './pages/AgentDashboardPage';
 import AgentDeliveryBookingPage from './pages/AgentDeliveryBookingPage';
 import AgentLogisticsPage from './pages/AgentLogisticsPage';
 import AdminAgentsPage from './pages/AdminAgentsPage';
+import BusinessRegisterPage from './pages/BusinessRegisterPage';
+import BusinessLoginPage from './pages/BusinessLoginPage';
+import BusinessDashboardPage from './pages/BusinessDashboardPage';
+import BusinessDeliveryBookingPage from './pages/BusinessDeliveryBookingPage';
+import BusinessLogisticsPage from './pages/BusinessLogisticsPage';
+import AdminBusinessesPage from './pages/AdminBusinessesPage';
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -57,12 +63,19 @@ function App() {
         <Route path="/admin/marketplace-partners" element={<ProtectedRoute element={<AdminMarketplacePartnersPage />} />} />
         <Route path="/admin/messages" element={<ProtectedRoute element={<AdminContactMessagesPage />} />} />
         <Route path="/admin/agents" element={<ProtectedRoute element={<AdminAgentsPage />} />} />
+        <Route path="/admin/businesses" element={<ProtectedRoute element={<AdminBusinessesPage />} />} />
 
         <Route path="/agent/register" element={<AgentRegisterPage />} />
         <Route path="/agent/login" element={<AgentLoginPage />} />
         <Route path="/agent/dashboard" element={<AgentDashboardPage />} />
         <Route path="/agent/booking/new" element={<AgentDeliveryBookingPage />} />
         <Route path="/agent/logistics/new" element={<AgentLogisticsPage />} />
+
+        <Route path="/business/register" element={<BusinessRegisterPage />} />
+        <Route path="/business/login" element={<BusinessLoginPage />} />
+        <Route path="/business/dashboard" element={<BusinessDashboardPage />} />
+        <Route path="/business/booking/new" element={<BusinessDeliveryBookingPage />} />
+        <Route path="/business/logistics/new" element={<BusinessLogisticsPage />} />
 
         <Route
           path="/*"

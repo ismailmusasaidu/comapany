@@ -10,15 +10,18 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingAgents, setPendingAgents] = useState(0);
+  const [pendingBusinesses, setPendingBusinesses] = useState(0);
 
   useEffect(() => {
     const fetchCounts = async () => {
-      const [{ count: unread }, { count: pending }] = await Promise.all([
+      const [{ count: unread }, { count: pending }, { count: pendingBiz }] = await Promise.all([
         supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('is_read', false),
         supabase.from('agent_profiles').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('business_profiles').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       ]);
       setUnreadCount(unread || 0);
       setPendingAgents(pending || 0);
+      setPendingBusinesses(pendingBiz || 0);
     };
     fetchCounts();
   }, []);
@@ -117,6 +120,22 @@ export default function AdminDashboardPage() {
                 <h3 className="text-lg font-semibold text-slate-900">Logistics Requests</h3>
               </div>
               <p className="text-gray-600 text-sm">Review and process agent logistics service requests</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/businesses')}
+              className="relative bg-white p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              {pendingBusinesses > 0 && (
+                <span className="absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <Clock className="h-3 w-3" /> {pendingBusinesses} pending
+                </span>
+              )}
+              <div className="flex items-center space-x-3 mb-2">
+                <Building2 className="h-6 w-6 text-blue-600" />
+                <h3 className="text-lg font-semibold text-slate-900">Business Management</h3>
+              </div>
+              <p className="text-gray-600 text-sm">Approve businesses, manage their bookings & logistics requests</p>
             </button>
           </div>
         </div>
