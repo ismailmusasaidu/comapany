@@ -99,6 +99,7 @@ export default function Layout({ children }: LayoutProps) {
               <NavLink href="/#home" label="Home" />
               <NavLink href="/#logistics" label="Services" />
               <NavLink href="/marketplace" label="Marketplace" isRouter />
+              <NavLink href="/track" label="Track Order" isRouter />
 
               {/* Company dropdown */}
               <div className="relative" ref={companyRef}>
