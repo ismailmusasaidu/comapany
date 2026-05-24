@@ -86,34 +86,53 @@ export default function OrderTrackingPage() {
     setEvents([]);
     setSearched(true);
 
-    const { data: orderData, error: orderErr } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('order_id', trimmed)
-      .maybeSingle();
+    // Search the legacy orders table first, then delivery_bookings
+    const [{ data: orderData, error: orderErr }, { data: bookingData, error: bookingErr }] = await Promise.all([
+      supabase.from('orders').select('*').eq('order_id', trimmed).maybeSingle(),
+      supabase.from('delivery_bookings').select('*').eq('booking_ref', trimmed).maybeSingle(),
+    ]);
 
-    if (orderErr) {
+    if (orderErr && bookingErr) {
       setError('Something went wrong. Please try again.');
       setLoading(false);
       return;
     }
 
-    if (!orderData) {
+    if (orderData) {
+      // Legacy orders table result
+      const { data: eventsData } = await supabase
+        .from('order_tracking_events')
+        .select('*')
+        .eq('order_id', orderData.id)
+        .order('occurred_at', { ascending: true });
+      setOrder(orderData);
+      setEvents(eventsData ?? []);
+    } else if (bookingData) {
+      // Normalize delivery_bookings row into the Order shape
+      const normalized: Order = {
+        id: bookingData.id,
+        order_id: bookingData.booking_ref,
+        customer_name: bookingData.recipient_name,
+        customer_email: '',
+        customer_phone: bookingData.recipient_phone,
+        origin: `${bookingData.sender_address}, ${bookingData.pickup_city}`,
+        destination: `${bookingData.recipient_address}, ${bookingData.delivery_city}`,
+        status: bookingData.status,
+        package_description: `${bookingData.package_description} (${bookingData.package_type})`,
+        weight_kg: bookingData.weight_kg,
+        estimated_delivery: null,
+        created_at: bookingData.created_at,
+        updated_at: bookingData.updated_at,
+      };
+      setOrder(normalized);
+      setEvents([]);
+    } else {
       setError(`No order found with ID "${trimmed}". Please check and try again.`);
       setLoading(false);
       return;
     }
 
-    const { data: eventsData } = await supabase
-      .from('order_tracking_events')
-      .select('*')
-      .eq('order_id', orderData.id)
-      .order('occurred_at', { ascending: true });
-
-    setOrder(orderData);
-    setEvents(eventsData ?? []);
     setLoading(false);
-
     setTimeout(() => {
       resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
@@ -152,7 +171,7 @@ export default function OrderTrackingPage() {
                 type="text"
                 value={inputValue}
                 onChange={(e) => { setInputValue(e.target.value); setError(''); }}
-                placeholder="e.g. ORD-2024001"
+                placeholder="e.g. ORD-2024001 or BK-123456"
                 className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 text-white placeholder-gray-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent backdrop-blur-sm text-base transition-all"
                 autoComplete="off"
                 spellCheck={false}
