@@ -30,6 +30,7 @@ export default function Layout({ children }: LayoutProps) {
     { label: 'Home', href: '/#home', isLink: false },
     { label: 'Logistics', href: '/#logistics', isLink: false },
     { label: 'Marketplace', href: '/marketplace', isLink: true },
+    { label: 'Track Order', href: '/track', isLink: true },
     { label: 'Gallery', href: '/#gallery', isLink: false },
     { label: 'Partners', href: '/#partners', isLink: false },
     { label: 'Team', href: '/#team', isLink: false },
@@ -162,7 +163,7 @@ export default function Layout({ children }: LayoutProps) {
                 <li><a href="/#logistics" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Express Shipping</a></li>
                 <li><a href="/#logistics" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Freight Services</a></li>
                 <li><Link to="/marketplace" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Marketplace</Link></li>
-                <li><a href="#" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Track Package</a></li>
+                <li><Link to="/track" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Track Package</Link></li>
               </ul>
             </div>
 
