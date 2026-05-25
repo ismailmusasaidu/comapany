@@ -4,7 +4,7 @@ import {
   Truck, Package, BarChart3, Clock, CheckCircle, XCircle,
   LogOut, Plus, ChevronRight, AlertTriangle, User, Building2,
   MapPin, Phone, Mail, TrendingUp, Activity, FileText,
-  Target, ArrowUpRight, ArrowDownRight, Minus, Award, Zap, MessageSquare, FileDown
+  Target, ArrowUpRight, ArrowDownRight, Minus, Award, Zap, MessageSquare, FileDown, SlidersHorizontal
 } from 'lucide-react';
 import { useAgent } from '../contexts/AgentContext';
 import { supabase } from '../lib/supabase';
@@ -358,11 +358,14 @@ export default function AgentDashboardPage() {
             </Link>
             {profile.status === 'approved' && (
               <>
+                <Link to="/agent/orders" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm">
+                  <SlidersHorizontal className="h-4 w-4" /> Orders & Requests
+                </Link>
                 <Link to="/agent/booking/new" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm">
-                  <Package className="h-4 w-4" /> Delivery Bookings
+                  <Package className="h-4 w-4" /> New Booking
                 </Link>
                 <Link to="/agent/logistics/new" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm">
-                  <Truck className="h-4 w-4" /> Logistics Requests
+                  <Truck className="h-4 w-4" /> New Logistics Request
                 </Link>
                 <Link to="/agent/messages" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm relative">
                   <MessageSquare className="h-4 w-4" /> Messages

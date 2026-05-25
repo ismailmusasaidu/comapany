@@ -5,7 +5,7 @@ import {
   LogOut, Plus, ChevronRight, AlertTriangle, Building2,
   MapPin, Phone, Mail, TrendingUp, Activity, FileText,
   Target, ArrowUpRight, ArrowDownRight, Minus, Award, Zap,
-  Users, Globe, Briefcase, MessageSquare, FileDown
+  Users, Globe, Briefcase, MessageSquare, FileDown, SlidersHorizontal
 } from 'lucide-react';
 import { useBusiness } from '../contexts/BusinessContext';
 import { supabase } from '../lib/supabase';
@@ -325,11 +325,14 @@ export default function BusinessDashboardPage() {
             </Link>
             {profile.status === 'approved' && (
               <>
+                <Link to="/business/orders" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm">
+                  <SlidersHorizontal className="h-4 w-4" /> Orders & Requests
+                </Link>
                 <Link to="/business/booking/new" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm">
-                  <Package className="h-4 w-4" /> Delivery Bookings
+                  <Package className="h-4 w-4" /> New Booking
                 </Link>
                 <Link to="/business/logistics/new" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm">
-                  <Truck className="h-4 w-4" /> Logistics Requests
+                  <Truck className="h-4 w-4" /> New Logistics Request
                 </Link>
                 <Link to="/business/messages" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm">
                   <MessageSquare className="h-4 w-4" /> Messages
