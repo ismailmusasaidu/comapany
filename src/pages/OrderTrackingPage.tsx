@@ -31,6 +31,7 @@ interface TrackedOrder {
   weight?: string | null;
   budget_range?: string;
   // shared
+  delivery_type?: string | null;
   estimated_delivery: string | null;
   created_at: string;
   updated_at: string;
@@ -82,9 +83,9 @@ const LOGISTICS_STEPS = ['pending', 'reviewing', 'approved', 'in_progress', 'com
 const NATIONAL_STATUSES = new Set(['national_in_transit', 'national_at_hub', 'national_out_for_delivery']);
 const INTERNATIONAL_STATUSES = new Set(['international_in_transit', 'customs_clearance', 'customs_hold', 'international_out_for_delivery']);
 
-function getDeliverySteps(status: string) {
-  if (INTERNATIONAL_STATUSES.has(status)) return INTERNATIONAL_STEPS;
-  if (NATIONAL_STATUSES.has(status)) return NATIONAL_STEPS;
+function getDeliverySteps(status: string, deliveryType?: string | null) {
+  if (deliveryType === 'international' || INTERNATIONAL_STATUSES.has(status)) return INTERNATIONAL_STEPS;
+  if (deliveryType === 'national' || deliveryType === 'inter_state' || NATIONAL_STATUSES.has(status)) return NATIONAL_STEPS;
   return DELIVERY_STEPS;
 }
 
@@ -170,8 +171,9 @@ function synthesizeDeliveryHistory(
   currentStatus: string,
   createdAt: string,
   updatedAt: string,
+  deliveryType?: string | null,
 ): TrackingEvent[] {
-  const steps = getDeliverySteps(currentStatus);
+  const steps = getDeliverySteps(currentStatus, deliveryType);
   const currentIdx = steps.indexOf(currentStatus);
   const completedSteps = currentIdx >= 0 ? steps.slice(0, currentIdx + 1) : [];
 
@@ -281,6 +283,7 @@ export default function OrderTrackingPage() {
         origin: `${bookingData.sender_address}, ${bookingData.pickup_city}`,
         destination: `${bookingData.recipient_address}, ${bookingData.delivery_city}`,
         status: bookingData.status,
+        delivery_type: bookingData.delivery_type ?? null,
         package_description: bookingData.package_description
           ? `${bookingData.package_description} (${cap(bookingData.package_type)})`
           : cap(bookingData.package_type),
@@ -289,7 +292,7 @@ export default function OrderTrackingPage() {
         created_at: bookingData.created_at,
         updated_at: bookingData.updated_at,
       });
-      setEvents(synthesizeDeliveryHistory(bookingData.status, bookingData.created_at, bookingData.updated_at));
+      setEvents(synthesizeDeliveryHistory(bookingData.status, bookingData.created_at, bookingData.updated_at, bookingData.delivery_type));
 
     } else if (bizBookingData) {
       setOrder({
@@ -302,6 +305,7 @@ export default function OrderTrackingPage() {
         origin: `${bizBookingData.sender_address}, ${bizBookingData.pickup_city}`,
         destination: `${bizBookingData.recipient_address}, ${bizBookingData.delivery_city}`,
         status: bizBookingData.status,
+        delivery_type: bizBookingData.delivery_type ?? null,
         package_description: bizBookingData.package_description
           ? `${bizBookingData.package_description} (${cap(bizBookingData.package_type)})`
           : cap(bizBookingData.package_type),
@@ -310,7 +314,7 @@ export default function OrderTrackingPage() {
         created_at: bizBookingData.created_at,
         updated_at: bizBookingData.updated_at,
       });
-      setEvents(synthesizeDeliveryHistory(bizBookingData.status, bizBookingData.created_at, bizBookingData.updated_at));
+      setEvents(synthesizeDeliveryHistory(bizBookingData.status, bizBookingData.created_at, bizBookingData.updated_at, bizBookingData.delivery_type));
 
     } else if (logisticsData) {
       // Fetch agent profile for customer info
@@ -384,7 +388,7 @@ export default function OrderTrackingPage() {
 
   const currentStatus = order ? STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending : null;
   const isLogistics = order?.kind === 'logistics';
-  const steps = isLogistics ? LOGISTICS_STEPS : (order ? getDeliverySteps(order.status) : DELIVERY_STEPS);
+  const steps = isLogistics ? LOGISTICS_STEPS : (order ? getDeliverySteps(order.status, order.delivery_type) : DELIVERY_STEPS);
   const currentStepIndex = order ? steps.indexOf(order.status) : -1;
   const isTerminal = order?.status === 'cancelled' || order?.status === 'rejected';
 
