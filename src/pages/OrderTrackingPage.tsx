@@ -69,6 +69,67 @@ const LOGISTICS_STEPS = ['pending', 'reviewing', 'approved', 'in_progress', 'com
 
 function cap(s: string) { return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 
+const DELIVERY_STEP_META: Record<string, { title: string; description: string }> = {
+  pending:          { title: 'Booking Received',      description: 'Your booking has been received and is awaiting confirmation.' },
+  confirmed:        { title: 'Booking Confirmed',     description: 'Your booking has been confirmed and is being prepared for pickup.' },
+  picked_up:        { title: 'Package Picked Up',     description: 'The package has been collected from the sender.' },
+  in_transit:       { title: 'In Transit',            description: 'Your package is on its way to the destination.' },
+  out_for_delivery: { title: 'Out for Delivery',      description: 'The package is out for final delivery to the recipient.' },
+  delivered:        { title: 'Delivered',             description: 'The package has been successfully delivered to the recipient.' },
+  cancelled:        { title: 'Order Cancelled',       description: 'This order was cancelled.' },
+};
+
+function synthesizeDeliveryHistory(
+  currentStatus: string,
+  createdAt: string,
+  updatedAt: string,
+): TrackingEvent[] {
+  const steps = DELIVERY_STEPS;
+  const currentIdx = steps.indexOf(currentStatus);
+  const completedSteps = currentIdx >= 0 ? steps.slice(0, currentIdx + 1) : [];
+
+  // If cancelled, just show the single cancelled event
+  if (currentStatus === 'cancelled') {
+    return [{
+      id: 'cancelled',
+      order_id: '',
+      status: 'cancelled',
+      title: DELIVERY_STEP_META.cancelled.title,
+      description: DELIVERY_STEP_META.cancelled.description,
+      location: '',
+      occurred_at: updatedAt,
+    }];
+  }
+
+  // Spread timestamps: created_at for first step, updated_at for last, interpolate between
+  return completedSteps.map((step, idx) => {
+    let occurred_at: string;
+    if (completedSteps.length === 1) {
+      occurred_at = createdAt;
+    } else if (idx === 0) {
+      occurred_at = createdAt;
+    } else if (idx === completedSteps.length - 1) {
+      occurred_at = updatedAt;
+    } else {
+      // Interpolate between created and updated
+      const start = new Date(createdAt).getTime();
+      const end = new Date(updatedAt).getTime();
+      const t = idx / (completedSteps.length - 1);
+      occurred_at = new Date(start + t * (end - start)).toISOString();
+    }
+    const meta = DELIVERY_STEP_META[step] ?? { title: cap(step), description: '' };
+    return {
+      id: step,
+      order_id: '',
+      status: step,
+      title: meta.title,
+      description: meta.description,
+      location: '',
+      occurred_at,
+    };
+  });
+}
+
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
@@ -141,7 +202,7 @@ export default function OrderTrackingPage() {
         created_at: bookingData.created_at,
         updated_at: bookingData.updated_at,
       });
-      setEvents([]);
+      setEvents(synthesizeDeliveryHistory(bookingData.status, bookingData.created_at, bookingData.updated_at));
 
     } else if (bizBookingData) {
       setOrder({
@@ -162,7 +223,7 @@ export default function OrderTrackingPage() {
         created_at: bizBookingData.created_at,
         updated_at: bizBookingData.updated_at,
       });
-      setEvents([]);
+      setEvents(synthesizeDeliveryHistory(bizBookingData.status, bizBookingData.created_at, bizBookingData.updated_at));
 
     } else if (logisticsData) {
       // Fetch agent profile for customer info
