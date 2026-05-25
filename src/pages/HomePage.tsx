@@ -1,4 +1,4 @@
-import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, Users, TrendingUp, ArrowRight, Star, Zap, CheckCircle, ChevronLeft, ChevronRight, Bike, Store, FileText, CreditCard, BadgeCheck, Upload, X } from 'lucide-react';
+import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, Users, TrendingUp, ArrowRight, Star, Zap, CheckCircle, ChevronLeft, ChevronRight, Bike, Store, FileText, CreditCard, BadgeCheck, Upload, X, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
@@ -52,6 +52,13 @@ interface AboutData {
   vision: string;
 }
 
+interface WhatsAppSettings {
+  phone_number: string;
+  delivery_message: string;
+  logistics_message: string;
+  is_enabled: boolean;
+}
+
 const iconMap: Record<string, React.ReactNode> = {
   truck: <Truck className="h-7 w-7 text-white" />,
   package: <Package className="h-7 w-7 text-white" />,
@@ -82,6 +89,7 @@ export default function HomePage() {
     mission: 'Your security is our priority. We use cutting-edge technology to protect your data and transactions.',
     vision: 'Punctuality is our promise. We pride ourselves on meeting deadlines and exceeding expectations.',
   });
+  const [whatsapp, setWhatsapp] = useState<WhatsAppSettings | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -105,6 +113,9 @@ export default function HomePage() {
 
       const { data: about } = await supabase.from('about_section').select('*').limit(1).maybeSingle();
       if (about) setAboutData(about);
+
+      const { data: wa } = await supabase.from('whatsapp_settings').select('*').limit(1).maybeSingle();
+      if (wa && wa.is_enabled && wa.phone_number) setWhatsapp(wa);
     };
     fetchData();
   }, []);
@@ -989,6 +1000,93 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      {/* ── WHATSAPP BOOKING ── */}
+      {whatsapp && (
+        <section id="whatsapp-booking" className="py-20 lg:py-28 bg-gradient-to-br from-[#075E54] via-[#128C7E] to-[#075E54] relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3" />
+            <svg className="absolute inset-0 w-full h-full opacity-5" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <defs>
+                <pattern id="wa-dots" width="6" height="6" patternUnits="userSpaceOnUse">
+                  <circle cx="1" cy="1" r="1" fill="white" />
+                </pattern>
+              </defs>
+              <rect width="100" height="100" fill="url(#wa-dots)" />
+            </svg>
+          </div>
+
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            {/* Header */}
+            <div className="text-center mb-14">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/15 backdrop-blur-sm rounded-2xl mb-5 border border-white/20">
+                <MessageCircle className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+                Book via WhatsApp
+              </h2>
+              <p className="text-lg text-white/80 max-w-xl mx-auto leading-relaxed">
+                Chat with us directly on WhatsApp to book a delivery or request logistics services — fast, simple, and personal.
+              </p>
+            </div>
+
+            {/* Cards */}
+            <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              {/* Delivery card */}
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 flex flex-col items-center text-center group hover:bg-white/15 transition-all duration-300">
+                <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                  <Truck className="h-7 w-7 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Delivery Booking</h3>
+                <p className="text-white/70 text-sm leading-relaxed mb-6">
+                  Send a package anywhere — same state, inter-state, or international. Get a quote and confirm your booking instantly.
+                </p>
+                <a
+                  href={`https://wa.me/${whatsapp.phone_number.replace(/\D/g, '')}?text=${encodeURIComponent(whatsapp.delivery_message)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-auto inline-flex items-center gap-2.5 bg-white text-[#075E54] hover:bg-green-50 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 w-full justify-center"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  Book a Delivery
+                </a>
+              </div>
+
+              {/* Logistics card */}
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 flex flex-col items-center text-center group hover:bg-white/15 transition-all duration-300">
+                <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                  <Package className="h-7 w-7 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Logistics Request</h3>
+                <p className="text-white/70 text-sm leading-relaxed mb-6">
+                  Need bulk freight, warehousing, or a custom logistics plan? Describe your needs and our team will respond promptly.
+                </p>
+                <a
+                  href={`https://wa.me/${whatsapp.phone_number.replace(/\D/g, '')}?text=${encodeURIComponent(whatsapp.logistics_message)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-auto inline-flex items-center gap-2.5 bg-white/10 border-2 border-white/50 text-white hover:bg-white hover:text-[#075E54] px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg hover:-translate-y-0.5 w-full justify-center"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  Logistics Request
+                </a>
+              </div>
+            </div>
+
+            {/* Bottom note */}
+            <div className="mt-10 flex items-center justify-center gap-3">
+              <div className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-5 py-2.5">
+                <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse" />
+                <span className="text-white/90 text-sm font-medium">
+                  WhatsApp: +{whatsapp.phone_number.replace(/\D/g, '')}
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── CONTACT ── */}
       <section id="contact" className="py-20 lg:py-28 bg-gray-50 relative overflow-hidden">

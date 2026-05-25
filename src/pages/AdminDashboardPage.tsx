@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock, Plus, Send, DollarSign } from 'lucide-react';
+import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock, Plus, Send, DollarSign, MessageCircle } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { user, signOut } = useAuth();
@@ -186,6 +186,19 @@ export default function AdminDashboardPage() {
                 <h3 className="text-lg font-semibold text-slate-900">Delivery Fee Settings</h3>
               </div>
               <p className="text-gray-600 text-sm">Configure per-km rates for same state, inter-state & international</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/whatsapp')}
+              className="relative bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="w-8 h-8 bg-[#25D366] rounded-lg flex items-center justify-center">
+                  <MessageCircle className="h-4 w-4 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900">WhatsApp Booking</h3>
+              </div>
+              <p className="text-gray-600 text-sm">Set your WhatsApp number and messages for customer bookings on the homepage</p>
             </button>
           </div>
         </div>
