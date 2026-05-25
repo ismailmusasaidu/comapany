@@ -208,10 +208,11 @@ export default function Layout({ children }: LayoutProps) {
         </div>
 
         {/* ── Mobile drawer ── */}
-        <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${mobileMenuOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}>
-          <div className="bg-slate-800/98 backdrop-blur-xl border-t border-white/5">
-            {/* Main links */}
-            <div className="px-4 pt-3 pb-1 space-y-0.5">
+        <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${mobileMenuOpen ? 'max-h-[700px] opacity-100' : 'max-h-0 opacity-0'}`}>
+          <div className="bg-slate-800 border-t border-white/5 divide-y divide-white/5">
+
+            {/* Main nav links */}
+            <div className="px-3 py-2 space-y-0.5">
               {[
                 { href: '/#home', label: 'Home', isRouter: false },
                 { href: '/#logistics', label: 'Services', isRouter: false },
@@ -225,55 +226,45 @@ export default function Layout({ children }: LayoutProps) {
               ].map(link =>
                 link.isRouter ? (
                   <Link key={link.label} to={link.href} onClick={closeMobileMenu}
-                    className="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-white/8 rounded-xl transition-all text-sm font-medium">
+                    className="flex items-center px-3 py-2.5 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all text-sm font-medium">
                     {link.label}
                   </Link>
                 ) : (
                   <a key={link.label} href={link.href} onClick={closeMobileMenu}
-                    className="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-white/8 rounded-xl transition-all text-sm font-medium">
+                    className="flex items-center px-3 py-2.5 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all text-sm font-medium">
                     {link.label}
                   </a>
                 )
               )}
             </div>
 
-            {/* Portals section */}
-            <div className="px-4 pt-2 pb-2 border-t border-white/5 mt-1">
-              <p className="text-xs font-bold text-gray-600 uppercase tracking-wider px-4 mb-2">Partner Portals</p>
-              <div className="grid grid-cols-2 gap-2">
-                <Link to="/agent/login" onClick={closeMobileMenu}
-                  className="flex flex-col items-center gap-2 p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-center">
-                  <div className="w-9 h-9 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                    <UserCheck className="h-4.5 w-4.5 text-orange-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white">Agent Portal</p>
-                    <p className="text-xs text-gray-500">Agents & couriers</p>
-                  </div>
-                </Link>
-                <Link to="/business/login" onClick={closeMobileMenu}
-                  className="flex flex-col items-center gap-2 p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-center">
-                  <div className="w-9 h-9 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                    <Building2 className="h-4.5 w-4.5 text-orange-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white">Business Portal</p>
-                    <p className="text-xs text-gray-500">Companies & enterprise</p>
-                  </div>
-                </Link>
+            {/* Portals — 3 equal cards */}
+            <div className="px-3 py-3">
+              <p className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2.5 px-1">Portals</p>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { to: '/track', icon: MapPin, label: 'Track Order', sub: 'Track shipment' },
+                  { to: '/agent/login', icon: UserCheck, label: 'Agent', sub: 'Agents & couriers' },
+                  { to: '/business/login', icon: Building2, label: 'Business', sub: 'Companies' },
+                ].map(({ to, icon: Icon, label, sub }) => (
+                  <Link key={to} to={to} onClick={closeMobileMenu}
+                    className="flex flex-col items-center gap-1.5 p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-center">
+                    <div className="w-9 h-9 bg-orange-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Icon className="h-4 w-4 text-orange-400" />
+                    </div>
+                    <p className="text-xs font-semibold text-white leading-tight">{label}</p>
+                    <p className="text-xs text-gray-500 leading-tight hidden sm:block">{sub}</p>
+                  </Link>
+                ))}
               </div>
             </div>
 
             {/* Bottom CTA */}
-            <div className="px-4 pt-2 pb-4 border-t border-white/5 mt-1 flex gap-2">
-              <Link to="/track" onClick={closeMobileMenu}
-                className="flex-1 flex items-center justify-center gap-2 border border-orange-500/40 text-orange-400 px-4 py-3 rounded-xl font-semibold text-sm transition-all hover:bg-orange-500/10">
-                <MapPin className="h-4 w-4" /> Track Order
-              </Link>
+            <div className="px-3 py-3">
               <Link
                 to={isMarketplacePage ? '/#contact' : '/marketplace'}
                 onClick={closeMobileMenu}
-                className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl font-semibold text-sm transition-all"
+                className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl font-semibold text-sm transition-all"
               >
                 <Truck className="h-4 w-4" />
                 {isMarketplacePage ? 'Contact Us' : 'Get Started'}
