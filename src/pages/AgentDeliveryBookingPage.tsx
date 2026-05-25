@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   Truck, Package, MapPin, Phone, User, Weight,
   DollarSign, FileText, CheckCircle, ArrowLeft, ArrowRight, ChevronRight,
-  Globe, Map, Navigation
+  Globe, Map, Navigation, Ruler, RefreshCw, AlertCircle
 } from 'lucide-react';
 import { useAgent } from '../contexts/AgentContext';
 import { supabase } from '../lib/supabase';
@@ -79,6 +79,18 @@ function generateRef() {
 
 function cap(s: string) { return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 
+interface FeeEstimate {
+  distance_km: number;
+  fee_per_km: number;
+  minimum_fee: number;
+  estimated_fee: number;
+  origin_name: string;
+  destination_name: string;
+}
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+
 export default function AgentDeliveryBookingPage() {
   const { user, profile } = useAgent();
   const navigate = useNavigate();
@@ -88,6 +100,9 @@ export default function AgentDeliveryBookingPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [createdRef, setCreatedRef] = useState('');
+  const [feeEstimate, setFeeEstimate] = useState<FeeEstimate | null>(null);
+  const [feeLoading, setFeeLoading] = useState(false);
+  const [feeError, setFeeError] = useState('');
 
   if (!profile || profile.status !== 'approved') {
     return (
@@ -107,6 +122,29 @@ export default function AgentDeliveryBookingPage() {
   const set = (key: keyof BookingForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [key]: e.target.value }));
     setError('');
+  };
+
+  const calculateFee = async (pickupCity: string, deliveryCity: string) => {
+    setFeeLoading(true);
+    setFeeError('');
+    setFeeEstimate(null);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/calculate-delivery-fee`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ pickup_city: pickupCity, delivery_city: deliveryCity, delivery_type: 'same_state' }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setFeeError(data.error ?? 'Could not calculate fee.'); }
+      else { setFeeEstimate(data); }
+    } catch {
+      setFeeError('Network error while calculating fee.');
+    } finally {
+      setFeeLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -202,6 +240,10 @@ export default function AgentDeliveryBookingPage() {
       return;
     }
     setError('');
+    // Auto-calculate fee when entering package step for same_state
+    if (step === 3 && form.delivery_type === 'same_state' && form.pickup_city && form.delivery_city) {
+      calculateFee(form.pickup_city, form.delivery_city);
+    }
     setStep(s => s + 1);
   };
 
@@ -343,6 +385,60 @@ export default function AgentDeliveryBookingPage() {
                 <div className="bg-green-50 p-2.5 rounded-xl"><Package className="h-5 w-5 text-green-600" /></div>
                 <div><h2 className="font-bold text-gray-900">Package Details</h2><p className="text-gray-500 text-sm">Tell us about the shipment</p></div>
               </div>
+
+              {/* Distance & fee card — same_state only */}
+              {form.delivery_type === 'same_state' && (
+                <div className="rounded-xl border-2 border-green-200 bg-green-50 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-green-200 flex items-center gap-2">
+                    <Ruler className="h-4 w-4 text-green-600" />
+                    <span className="text-sm font-semibold text-green-800">Distance & Fee Estimate</span>
+                    {feeLoading && <RefreshCw className="h-3.5 w-3.5 text-green-600 animate-spin ml-auto" />}
+                  </div>
+                  <div className="p-4">
+                    {feeLoading && (
+                      <p className="text-sm text-green-700 animate-pulse">Calculating road distance between {form.pickup_city} and {form.delivery_city}...</p>
+                    )}
+                    {feeError && !feeLoading && (
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm text-red-700">{feeError}</p>
+                          <button
+                            type="button"
+                            onClick={() => calculateFee(form.pickup_city, form.delivery_city)}
+                            className="text-xs text-orange-600 underline mt-1"
+                          >Retry calculation</button>
+                        </div>
+                      </div>
+                    )}
+                    {feeEstimate && !feeLoading && (
+                      <div className="grid grid-cols-3 gap-3 text-center">
+                        <div>
+                          <p className="text-xs text-green-600 font-medium mb-1">Road Distance</p>
+                          <p className="text-xl font-bold text-green-800">{feeEstimate.distance_km} km</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-green-600 font-medium mb-1">Rate</p>
+                          <p className="text-xl font-bold text-green-800">₦{feeEstimate.fee_per_km}/km</p>
+                        </div>
+                        <div className="bg-white rounded-lg p-2 border border-green-200">
+                          <p className="text-xs text-green-600 font-medium mb-1">Est. Fee</p>
+                          <p className="text-xl font-bold text-green-700">₦{feeEstimate.estimated_fee.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    )}
+                    {!feeLoading && !feeError && !feeEstimate && (
+                      <button
+                        type="button"
+                        onClick={() => calculateFee(form.pickup_city, form.delivery_city)}
+                        className="flex items-center gap-2 text-sm text-green-700 font-semibold hover:text-green-800"
+                      >
+                        <RefreshCw className="h-4 w-4" /> Calculate distance
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">Package Type</label>
                 <div className="grid grid-cols-2 gap-3">
@@ -395,10 +491,16 @@ export default function AgentDeliveryBookingPage() {
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${selectedDt.bg}`}>
                     <selectedDt.icon className={`h-5 w-5 ${selectedDt.color}`} />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-xs text-gray-400 font-medium">Delivery Type</p>
                     <p className={`font-bold text-sm ${selectedDt.color}`}>{selectedDt.label}</p>
                   </div>
+                  {feeEstimate && form.delivery_type === 'same_state' && (
+                    <div className="text-right">
+                      <p className="text-xs text-gray-400 font-medium">{feeEstimate.distance_km} km road distance</p>
+                      <p className="font-bold text-sm text-green-700">Est. ₦{feeEstimate.estimated_fee.toLocaleString()}</p>
+                    </div>
+                  )}
                 </div>
               )}
 

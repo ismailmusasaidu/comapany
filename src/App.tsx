@@ -33,6 +33,7 @@ import AdminBusinessesPage from './pages/AdminBusinessesPage';
 import AdminDeliveryBookingPage from './pages/AdminDeliveryBookingPage';
 import AdminDeliveryRequestPage from './pages/AdminDeliveryRequestPage';
 import AdminMessagingPage from './pages/AdminMessagingPage';
+import AdminDeliveryFeesPage from './pages/AdminDeliveryFeesPage';
 import AgentMessagesPage from './pages/AgentMessagesPage';
 import BusinessMessagesPage from './pages/BusinessMessagesPage';
 import AgentOrdersPage from './pages/AgentOrdersPage';
@@ -74,6 +75,7 @@ function App() {
         <Route path="/admin/booking/new" element={<ProtectedRoute element={<AdminDeliveryBookingPage />} />} />
         <Route path="/admin/delivery-request/new" element={<ProtectedRoute element={<AdminDeliveryRequestPage />} />} />
         <Route path="/admin/private-messages" element={<ProtectedRoute element={<AdminMessagingPage />} />} />
+        <Route path="/admin/delivery-fees" element={<ProtectedRoute element={<AdminDeliveryFeesPage />} />} />
 
         <Route path="/agent/messages" element={<AgentMessagesPage />} />
         <Route path="/business/messages" element={<BusinessMessagesPage />} />
