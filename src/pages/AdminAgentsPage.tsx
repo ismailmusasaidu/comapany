@@ -64,7 +64,14 @@ interface Request {
   agent_profiles: { full_name: string; company_name: string } | null;
 }
 
-const BOOKING_STATUS_OPTIONS = ['pending', 'confirmed', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled'];
+const BOOKING_STATUS_OPTIONS = [
+  // General
+  'pending', 'confirmed', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled',
+  // National (inter-state)
+  'national_in_transit', 'national_at_hub', 'national_out_for_delivery',
+  // International
+  'international_in_transit', 'customs_clearance', 'customs_hold', 'international_out_for_delivery',
+];
 const REQUEST_STATUS_OPTIONS = ['pending', 'reviewing', 'approved', 'in_progress', 'completed', 'rejected'];
 
 const STATUS_BADGE: Record<string, string> = {
@@ -75,6 +82,16 @@ const STATUS_BADGE: Record<string, string> = {
   out_for_delivery: 'bg-teal-50 text-teal-700 border-teal-200',
   delivered: 'bg-green-50 text-green-700 border-green-200',
   cancelled: 'bg-red-50 text-red-700 border-red-200',
+  // National
+  national_in_transit: 'bg-sky-50 text-sky-700 border-sky-200',
+  national_at_hub: 'bg-sky-50 text-sky-800 border-sky-300',
+  national_out_for_delivery: 'bg-teal-50 text-teal-700 border-teal-200',
+  // International
+  international_in_transit: 'bg-blue-50 text-blue-700 border-blue-200',
+  customs_clearance: 'bg-amber-50 text-amber-700 border-amber-200',
+  customs_hold: 'bg-red-50 text-red-700 border-red-200',
+  international_out_for_delivery: 'bg-teal-50 text-teal-700 border-teal-200',
+  // Logistics
   reviewing: 'bg-blue-50 text-blue-700 border-blue-200',
   approved: 'bg-teal-50 text-teal-700 border-teal-200',
   in_progress: 'bg-orange-50 text-orange-700 border-orange-200',

@@ -50,33 +50,63 @@ const STATUS_CONFIG: Record<string, {
   label: string; color: string; bg: string; border: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = {
-  pending:          { label: 'Pending',          color: 'text-yellow-600', bg: 'bg-yellow-50',  border: 'border-yellow-200',  icon: Clock },
-  confirmed:        { label: 'Confirmed',         color: 'text-blue-600',   bg: 'bg-blue-50',    border: 'border-blue-200',    icon: CheckCircle },
-  picked_up:        { label: 'Picked Up',         color: 'text-orange-600', bg: 'bg-orange-50',  border: 'border-orange-200',  icon: Package },
-  in_transit:       { label: 'In Transit',        color: 'text-orange-500', bg: 'bg-orange-50',  border: 'border-orange-200',  icon: Truck },
-  out_for_delivery: { label: 'Out for Delivery',  color: 'text-green-600',  bg: 'bg-green-50',   border: 'border-green-200',   icon: Truck },
-  delivered:        { label: 'Delivered',         color: 'text-green-700',  bg: 'bg-green-50',   border: 'border-green-200',   icon: CheckCircle },
-  cancelled:        { label: 'Cancelled',         color: 'text-red-600',    bg: 'bg-red-50',     border: 'border-red-200',     icon: XCircle },
-  reviewing:        { label: 'Under Review',      color: 'text-blue-600',   bg: 'bg-blue-50',    border: 'border-blue-200',    icon: Clock },
-  approved:         { label: 'Approved',          color: 'text-teal-600',   bg: 'bg-teal-50',    border: 'border-teal-200',    icon: CheckCircle },
-  in_progress:      { label: 'In Progress',       color: 'text-orange-600', bg: 'bg-orange-50',  border: 'border-orange-200',  icon: Truck },
-  completed:        { label: 'Completed',         color: 'text-green-700',  bg: 'bg-green-50',   border: 'border-green-200',   icon: CheckCircle },
-  rejected:         { label: 'Rejected',          color: 'text-red-600',    bg: 'bg-red-50',     border: 'border-red-200',     icon: XCircle },
+  pending:                        { label: 'Pending',                    color: 'text-yellow-600', bg: 'bg-yellow-50',  border: 'border-yellow-200',  icon: Clock },
+  confirmed:                      { label: 'Confirmed',                  color: 'text-blue-600',   bg: 'bg-blue-50',    border: 'border-blue-200',    icon: CheckCircle },
+  picked_up:                      { label: 'Picked Up',                  color: 'text-orange-600', bg: 'bg-orange-50',  border: 'border-orange-200',  icon: Package },
+  in_transit:                     { label: 'In Transit',                 color: 'text-orange-500', bg: 'bg-orange-50',  border: 'border-orange-200',  icon: Truck },
+  out_for_delivery:               { label: 'Out for Delivery',           color: 'text-green-600',  bg: 'bg-green-50',   border: 'border-green-200',   icon: Truck },
+  delivered:                      { label: 'Delivered',                  color: 'text-green-700',  bg: 'bg-green-50',   border: 'border-green-200',   icon: CheckCircle },
+  cancelled:                      { label: 'Cancelled',                  color: 'text-red-600',    bg: 'bg-red-50',     border: 'border-red-200',     icon: XCircle },
+  // National (inter-state)
+  national_in_transit:            { label: 'National — In Transit',      color: 'text-sky-700',    bg: 'bg-sky-50',     border: 'border-sky-200',     icon: Truck },
+  national_at_hub:                { label: 'National — At Hub',          color: 'text-sky-800',    bg: 'bg-sky-50',     border: 'border-sky-300',     icon: MapPin },
+  national_out_for_delivery:      { label: 'National — Out for Delivery',color: 'text-teal-700',   bg: 'bg-teal-50',    border: 'border-teal-200',    icon: Truck },
+  // International
+  international_in_transit:       { label: 'International — In Transit', color: 'text-blue-700',   bg: 'bg-blue-50',    border: 'border-blue-200',    icon: Truck },
+  customs_clearance:              { label: 'Customs Clearance',          color: 'text-amber-700',  bg: 'bg-amber-50',   border: 'border-amber-200',   icon: AlertCircle },
+  customs_hold:                   { label: 'Customs Hold',               color: 'text-red-600',    bg: 'bg-red-50',     border: 'border-red-200',     icon: AlertCircle },
+  international_out_for_delivery: { label: 'Intl — Out for Delivery',    color: 'text-teal-700',   bg: 'bg-teal-50',    border: 'border-teal-200',    icon: Truck },
+  // Logistics
+  reviewing:                      { label: 'Under Review',               color: 'text-blue-600',   bg: 'bg-blue-50',    border: 'border-blue-200',    icon: Clock },
+  approved:                       { label: 'Approved',                   color: 'text-teal-600',   bg: 'bg-teal-50',    border: 'border-teal-200',    icon: CheckCircle },
+  in_progress:                    { label: 'In Progress',                color: 'text-orange-600', bg: 'bg-orange-50',  border: 'border-orange-200',  icon: Truck },
+  completed:                      { label: 'Completed',                  color: 'text-green-700',  bg: 'bg-green-50',   border: 'border-green-200',   icon: CheckCircle },
+  rejected:                       { label: 'Rejected',                   color: 'text-red-600',    bg: 'bg-red-50',     border: 'border-red-200',     icon: XCircle },
 };
 
 const DELIVERY_STEPS = ['pending', 'confirmed', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered'];
+const NATIONAL_STEPS = ['pending', 'confirmed', 'picked_up', 'national_in_transit', 'national_at_hub', 'national_out_for_delivery', 'delivered'];
+const INTERNATIONAL_STEPS = ['pending', 'confirmed', 'picked_up', 'international_in_transit', 'customs_clearance', 'international_out_for_delivery', 'delivered'];
 const LOGISTICS_STEPS = ['pending', 'reviewing', 'approved', 'in_progress', 'completed'];
+
+const NATIONAL_STATUSES = new Set(['national_in_transit', 'national_at_hub', 'national_out_for_delivery']);
+const INTERNATIONAL_STATUSES = new Set(['international_in_transit', 'customs_clearance', 'customs_hold', 'international_out_for_delivery']);
+
+function getDeliverySteps(status: string) {
+  if (INTERNATIONAL_STATUSES.has(status)) return INTERNATIONAL_STEPS;
+  if (NATIONAL_STATUSES.has(status)) return NATIONAL_STEPS;
+  return DELIVERY_STEPS;
+}
 
 function cap(s: string) { return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 
 const DELIVERY_STEP_META: Record<string, { title: string; description: string }> = {
-  pending:          { title: 'Booking Received',      description: 'Your booking has been received and is awaiting confirmation.' },
-  confirmed:        { title: 'Booking Confirmed',     description: 'Your booking has been confirmed and is being prepared for pickup.' },
-  picked_up:        { title: 'Package Picked Up',     description: 'The package has been collected from the sender.' },
-  in_transit:       { title: 'In Transit',            description: 'Your package is on its way to the destination.' },
-  out_for_delivery: { title: 'Out for Delivery',      description: 'The package is out for final delivery to the recipient.' },
-  delivered:        { title: 'Delivered',             description: 'The package has been successfully delivered to the recipient.' },
-  cancelled:        { title: 'Order Cancelled',       description: 'This order was cancelled.' },
+  pending:                        { title: 'Booking Received',                    description: 'Your booking has been received and is awaiting confirmation.' },
+  confirmed:                      { title: 'Booking Confirmed',                   description: 'Your booking has been confirmed and is being prepared for pickup.' },
+  picked_up:                      { title: 'Package Picked Up',                   description: 'The package has been collected from the sender.' },
+  in_transit:                     { title: 'In Transit',                          description: 'Your package is on its way to the destination.' },
+  out_for_delivery:               { title: 'Out for Delivery',                    description: 'The package is out for final delivery to the recipient.' },
+  delivered:                      { title: 'Delivered',                           description: 'The package has been successfully delivered to the recipient.' },
+  cancelled:                      { title: 'Order Cancelled',                     description: 'This order was cancelled.' },
+  // National
+  national_in_transit:            { title: 'Inter-State Transit',                 description: 'Your package is en route between states.' },
+  national_at_hub:                { title: 'Arrived at Hub',                      description: 'Your package has arrived at a national distribution hub.' },
+  national_out_for_delivery:      { title: 'Out for Delivery (National)',          description: 'The package is out for final delivery in the destination state.' },
+  // International
+  international_in_transit:       { title: 'International Transit',               description: 'Your package is in international transit.' },
+  customs_clearance:              { title: 'Customs Clearance',                   description: 'Your package is undergoing customs inspection and clearance.' },
+  customs_hold:                   { title: 'Customs Hold',                        description: 'Your package is being held by customs. Our team will contact you.' },
+  international_out_for_delivery: { title: 'Out for Delivery (International)',     description: 'Your package has cleared customs and is out for final delivery.' },
 };
 
 const LOGISTICS_STEP_META: Record<string, { title: string; description: string }> = {
@@ -141,7 +171,7 @@ function synthesizeDeliveryHistory(
   createdAt: string,
   updatedAt: string,
 ): TrackingEvent[] {
-  const steps = DELIVERY_STEPS;
+  const steps = getDeliverySteps(currentStatus);
   const currentIdx = steps.indexOf(currentStatus);
   const completedSteps = currentIdx >= 0 ? steps.slice(0, currentIdx + 1) : [];
 
@@ -354,7 +384,7 @@ export default function OrderTrackingPage() {
 
   const currentStatus = order ? STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending : null;
   const isLogistics = order?.kind === 'logistics';
-  const steps = isLogistics ? LOGISTICS_STEPS : DELIVERY_STEPS;
+  const steps = isLogistics ? LOGISTICS_STEPS : (order ? getDeliverySteps(order.status) : DELIVERY_STEPS);
   const currentStepIndex = order ? steps.indexOf(order.status) : -1;
   const isTerminal = order?.status === 'cancelled' || order?.status === 'rejected';
 
@@ -635,7 +665,7 @@ export default function OrderTrackingPage() {
                       style={{ width: currentStepIndex >= 0 ? `${(currentStepIndex / (steps.length - 1)) * 100}%` : '0%' }}
                     />
                   </div>
-                  <div className={`grid gap-2 relative z-10 ${isLogistics ? 'grid-cols-3 sm:grid-cols-5' : 'grid-cols-3 sm:grid-cols-6'}`}>
+                  <div className={`grid gap-2 relative z-10 ${isLogistics ? 'grid-cols-3 sm:grid-cols-5' : steps.length <= 6 ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-4 sm:grid-cols-7'}`}>
                     {steps.map((step, idx) => {
                       const cfg = STATUS_CONFIG[step];
                       const done = idx <= currentStepIndex;
