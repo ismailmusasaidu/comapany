@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Users, Package, Truck, CheckCircle, XCircle, Clock,
   Search, Filter, Eye, Building2, MapPin, Phone, Mail, RefreshCw,
   ChevronDown, AlertCircle, TrendingUp, Target, Activity, Award,
-  ArrowUpRight, ArrowDownRight, Minus, UserCheck, UserX, BarChart3, Zap
+  ArrowUpRight, ArrowDownRight, Minus, UserCheck, UserX, BarChart3, Zap,
+  MessageSquare, Send, Plus, X, ChevronRight, Check, CheckCheck
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import BookingDetailModal from '../components/BookingDetailModal';
 
-type Tab = 'overview' | 'agents' | 'bookings' | 'requests';
+type Tab = 'overview' | 'agents' | 'bookings' | 'requests' | 'messages';
 type AgentStatus = 'all' | 'pending' | 'approved' | 'rejected';
 
 interface Agent {
@@ -152,8 +154,19 @@ function TopAgentsTable({ bookings }: { bookings: Booking[] }) {
   );
 }
 
+interface MsgThread {
+  id: string; recipient_type: string; recipient_id: string; subject: string;
+  created_at: string; updated_at: string; recipient_name?: string;
+  unread_count?: number; last_message?: string;
+}
+interface MsgMessage {
+  id: string; thread_id: string; sender_role: string; sender_id: string;
+  body: string; is_read: boolean; created_at: string;
+}
+
 export default function AdminAgentsPage() {
   const navigate = useNavigate();
+  const { user: adminUser } = useAuth();
   const [tab, setTab] = useState<Tab>('overview');
   const [agents, setAgents] = useState<Agent[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -165,6 +178,72 @@ export default function AdminAgentsPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  // ── Messaging state ──
+  const [msgThreads, setMsgThreads] = useState<MsgThread[]>([]);
+  const [msgActive, setMsgActive] = useState<MsgThread | null>(null);
+  const [msgMessages, setMsgMessages] = useState<MsgMessage[]>([]);
+  const [msgReply, setMsgReply] = useState('');
+  const [msgSending, setMsgSending] = useState(false);
+  const [msgLoading, setMsgLoading] = useState(false);
+  const [msgSearch, setMsgSearch] = useState('');
+  const [composing, setComposing] = useState(false);
+  const [composeRecipient, setComposeRecipient] = useState<Agent | null>(null);
+  const [composeSubject, setComposeSubject] = useState('');
+  const [composeBody, setComposeBody] = useState('');
+  const [composeSending, setComposeSending] = useState(false);
+  const [composeError, setComposeError] = useState('');
+  const msgBottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { if (tab === 'messages') loadMsgThreads(); }, [tab]);
+  useEffect(() => { if (msgActive) loadMsgMessages(msgActive.id); }, [msgActive]);
+  useEffect(() => { msgBottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [msgMessages]);
+
+  const loadMsgThreads = async () => {
+    setMsgLoading(true);
+    const { data } = await supabase.from('message_threads').select('*').eq('recipient_type', 'agent').order('updated_at', { ascending: false });
+    if (!data) { setMsgLoading(false); return; }
+    const enriched = await Promise.all(data.map(async (t) => {
+      const { data: profile } = await supabase.from('agent_profiles').select('full_name').eq('id', t.recipient_id).maybeSingle();
+      const { count } = await supabase.from('messages').select('id', { count: 'exact', head: true }).eq('thread_id', t.id).eq('is_read', false).neq('sender_role', 'admin');
+      const { data: last } = await supabase.from('messages').select('body').eq('thread_id', t.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
+      return { ...t, recipient_name: profile?.full_name ?? 'Unknown Agent', unread_count: count || 0, last_message: last?.body || '' };
+    }));
+    setMsgThreads(enriched);
+    setMsgLoading(false);
+  };
+
+  const loadMsgMessages = async (threadId: string) => {
+    const { data } = await supabase.from('messages').select('*').eq('thread_id', threadId).order('created_at', { ascending: true });
+    setMsgMessages(data || []);
+    await supabase.from('messages').update({ is_read: true }).eq('thread_id', threadId).neq('sender_role', 'admin');
+    setMsgThreads(prev => prev.map(t => t.id === threadId ? { ...t, unread_count: 0 } : t));
+  };
+
+  const sendMsgReply = async () => {
+    if (!msgReply.trim() || !msgActive || !adminUser) return;
+    setMsgSending(true);
+    await supabase.from('messages').insert({ thread_id: msgActive.id, sender_role: 'admin', sender_id: adminUser.id, body: msgReply.trim(), is_read: false });
+    await supabase.from('message_threads').update({ updated_at: new Date().toISOString() }).eq('id', msgActive.id);
+    setMsgReply('');
+    await loadMsgMessages(msgActive.id);
+    await loadMsgThreads();
+    setMsgSending(false);
+  };
+
+  const sendNewThread = async () => {
+    if (!composeRecipient || !composeSubject.trim() || !composeBody.trim() || !adminUser) { setComposeError('Fill in all fields.'); return; }
+    setComposeSending(true); setComposeError('');
+    const { data: thread, error: te } = await supabase.from('message_threads').insert({ recipient_type: 'agent', recipient_id: composeRecipient.id, subject: composeSubject.trim() }).select().maybeSingle();
+    if (te || !thread) { setComposeError('Failed to create thread.'); setComposeSending(false); return; }
+    await supabase.from('messages').insert({ thread_id: thread.id, sender_role: 'admin', sender_id: adminUser.id, body: composeBody.trim(), is_read: false });
+    setComposing(false); setComposeRecipient(null); setComposeSubject(''); setComposeBody(''); setComposeError('');
+    await loadMsgThreads();
+    setComposeSending(false);
+  };
+
+  const fmtMsg = (iso: string) => { const d = new Date(iso); const now = new Date(); return d.toDateString() === now.toDateString() ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString([], { month: 'short', day: 'numeric' }); };
+  const totalUnread = msgThreads.reduce((s, t) => s + (t.unread_count || 0), 0);
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -257,6 +336,7 @@ export default function AdminAgentsPage() {
     { key: 'agents' as Tab, label: 'Agents', icon: Users, count: agents.length, alert: pendingAgents > 0 },
     { key: 'bookings' as Tab, label: 'Bookings', icon: Package, count: bookings.length },
     { key: 'requests' as Tab, label: 'Requests', icon: Truck, count: requests.length },
+    { key: 'messages' as Tab, label: 'Messages', icon: MessageSquare, count: totalUnread || undefined },
   ];
 
   return (
@@ -755,8 +835,165 @@ export default function AdminAgentsPage() {
               )}
             </div>
           )}
+          {/* ══ MESSAGES TAB ══ */}
+          {tab === 'messages' && (
+            <div className="p-0">
+              <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100">
+                <p className="text-sm font-semibold text-gray-700">Agent Conversations</p>
+                <button onClick={() => setComposing(true)}
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1.5 rounded-xl text-xs font-semibold hover:from-orange-600 hover:to-red-600 transition-all">
+                  <Plus className="h-3.5 w-3.5" /> New Message
+                </button>
+              </div>
+              <div className="flex h-[520px]">
+                {/* Thread list */}
+                <div className="w-64 border-r border-gray-100 flex flex-col overflow-hidden flex-shrink-0">
+                  <div className="px-3 py-2 border-b border-gray-50">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                      <input value={msgSearch} onChange={e => setMsgSearch(e.target.value)} placeholder="Search..."
+                        className="w-full pl-8 pr-3 py-2 bg-gray-50 rounded-lg border-0 text-xs focus:outline-none focus:ring-1 focus:ring-orange-400" />
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
+                    {msgLoading ? (
+                      <div className="flex items-center justify-center h-24"><span className="w-4 h-4 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" /></div>
+                    ) : msgThreads.filter(t => (t.recipient_name || '').toLowerCase().includes(msgSearch.toLowerCase()) || t.subject.toLowerCase().includes(msgSearch.toLowerCase())).length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-32 text-center px-4">
+                        <MessageSquare className="h-6 w-6 text-gray-200 mb-2" />
+                        <p className="text-gray-400 text-xs">No conversations yet</p>
+                      </div>
+                    ) : msgThreads.filter(t => (t.recipient_name || '').toLowerCase().includes(msgSearch.toLowerCase()) || t.subject.toLowerCase().includes(msgSearch.toLowerCase())).map(t => (
+                      <button key={t.id} onClick={() => setMsgActive(t)}
+                        className={`w-full text-left px-3 py-3 hover:bg-gray-50 transition-colors ${msgActive?.id === t.id ? 'bg-orange-50 border-l-2 border-orange-500' : ''}`}>
+                        <div className="flex items-start gap-2">
+                          <div className="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Users className="h-3.5 w-3.5 text-orange-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs font-semibold text-gray-900 truncate">{t.recipient_name}</p>
+                              <span className="text-xs text-gray-400 flex-shrink-0 ml-1">{fmtMsg(t.updated_at)}</span>
+                            </div>
+                            <p className="text-xs text-gray-500 truncate">{t.subject}</p>
+                            {t.last_message && <p className="text-xs text-gray-400 truncate">{t.last_message}</p>}
+                          </div>
+                          {(t.unread_count || 0) > 0 && (
+                            <span className="w-4 h-4 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold flex-shrink-0">{t.unread_count}</span>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Chat area */}
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {msgActive ? (
+                    <>
+                      <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+                        <div className="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center">
+                          <Users className="h-3.5 w-3.5 text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">{msgActive.recipient_name}</p>
+                          <p className="text-xs text-gray-400">{msgActive.subject}</p>
+                        </div>
+                      </div>
+                      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+                        {msgMessages.map(msg => {
+                          const isAdmin = msg.sender_role === 'admin';
+                          return (
+                            <div key={msg.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-[72%] flex flex-col gap-0.5 ${isAdmin ? 'items-end' : 'items-start'}`}>
+                                {!isAdmin && <p className="text-xs text-gray-400 px-1">Agent</p>}
+                                <div className={`px-3 py-2.5 rounded-xl text-xs leading-relaxed ${isAdmin ? 'bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-tr-sm' : 'bg-gray-100 text-gray-800 rounded-tl-sm'}`}>
+                                  {msg.body}
+                                </div>
+                                <div className="flex items-center gap-1 px-1">
+                                  <span className="text-xs text-gray-400">{fmtMsg(msg.created_at)}</span>
+                                  {isAdmin && (msg.is_read ? <CheckCheck className="h-3 w-3 text-blue-400" /> : <Check className="h-3 w-3 text-gray-400" />)}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <div ref={msgBottomRef} />
+                      </div>
+                      <div className="px-3 py-2.5 border-t border-gray-100 flex items-end gap-2">
+                        <textarea value={msgReply} onChange={e => setMsgReply(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsgReply(); } }}
+                          placeholder="Reply... (Enter to send)" rows={2}
+                          className="flex-1 px-3 py-2 bg-gray-50 rounded-xl border-0 text-xs focus:outline-none focus:ring-1 focus:ring-orange-400 resize-none" />
+                        <button onClick={sendMsgReply} disabled={msgSending || !msgReply.trim()}
+                          className="flex items-center justify-center bg-gradient-to-r from-orange-500 to-red-500 text-white p-2.5 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all disabled:opacity-50">
+                          {msgSending ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+                      <MessageSquare className="h-10 w-10 text-gray-200 mb-3" />
+                      <p className="text-sm font-semibold text-gray-500 mb-1">Select a conversation</p>
+                      <p className="text-xs text-gray-400 mb-4">Or start a new message to an agent</p>
+                      <button onClick={() => setComposing(true)}
+                        className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:from-orange-600 hover:to-red-600 transition-all">
+                        <Plus className="h-3.5 w-3.5" /> New Message
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Compose Modal */}
+      {composing && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="font-bold text-gray-900">New Message to Agent</h2>
+              <button onClick={() => { setComposing(false); setComposeRecipient(null); setComposeSubject(''); setComposeBody(''); setComposeError(''); }}
+                className="p-2 hover:bg-gray-100 rounded-xl"><X className="h-4 w-4 text-gray-500" /></button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              {composeError && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2.5 rounded-xl text-sm">{composeError}</div>}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">To (Agent)</label>
+                <div className="relative">
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                  <select value={composeRecipient?.id || ''} onChange={e => setComposeRecipient(agents.find(a => a.id === e.target.value) || null)}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none bg-white">
+                    <option value="">Select an agent...</option>
+                    {agents.map(a => <option key={a.id} value={a.id}>{a.full_name} — {a.company_name}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Subject</label>
+                <input value={composeSubject} onChange={e => setComposeSubject(e.target.value)} placeholder="Message subject..."
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Message</label>
+                <textarea value={composeBody} onChange={e => setComposeBody(e.target.value)} placeholder="Write your message..." rows={4}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none" />
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+              <button onClick={() => { setComposing(false); setComposeRecipient(null); setComposeSubject(''); setComposeBody(''); setComposeError(''); }}
+                className="px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-xl transition-colors font-medium">Cancel</button>
+              <button onClick={sendNewThread} disabled={composeSending}
+                className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-red-600 transition-all disabled:opacity-50">
+                {composeSending ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Send className="h-4 w-4" />}
+                Send Message
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Agent Detail Modal */}
       {selectedAgent && (
