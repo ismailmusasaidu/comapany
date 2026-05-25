@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock } from 'lucide-react';
+import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock, Plus } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { user, signOut } = useAuth();
@@ -136,6 +136,32 @@ export default function AdminDashboardPage() {
                 <h3 className="text-lg font-semibold text-slate-900">Business Management</h3>
               </div>
               <p className="text-gray-600 text-sm">Approve businesses, manage their bookings & logistics requests</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/booking/new')}
+              className="relative bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                  <Plus className="h-4 w-4 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900">New Delivery Booking</h3>
+              </div>
+              <p className="text-gray-600 text-sm">Create a delivery booking on behalf of an agent or customer</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/delivery-request/new')}
+              className="relative bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <Plus className="h-4 w-4 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900">New Delivery Request</h3>
+              </div>
+              <p className="text-gray-600 text-sm">Create a business delivery request on behalf of a client</p>
             </button>
           </div>
         </div>
