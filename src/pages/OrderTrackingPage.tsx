@@ -79,6 +79,63 @@ const DELIVERY_STEP_META: Record<string, { title: string; description: string }>
   cancelled:        { title: 'Order Cancelled',       description: 'This order was cancelled.' },
 };
 
+const LOGISTICS_STEP_META: Record<string, { title: string; description: string }> = {
+  pending:     { title: 'Request Submitted',    description: 'Your logistics request has been received and is awaiting review.' },
+  reviewing:   { title: 'Under Review',         description: 'Our team is reviewing your request and assessing feasibility.' },
+  approved:    { title: 'Request Approved',     description: 'Your logistics request has been approved and is being scheduled.' },
+  in_progress: { title: 'In Progress',          description: 'Your logistics operation is currently underway.' },
+  completed:   { title: 'Completed',            description: 'Your logistics request has been successfully completed.' },
+  rejected:    { title: 'Request Rejected',     description: 'This logistics request was not approved.' },
+};
+
+function synthesizeLogisticsHistory(
+  currentStatus: string,
+  createdAt: string,
+  updatedAt: string,
+): TrackingEvent[] {
+  if (currentStatus === 'rejected') {
+    return [{
+      id: 'rejected',
+      order_id: '',
+      status: 'rejected',
+      title: LOGISTICS_STEP_META.rejected.title,
+      description: LOGISTICS_STEP_META.rejected.description,
+      location: '',
+      occurred_at: updatedAt,
+    }];
+  }
+
+  const steps = LOGISTICS_STEPS;
+  const currentIdx = steps.indexOf(currentStatus);
+  const completedSteps = currentIdx >= 0 ? steps.slice(0, currentIdx + 1) : [];
+
+  return completedSteps.map((step, idx) => {
+    let occurred_at: string;
+    if (completedSteps.length === 1) {
+      occurred_at = createdAt;
+    } else if (idx === 0) {
+      occurred_at = createdAt;
+    } else if (idx === completedSteps.length - 1) {
+      occurred_at = updatedAt;
+    } else {
+      const start = new Date(createdAt).getTime();
+      const end = new Date(updatedAt).getTime();
+      const t = idx / (completedSteps.length - 1);
+      occurred_at = new Date(start + t * (end - start)).toISOString();
+    }
+    const meta = LOGISTICS_STEP_META[step] ?? { title: cap(step), description: '' };
+    return {
+      id: step,
+      order_id: '',
+      status: step,
+      title: meta.title,
+      description: meta.description,
+      location: '',
+      occurred_at,
+    };
+  });
+}
+
 function synthesizeDeliveryHistory(
   currentStatus: string,
   createdAt: string,
@@ -252,7 +309,7 @@ export default function OrderTrackingPage() {
         created_at: logisticsData.created_at,
         updated_at: logisticsData.updated_at,
       });
-      setEvents([]);
+      setEvents(synthesizeLogisticsHistory(logisticsData.status, logisticsData.created_at, logisticsData.updated_at));
 
     } else if (bizLogisticsData) {
       // Fetch business profile for customer info
@@ -281,7 +338,7 @@ export default function OrderTrackingPage() {
         created_at: bizLogisticsData.created_at,
         updated_at: bizLogisticsData.updated_at,
       });
-      setEvents([]);
+      setEvents(synthesizeLogisticsHistory(bizLogisticsData.status, bizLogisticsData.created_at, bizLogisticsData.updated_at));
 
     } else {
       setError(`No order found with ID "${trimmed}". Please check and try again.`);
