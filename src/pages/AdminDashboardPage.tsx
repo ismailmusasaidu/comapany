@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock, Plus } from 'lucide-react';
+import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock, Plus, Send } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { user, signOut } = useAuth();
@@ -93,6 +93,17 @@ export default function AdminDashboardPage() {
                 <h3 className="text-lg font-semibold text-slate-900">Contact Messages</h3>
               </div>
               <p className="text-gray-600 text-sm">View and manage customer messages from the contact form</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/private-messages')}
+              className="relative bg-white p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <Send className="h-6 w-6 text-slate-700" />
+                <h3 className="text-lg font-semibold text-slate-900">Private Messages</h3>
+              </div>
+              <p className="text-gray-600 text-sm">Send and receive private messages with agents and businesses</p>
             </button>
 
             <button

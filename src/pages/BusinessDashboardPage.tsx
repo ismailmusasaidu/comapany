@@ -5,7 +5,7 @@ import {
   LogOut, Plus, ChevronRight, AlertTriangle, Building2,
   MapPin, Phone, Mail, TrendingUp, Activity, FileText,
   Target, ArrowUpRight, ArrowDownRight, Minus, Award, Zap,
-  Users, Globe, Briefcase
+  Users, Globe, Briefcase, MessageSquare
 } from 'lucide-react';
 import { useBusiness } from '../contexts/BusinessContext';
 import { supabase } from '../lib/supabase';
@@ -176,12 +176,24 @@ export default function BusinessDashboardPage() {
   const [recentRequests, setRecentRequests] = useState<Request[]>([]);
   const [loggingOut, setLoggingOut] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => { refreshProfile(); }, []);
   useEffect(() => {
     if (!user || !profile || profile.status !== 'approved') { setDataLoading(false); return; }
     fetchData();
   }, [user, profile]);
+  useEffect(() => {
+    if (!user) return;
+    const fetchUnread = async () => {
+      const { data: threads } = await supabase.from('message_threads').select('id').eq('recipient_id', user.id).eq('recipient_type', 'business');
+      if (!threads?.length) return;
+      const ids = threads.map(t => t.id);
+      const { count } = await supabase.from('messages').select('id', { count: 'exact', head: true }).in('thread_id', ids).eq('is_read', false).eq('sender_role', 'admin');
+      setUnreadMessages(count || 0);
+    };
+    fetchUnread();
+  }, [user]);
 
   const fetchData = async () => {
     if (!user) return;
@@ -309,6 +321,12 @@ export default function BusinessDashboardPage() {
                 </Link>
                 <Link to="/business/logistics/new" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm">
                   <Truck className="h-4 w-4" /> Logistics Requests
+                </Link>
+                <Link to="/business/messages" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm">
+                  <MessageSquare className="h-4 w-4" /> Messages
+                  {unreadMessages > 0 && (
+                    <span className="ml-auto w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold">{unreadMessages}</span>
+                  )}
                 </Link>
               </>
             )}

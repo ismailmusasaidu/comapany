@@ -32,6 +32,9 @@ import BusinessLogisticsPage from './pages/BusinessLogisticsPage';
 import AdminBusinessesPage from './pages/AdminBusinessesPage';
 import AdminDeliveryBookingPage from './pages/AdminDeliveryBookingPage';
 import AdminDeliveryRequestPage from './pages/AdminDeliveryRequestPage';
+import AdminMessagingPage from './pages/AdminMessagingPage';
+import AgentMessagesPage from './pages/AgentMessagesPage';
+import BusinessMessagesPage from './pages/BusinessMessagesPage';
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -68,6 +71,10 @@ function App() {
         <Route path="/admin/businesses" element={<ProtectedRoute element={<AdminBusinessesPage />} />} />
         <Route path="/admin/booking/new" element={<ProtectedRoute element={<AdminDeliveryBookingPage />} />} />
         <Route path="/admin/delivery-request/new" element={<ProtectedRoute element={<AdminDeliveryRequestPage />} />} />
+        <Route path="/admin/private-messages" element={<ProtectedRoute element={<AdminMessagingPage />} />} />
+
+        <Route path="/agent/messages" element={<AgentMessagesPage />} />
+        <Route path="/business/messages" element={<BusinessMessagesPage />} />
 
         <Route path="/agent/register" element={<AgentRegisterPage />} />
         <Route path="/agent/login" element={<AgentLoginPage />} />
