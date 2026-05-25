@@ -52,8 +52,8 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-white">
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? 'bg-slate-900/98 backdrop-blur-xl shadow-2xl shadow-black/30'
-          : 'bg-gradient-to-r from-slate-900 via-slate-900 to-blue-950'
+          ? 'bg-slate-900/98 backdrop-blur-xl shadow-2xl shadow-black/30 border-b border-white/10'
+          : 'bg-gradient-to-r from-slate-900 via-slate-900 to-blue-950 border-b border-white/10'
       }`}>
 
         {/* ── Top utility bar ── */}

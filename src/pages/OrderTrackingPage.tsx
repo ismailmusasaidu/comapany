@@ -395,7 +395,7 @@ export default function OrderTrackingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-20 px-4 relative overflow-hidden">
+      <section className="bg-gradient-to-b from-[#0c1730] via-[#0f172a] to-[#0f1e3d] py-20 px-4 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-orange-500 blur-3xl" />
           <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-blue-500 blur-3xl" />
