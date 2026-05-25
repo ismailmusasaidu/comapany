@@ -36,6 +36,12 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   out_for_delivery: { label: 'Out for Delivery', color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', icon: Truck },
   delivered: { label: 'Delivered', color: 'text-green-700', bg: 'bg-green-50', border: 'border-green-200', icon: CheckCircle },
   cancelled: { label: 'Cancelled', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200', icon: XCircle },
+  // Logistics request statuses
+  reviewing: { label: 'Under Review', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', icon: Clock },
+  approved: { label: 'Approved', color: 'text-teal-600', bg: 'bg-teal-50', border: 'border-teal-200', icon: CheckCircle },
+  in_progress: { label: 'In Progress', color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200', icon: Truck },
+  completed: { label: 'Completed', color: 'text-green-700', bg: 'bg-green-50', border: 'border-green-200', icon: CheckCircle },
+  rejected: { label: 'Rejected', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200', icon: XCircle },
 };
 
 const STATUS_STEPS = ['pending', 'confirmed', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered'];
@@ -86,20 +92,22 @@ export default function OrderTrackingPage() {
     setEvents([]);
     setSearched(true);
 
-    // Search the legacy orders table first, then delivery_bookings
-    const [{ data: orderData, error: orderErr }, { data: bookingData, error: bookingErr }] = await Promise.all([
+    // Search all tables in parallel
+    const [
+      { data: orderData },
+      { data: bookingData },
+      { data: bizBookingData },
+      { data: logisticsData },
+      { data: bizLogisticsData },
+    ] = await Promise.all([
       supabase.from('orders').select('*').eq('order_id', trimmed).maybeSingle(),
       supabase.from('delivery_bookings').select('*').eq('booking_ref', trimmed).maybeSingle(),
+      supabase.from('business_delivery_bookings').select('*').eq('booking_ref', trimmed).maybeSingle(),
+      supabase.from('logistics_requests').select('*').eq('request_ref', trimmed).maybeSingle(),
+      supabase.from('business_logistics_requests').select('*').eq('request_ref', trimmed).maybeSingle(),
     ]);
 
-    if (orderErr && bookingErr) {
-      setError('Something went wrong. Please try again.');
-      setLoading(false);
-      return;
-    }
-
     if (orderData) {
-      // Legacy orders table result
       const { data: eventsData } = await supabase
         .from('order_tracking_events')
         .select('*')
@@ -108,8 +116,7 @@ export default function OrderTrackingPage() {
       setOrder(orderData);
       setEvents(eventsData ?? []);
     } else if (bookingData) {
-      // Normalize delivery_bookings row into the Order shape
-      const normalized: Order = {
+      setOrder({
         id: bookingData.id,
         order_id: bookingData.booking_ref,
         customer_name: bookingData.recipient_name,
@@ -123,8 +130,58 @@ export default function OrderTrackingPage() {
         estimated_delivery: null,
         created_at: bookingData.created_at,
         updated_at: bookingData.updated_at,
-      };
-      setOrder(normalized);
+      });
+      setEvents([]);
+    } else if (bizBookingData) {
+      setOrder({
+        id: bizBookingData.id,
+        order_id: bizBookingData.booking_ref,
+        customer_name: bizBookingData.recipient_name,
+        customer_email: '',
+        customer_phone: bizBookingData.recipient_phone,
+        origin: `${bizBookingData.sender_address}, ${bizBookingData.pickup_city}`,
+        destination: `${bizBookingData.recipient_address}, ${bizBookingData.delivery_city}`,
+        status: bizBookingData.status,
+        package_description: `${bizBookingData.package_description} (${bizBookingData.package_type})`,
+        weight_kg: bizBookingData.weight_kg,
+        estimated_delivery: null,
+        created_at: bizBookingData.created_at,
+        updated_at: bizBookingData.updated_at,
+      });
+      setEvents([]);
+    } else if (logisticsData) {
+      setOrder({
+        id: logisticsData.id,
+        order_id: logisticsData.request_ref,
+        customer_name: '',
+        customer_email: '',
+        customer_phone: '',
+        origin: logisticsData.origin,
+        destination: logisticsData.destination,
+        status: logisticsData.status,
+        package_description: `${logisticsData.title} — ${logisticsData.service_type}`,
+        weight_kg: logisticsData.weight_kg ?? null,
+        estimated_delivery: logisticsData.preferred_date ?? null,
+        created_at: logisticsData.created_at,
+        updated_at: logisticsData.updated_at,
+      });
+      setEvents([]);
+    } else if (bizLogisticsData) {
+      setOrder({
+        id: bizLogisticsData.id,
+        order_id: bizLogisticsData.request_ref,
+        customer_name: '',
+        customer_email: '',
+        customer_phone: '',
+        origin: bizLogisticsData.origin,
+        destination: bizLogisticsData.destination,
+        status: bizLogisticsData.status,
+        package_description: `${bizLogisticsData.title} — ${bizLogisticsData.service_type}`,
+        weight_kg: null,
+        estimated_delivery: bizLogisticsData.preferred_date ?? null,
+        created_at: bizLogisticsData.created_at,
+        updated_at: bizLogisticsData.updated_at,
+      });
       setEvents([]);
     } else {
       setError(`No order found with ID "${trimmed}". Please check and try again.`);
@@ -171,7 +228,7 @@ export default function OrderTrackingPage() {
                 type="text"
                 value={inputValue}
                 onChange={(e) => { setInputValue(e.target.value); setError(''); }}
-                placeholder="e.g. ORD-2024001 or BK-123456"
+                placeholder="e.g. ORD-2024001, BK-123456, LR-123456, BR-123456"
                 className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 text-white placeholder-gray-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent backdrop-blur-sm text-base transition-all"
                 autoComplete="off"
                 spellCheck={false}
