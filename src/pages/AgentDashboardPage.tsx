@@ -4,11 +4,12 @@ import {
   Truck, Package, BarChart3, Clock, CheckCircle, XCircle,
   LogOut, Plus, ChevronRight, AlertTriangle, User, Building2,
   MapPin, Phone, Mail, TrendingUp, Activity, FileText,
-  Target, ArrowUpRight, ArrowDownRight, Minus, Award, Zap, MessageSquare
+  Target, ArrowUpRight, ArrowDownRight, Minus, Award, Zap, MessageSquare, FileDown
 } from 'lucide-react';
 import { useAgent } from '../contexts/AgentContext';
 import { supabase } from '../lib/supabase';
 import BookingDetailModal from '../components/BookingDetailModal';
+import InvoiceModal, { type InvoiceData } from '../components/InvoiceModal';
 
 interface RecentBooking {
   id: string;
@@ -35,7 +36,14 @@ interface RecentRequest {
   id: string;
   request_ref: string;
   title: string;
+  description: string;
   service_type: string;
+  origin: string;
+  destination: string;
+  quantity: number | null;
+  weight_kg: number | null;
+  preferred_date: string | null;
+  budget_range: string;
   status: string;
   created_at: string;
 }
@@ -194,6 +202,7 @@ export default function AgentDashboardPage() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
 
   useEffect(() => { refreshProfile(); }, []);
   useEffect(() => {
@@ -225,7 +234,7 @@ export default function AgentDashboardPage() {
       supabase.from('delivery_bookings').select('status, package_type, created_at').eq('agent_id', user.id),
       supabase.from('logistics_requests').select('status, service_type, created_at').eq('agent_id', user.id),
       supabase.from('delivery_bookings').select('*').eq('agent_id', user.id).order('created_at', { ascending: false }).limit(6),
-      supabase.from('logistics_requests').select('id, request_ref, title, service_type, status, created_at').eq('agent_id', user.id).order('created_at', { ascending: false }).limit(6),
+      supabase.from('logistics_requests').select('id, request_ref, title, description, service_type, origin, destination, quantity, weight_kg, preferred_date, budget_range, status, created_at').eq('agent_id', user.id).order('created_at', { ascending: false }).limit(6),
     ]);
 
     const bAll = bookingsRes.data ?? [];
@@ -727,9 +736,9 @@ export default function AgentDashboardPage() {
                     ) : (
                       <div className="divide-y divide-gray-50">
                         {recentBookings.map(b => (
-                          <div key={b.id} onClick={() => setSelectedBooking(b)}
-                            className="px-6 py-3.5 flex items-center justify-between gap-3 cursor-pointer hover:bg-gray-50/60 transition-colors">
-                            <div className="min-w-0">
+                          <div key={b.id}
+                            className="px-6 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/60 transition-colors">
+                            <div className="min-w-0 flex-1 cursor-pointer" onClick={() => setSelectedBooking(b)}>
                               <p className="font-semibold text-sm text-gray-900 truncate">{b.booking_ref}</p>
                               <p className="text-xs text-gray-500 truncate">{b.recipient_name} · {b.delivery_city}</p>
                             </div>
@@ -738,7 +747,12 @@ export default function AgentDashboardPage() {
                                 {cap(b.status)}
                               </span>
                               <span className="text-xs text-gray-400 hidden sm:block">{timeAgo(b.created_at)}</span>
-                              <ChevronRight className="h-3.5 w-3.5 text-gray-300" />
+                              <button onClick={() => setInvoiceData({ type: 'booking', ...b, agent_company: profile?.company_name, agent_name: profile?.full_name, agent_phone: profile?.phone, agent_email: profile?.email })}
+                                title="Generate Invoice"
+                                className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors">
+                                <FileDown className="h-3.5 w-3.5" />
+                              </button>
+                              <ChevronRight className="h-3.5 w-3.5 text-gray-300 cursor-pointer" onClick={() => setSelectedBooking(b)} />
                             </div>
                           </div>
                         ))}
@@ -766,7 +780,7 @@ export default function AgentDashboardPage() {
                       <div className="divide-y divide-gray-50">
                         {recentRequests.map(r => (
                           <div key={r.id} className="px-6 py-3.5 flex items-center justify-between gap-3">
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <p className="font-semibold text-sm text-gray-900 truncate">{r.title}</p>
                               <p className="text-xs text-gray-500 truncate">{r.request_ref} · {cap(r.service_type)}</p>
                             </div>
@@ -775,6 +789,11 @@ export default function AgentDashboardPage() {
                                 {cap(r.status)}
                               </span>
                               <span className="text-xs text-gray-400 hidden sm:block">{timeAgo(r.created_at)}</span>
+                              <button onClick={() => setInvoiceData({ type: 'request', ...r, agent_company: profile?.company_name, agent_name: profile?.full_name, agent_phone: profile?.phone, agent_email: profile?.email })}
+                                title="Generate Invoice"
+                                className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors">
+                                <FileDown className="h-3.5 w-3.5" />
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -824,6 +843,8 @@ export default function AgentDashboardPage() {
           }}
         />
       )}
+
+      {invoiceData && <InvoiceModal data={invoiceData} onClose={() => setInvoiceData(null)} />}
     </div>
   );
 }

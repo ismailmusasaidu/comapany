@@ -5,11 +5,12 @@ import {
   Search, Filter, Eye, Building2, MapPin, Phone, Mail, RefreshCw,
   ChevronDown, AlertCircle, TrendingUp, Target, Activity, Award,
   ArrowUpRight, ArrowDownRight, Minus, UserCheck, UserX, BarChart3, Zap,
-  MessageSquare, Send, Plus, X, ChevronRight, Check, CheckCheck
+  MessageSquare, Send, Plus, X, ChevronRight, Check, CheckCheck, FileDown
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import BookingDetailModal from '../components/BookingDetailModal';
+import InvoiceModal, { type InvoiceData } from '../components/InvoiceModal';
 
 type Tab = 'overview' | 'agents' | 'bookings' | 'requests' | 'messages';
 type AgentStatus = 'all' | 'pending' | 'approved' | 'rejected';
@@ -194,6 +195,7 @@ export default function AdminAgentsPage() {
   const [composeSending, setComposeSending] = useState(false);
   const [composeError, setComposeError] = useState('');
   const msgBottomRef = useRef<HTMLDivElement>(null);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
 
   useEffect(() => { if (tab === 'messages') loadMsgThreads(); }, [tab]);
   useEffect(() => { if (msgActive) loadMsgMessages(msgActive.id); }, [msgActive]);
@@ -767,10 +769,17 @@ export default function AdminAgentsPage() {
                           </td>
                           <td className="px-6 py-4 text-xs text-gray-400">{fmtDate(b.created_at)}</td>
                           <td className="px-6 py-4">
-                            <button onClick={e => { e.stopPropagation(); setSelectedBooking(b); }}
-                              className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 text-xs font-medium transition-all">
-                              <Eye className="h-3.5 w-3.5" /> View
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button onClick={e => { e.stopPropagation(); setSelectedBooking(b); }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 text-xs font-medium transition-all">
+                                <Eye className="h-3.5 w-3.5" /> View
+                              </button>
+                              <button onClick={e => { e.stopPropagation(); setInvoiceData({ type: 'booking', ...b, agent_name: b.agent_profiles?.full_name, agent_company: b.agent_profiles?.company_name, agent_phone: b.agent_profiles?.phone, agent_email: b.agent_profiles?.email }); }}
+                                title="Generate Invoice"
+                                className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors border border-gray-200">
+                                <FileDown className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -823,9 +832,16 @@ export default function AdminAgentsPage() {
                           </td>
                           <td className="px-6 py-4 text-xs text-gray-400">{fmtDate(r.created_at)}</td>
                           <td className="px-6 py-4">
-                            <input type="text" placeholder="Add notes..." defaultValue={r.admin_notes}
-                              onBlur={e => updateRequestStatus(r.id, r.status, e.target.value)}
-                              className="text-xs px-2.5 py-1.5 border border-gray-200 rounded-lg w-36 focus:outline-none focus:ring-1 focus:ring-orange-400" />
+                            <div className="flex items-center gap-2">
+                              <input type="text" placeholder="Add notes..." defaultValue={r.admin_notes}
+                                onBlur={e => updateRequestStatus(r.id, r.status, e.target.value)}
+                                className="text-xs px-2.5 py-1.5 border border-gray-200 rounded-lg w-28 focus:outline-none focus:ring-1 focus:ring-orange-400" />
+                              <button onClick={() => setInvoiceData({ type: 'request', ...r, budget_range: (r as Request & { budget_range?: string }).budget_range ?? '', agent_name: r.agent_profiles?.full_name, agent_company: r.agent_profiles?.company_name })}
+                                title="Generate Invoice"
+                                className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors border border-gray-200 flex-shrink-0">
+                                <FileDown className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1074,6 +1090,8 @@ export default function AdminAgentsPage() {
             setSelectedBooking(prev => prev ? { ...prev, status: newStatus } : null);
           }} />
       )}
+
+      {invoiceData && <InvoiceModal data={invoiceData} onClose={() => setInvoiceData(null)} />}
     </div>
   );
 }

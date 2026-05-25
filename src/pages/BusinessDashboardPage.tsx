@@ -5,10 +5,11 @@ import {
   LogOut, Plus, ChevronRight, AlertTriangle, Building2,
   MapPin, Phone, Mail, TrendingUp, Activity, FileText,
   Target, ArrowUpRight, ArrowDownRight, Minus, Award, Zap,
-  Users, Globe, Briefcase, MessageSquare
+  Users, Globe, Briefcase, MessageSquare, FileDown
 } from 'lucide-react';
 import { useBusiness } from '../contexts/BusinessContext';
 import { supabase } from '../lib/supabase';
+import InvoiceModal, { type InvoiceData } from '../components/InvoiceModal';
 
 interface Booking {
   id: string;
@@ -35,7 +36,14 @@ interface Request {
   id: string;
   request_ref: string;
   title: string;
+  description: string;
   service_type: string;
+  origin: string;
+  destination: string;
+  quantity: string | null;
+  weight: string | null;
+  preferred_date: string | null;
+  budget_range: string;
   status: string;
   created_at: string;
 }
@@ -177,6 +185,7 @@ export default function BusinessDashboardPage() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
 
   useEffect(() => { refreshProfile(); }, []);
   useEffect(() => {
@@ -207,7 +216,7 @@ export default function BusinessDashboardPage() {
       supabase.from('business_delivery_bookings').select('status, package_type, created_at').eq('business_id', user.id),
       supabase.from('business_logistics_requests').select('status, service_type, created_at').eq('business_id', user.id),
       supabase.from('business_delivery_bookings').select('*').eq('business_id', user.id).order('created_at', { ascending: false }).limit(6),
-      supabase.from('business_logistics_requests').select('id, request_ref, title, service_type, status, created_at').eq('business_id', user.id).order('created_at', { ascending: false }).limit(6),
+      supabase.from('business_logistics_requests').select('id, request_ref, title, description, service_type, origin, destination, quantity, weight, preferred_date, budget_range, status, created_at').eq('business_id', user.id).order('created_at', { ascending: false }).limit(6),
     ]);
 
     const bAll = bRes.data ?? [];
@@ -673,8 +682,8 @@ export default function BusinessDashboardPage() {
                     ) : (
                       <div className="divide-y divide-gray-50">
                         {recentBookings.map(b => (
-                          <div key={b.id} className="px-6 py-3.5 flex items-center justify-between gap-3">
-                            <div className="min-w-0">
+                          <div key={b.id} className="px-6 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/60 transition-colors">
+                            <div className="min-w-0 flex-1">
                               <p className="font-semibold text-sm text-gray-900 truncate">{b.booking_ref}</p>
                               <p className="text-xs text-gray-500 truncate">{b.recipient_name} · {b.delivery_city}</p>
                             </div>
@@ -683,6 +692,11 @@ export default function BusinessDashboardPage() {
                                 {cap(b.status)}
                               </span>
                               <span className="text-xs text-gray-400 hidden sm:block">{timeAgo(b.created_at)}</span>
+                              <button onClick={() => setInvoiceData({ type: 'booking', ...b, business_name: profile?.company_name, business_contact: profile?.contact_person, business_phone: profile?.phone, business_email: profile?.email })}
+                                title="Generate Invoice"
+                                className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors">
+                                <FileDown className="h-3.5 w-3.5" />
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -709,8 +723,8 @@ export default function BusinessDashboardPage() {
                     ) : (
                       <div className="divide-y divide-gray-50">
                         {recentRequests.map(r => (
-                          <div key={r.id} className="px-6 py-3.5 flex items-center justify-between gap-3">
-                            <div className="min-w-0">
+                          <div key={r.id} className="px-6 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/60 transition-colors">
+                            <div className="min-w-0 flex-1">
                               <p className="font-semibold text-sm text-gray-900 truncate">{r.title}</p>
                               <p className="text-xs text-gray-500 truncate">{r.request_ref} · {cap(r.service_type)}</p>
                             </div>
@@ -719,6 +733,11 @@ export default function BusinessDashboardPage() {
                                 {cap(r.status)}
                               </span>
                               <span className="text-xs text-gray-400 hidden sm:block">{timeAgo(r.created_at)}</span>
+                              <button onClick={() => setInvoiceData({ type: 'request', ...r, business_name: profile?.company_name, business_contact: profile?.contact_person, business_phone: profile?.phone, business_email: profile?.email })}
+                                title="Generate Invoice"
+                                className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors">
+                                <FileDown className="h-3.5 w-3.5" />
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -759,6 +778,8 @@ export default function BusinessDashboardPage() {
           </div>
         </main>
       </div>
+
+      {invoiceData && <InvoiceModal data={invoiceData} onClose={() => setInvoiceData(null)} />}
     </div>
   );
 }

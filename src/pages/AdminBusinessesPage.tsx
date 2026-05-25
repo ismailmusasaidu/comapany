@@ -5,10 +5,11 @@ import {
   Search, Eye, Building2, MapPin, Phone, Mail, RefreshCw,
   ChevronDown, AlertCircle, TrendingUp, Target, Activity, Award,
   ArrowUpRight, ArrowDownRight, Minus, BarChart3, Zap, Globe, Users, Briefcase,
-  MessageSquare, Send, Plus, X, Check, CheckCheck
+  MessageSquare, Send, Plus, X, Check, CheckCheck, FileDown
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import InvoiceModal, { type InvoiceData } from '../components/InvoiceModal';
 
 type Tab = 'overview' | 'businesses' | 'bookings' | 'requests' | 'messages';
 type BizStatus = 'all' | 'pending' | 'approved' | 'rejected';
@@ -163,6 +164,7 @@ export default function AdminBusinessesPage() {
   const [composeSending, setComposeSending] = useState(false);
   const [composeError, setComposeError] = useState('');
   const msgBottomRef = useRef<HTMLDivElement>(null);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
 
   useEffect(() => { if (tab === 'messages') loadMsgThreads(); }, [tab]);
   useEffect(() => { if (msgActive) loadMsgMessages(msgActive.id); }, [msgActive]);
@@ -774,7 +776,16 @@ export default function AdminBusinessesPage() {
                                 {BOOKING_STATUS_OPTIONS.map(s => <option key={s} value={s}>{cap(s)}</option>)}
                               </select>
                             </td>
-                            <td className="px-5 py-3.5 text-xs text-gray-400">{fmt(b.created_at)}</td>
+                            <td className="px-5 py-3.5 text-xs text-gray-400">
+                              <div className="flex items-center gap-2">
+                                <span>{fmt(b.created_at)}</span>
+                                <button onClick={() => setInvoiceData({ type: 'booking', ...b, business_name: b.business_profiles?.company_name, business_contact: b.business_profiles?.contact_person, business_phone: b.business_profiles?.phone, business_email: b.business_profiles?.email })}
+                                  title="Generate Invoice"
+                                  className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-gray-200">
+                                  <FileDown className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -824,6 +835,11 @@ export default function AdminBusinessesPage() {
                               className={`text-xs font-medium px-2.5 py-1.5 rounded-xl border cursor-pointer focus:outline-none ${STATUS_BADGE[r.status] ?? ''}`}>
                               {REQUEST_STATUS_OPTIONS.map(s => <option key={s} value={s}>{cap(s)}</option>)}
                             </select>
+                            <button onClick={() => setInvoiceData({ type: 'request', ...r, business_name: r.business_profiles?.company_name, business_contact: r.business_profiles?.contact_person })}
+                              title="Generate Invoice"
+                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors border border-gray-200">
+                              <FileDown className="h-3.5 w-3.5" />
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -1078,6 +1094,8 @@ export default function AdminBusinessesPage() {
           </div>
         </div>
       )}
+
+      {invoiceData && <InvoiceModal data={invoiceData} onClose={() => setInvoiceData(null)} />}
     </div>
   );
 }

@@ -2,9 +2,10 @@ import { useState } from 'react';
 import {
   X, Package, MapPin, Phone, User, Weight, DollarSign,
   FileText, CheckCircle, Truck, Clock, XCircle, ChevronRight,
-  Building2, Calendar, Hash, StickyNote
+  Building2, Calendar, Hash, StickyNote, FileDown
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import InvoiceModal, { type BookingInvoiceData } from './InvoiceModal';
 
 interface BookingDetail {
   id: string;
@@ -57,6 +58,7 @@ function fmtDate(d: string) {
 export default function BookingDetailModal({ booking, onClose, isAdmin = false, onStatusChange }: Props) {
   const [status, setStatus] = useState(booking.status);
   const [saving, setSaving] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
 
   const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
   const Icon = cfg.icon;
@@ -72,6 +74,7 @@ export default function BookingDetailModal({ booking, onClose, isAdmin = false, 
   };
 
   return (
+    <>
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden">
         {/* Header */}
@@ -91,9 +94,16 @@ export default function BookingDetailModal({ booking, onClose, isAdmin = false, 
               <p className="text-gray-500 text-xs mt-0.5">Created {fmtDate(booking.created_at)}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-black/10 rounded-xl transition-colors text-gray-500">
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setShowInvoice(true)}
+              title="Generate Invoice"
+              className="flex items-center gap-1.5 bg-slate-800 text-white px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-slate-700 transition-all">
+              <FileDown className="h-3.5 w-3.5" /> Invoice
+            </button>
+            <button onClick={onClose} className="p-2 hover:bg-black/10 rounded-xl transition-colors text-gray-500">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Scrollable content */}
@@ -252,6 +262,21 @@ export default function BookingDetailModal({ booking, onClose, isAdmin = false, 
         )}
       </div>
     </div>
+
+    {showInvoice && (
+      <InvoiceModal
+        data={{
+          type: 'booking',
+          ...booking,
+          agent_name: booking.agent_profiles?.full_name,
+          agent_company: booking.agent_profiles?.company_name,
+          agent_phone: booking.agent_profiles?.phone,
+          agent_email: booking.agent_profiles?.email,
+        } as BookingInvoiceData}
+        onClose={() => setShowInvoice(false)}
+      />
+    )}
+  </>
   );
 }
 
