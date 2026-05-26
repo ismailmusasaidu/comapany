@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import {
   Truck, Package, MapPin, Phone, User, Weight,
   DollarSign, FileText, CheckCircle, ArrowLeft, ArrowRight, ChevronRight,
-  Globe, Map, Navigation, Ruler, RefreshCw, AlertCircle, Tag
+  Globe, Map, Navigation, Ruler, RefreshCw, AlertCircle, Tag,
+  Banknote, CreditCard, Building2, Wifi
 } from 'lucide-react';
 import { useAgent } from '../contexts/AgentContext';
 import { supabase } from '../lib/supabase';
@@ -23,6 +24,7 @@ interface BookingForm {
   weight_kg: string;
   declared_value: string;
   special_instructions: string;
+  payment_method: string;
 }
 
 const EMPTY: BookingForm = {
@@ -31,12 +33,86 @@ const EMPTY: BookingForm = {
   recipient_name: '', recipient_phone: '', recipient_address: '', delivery_city: '',
   package_type: 'parcel', package_description: '',
   weight_kg: '', declared_value: '', special_instructions: '',
+  payment_method: '',
 };
 
 const DELIVERY_TYPES = [
-  { value: 'same_state',    label: 'Same State',    desc: 'Pickup and delivery within the same state',             icon: Navigation, color: 'text-green-600',  bg: 'bg-green-50',  activeBorder: 'border-green-500',  activeBg: 'bg-green-50' },
-  { value: 'inter_state',   label: 'Inter-State',   desc: 'Delivery across different Nigerian states',             icon: Map,        color: 'text-orange-600', bg: 'bg-orange-50', activeBorder: 'border-orange-500', activeBg: 'bg-orange-50' },
-  { value: 'international', label: 'International', desc: 'Cross-border or international delivery',                icon: Globe,      color: 'text-blue-600',   bg: 'bg-blue-50',   activeBorder: 'border-blue-500',   activeBg: 'bg-blue-50' },
+  { value: 'same_state',    label: 'Same State',    desc: 'Pickup and delivery within the same state',   icon: Navigation, color: 'text-green-600',  bg: 'bg-green-50',  activeBorder: 'border-green-500',  activeBg: 'bg-green-50' },
+  { value: 'inter_state',   label: 'Inter-State',   desc: 'Delivery across different Nigerian states',   icon: Map,        color: 'text-orange-600', bg: 'bg-orange-50', activeBorder: 'border-orange-500', activeBg: 'bg-orange-50' },
+  { value: 'international', label: 'International', desc: 'Cross-border or international delivery',      icon: Globe,      color: 'text-blue-600',   bg: 'bg-blue-50',   activeBorder: 'border-blue-500',   activeBg: 'bg-blue-50' },
+];
+
+const PAYMENT_METHODS = [
+  {
+    value: 'cash_on_delivery',
+    label: 'Cash on Delivery',
+    desc: 'Pay in cash when your package arrives',
+    icon: Banknote,
+    color: 'text-green-700',
+    bg: 'bg-green-50',
+    activeBorder: 'border-green-500',
+    activeBg: 'bg-green-50',
+    badge: null,
+  },
+  {
+    value: 'paystack',
+    label: 'Pay Online — Paystack',
+    desc: 'Secure online payment via card, bank or USSD',
+    icon: Wifi,
+    color: 'text-teal-700',
+    bg: 'bg-teal-50',
+    activeBorder: 'border-teal-500',
+    activeBg: 'bg-teal-50',
+    badge: 'Instant',
+  },
+  {
+    value: 'stripe',
+    label: 'Pay Online — Stripe',
+    desc: 'Pay securely with card via Stripe',
+    icon: CreditCard,
+    color: 'text-sky-700',
+    bg: 'bg-sky-50',
+    activeBorder: 'border-sky-500',
+    activeBg: 'bg-sky-50',
+    badge: 'International',
+  },
+  {
+    value: 'bank_transfer_local',
+    label: 'Bank Transfer — Nigeria',
+    desc: 'Transfer to our Nigerian bank account',
+    icon: Building2,
+    color: 'text-orange-700',
+    bg: 'bg-orange-50',
+    activeBorder: 'border-orange-500',
+    activeBg: 'bg-orange-50',
+    badge: 'Local',
+  },
+  {
+    value: 'bank_transfer_international',
+    label: 'Bank Transfer — International',
+    desc: 'Wire transfer from any country worldwide',
+    icon: Building2,
+    color: 'text-blue-700',
+    bg: 'bg-blue-50',
+    activeBorder: 'border-blue-500',
+    activeBg: 'bg-blue-50',
+    badge: 'SWIFT / IBAN',
+  },
+];
+
+const BANK_DETAILS_LOCAL = [
+  { label: 'Bank Name',      value: 'First Bank of Nigeria' },
+  { label: 'Account Name',   value: 'SwiftCargo Logistics Ltd' },
+  { label: 'Account Number', value: '3012345678' },
+  { label: 'Sort Code',      value: '011' },
+];
+
+const BANK_DETAILS_INTL = [
+  { label: 'Bank Name',      value: 'First Bank of Nigeria' },
+  { label: 'Account Name',   value: 'SwiftCargo Logistics Ltd' },
+  { label: 'IBAN / Account', value: 'NG99 0011 0301 2345 6780 00' },
+  { label: 'SWIFT / BIC',    value: 'FBNINGLA' },
+  { label: 'Bank Address',   value: 'Samuel Asabia House, 35 Marina, Lagos, Nigeria' },
 ];
 
 const PKG_META: Record<string, { icon: React.ComponentType<{ className?: string }>; desc: string }> = {
@@ -45,19 +121,22 @@ const PKG_META: Record<string, { icon: React.ComponentType<{ className?: string 
   fragile:  { icon: Tag,      desc: 'Glass, electronics, delicates' },
   heavy:    { icon: Weight,   desc: 'Over 25kg, bulk items' },
 };
-
 const PKG_ORDER = ['document', 'parcel', 'fragile', 'heavy'];
+
+interface PkgCharge  { package_type: string; label: string; surcharge: number; }
+interface WeightRate { delivery_type: string; weight_fee_per_kg: number; }
+interface FeeEstimate { distance_km: number; fee_per_km: number; minimum_fee: number; estimated_fee: number; }
+
+const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 function generateRef() { return `BK-${Date.now().toString().slice(-6)}`; }
 function cap(s: string) { return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 function fmt(n: number) { return `₦${Math.round(n).toLocaleString('en-NG')}`; }
 
-interface FeeEstimate { distance_km: number; fee_per_km: number; minimum_fee: number; estimated_fee: number; }
-interface PkgCharge   { package_type: string; label: string; surcharge: number; }
-interface WeightRate  { delivery_type: string; weight_fee_per_kg: number; }
-
-const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+function paymentLabel(value: string) {
+  return PAYMENT_METHODS.find(p => p.value === value)?.label ?? cap(value);
+}
 
 export default function AgentDeliveryBookingPage() {
   const { user, profile } = useAgent();
@@ -68,12 +147,9 @@ export default function AgentDeliveryBookingPage() {
   const [success, setSuccess] = useState(false);
   const [createdRef, setCreatedRef] = useState('');
 
-  // Fee state
   const [feeEstimate, setFeeEstimate] = useState<FeeEstimate | null>(null);
   const [feeLoading, setFeeLoading]   = useState(false);
   const [feeError, setFeeError]       = useState('');
-
-  // Package charges + weight rates from DB
   const [pkgCharges, setPkgCharges]   = useState<Record<string, PkgCharge>>({});
   const [weightRates, setWeightRates] = useState<Record<string, number>>({});
 
@@ -128,7 +204,6 @@ export default function AgentDeliveryBookingPage() {
     finally { setFeeLoading(false); }
   };
 
-  // Live total estimate
   const pkgSurcharge  = pkgCharges[form.package_type]?.surcharge ?? 0;
   const wRate         = weightRates[form.delivery_type] ?? 0;
   const weightFee     = wRate > 0 && form.weight_kg ? parseFloat(form.weight_kg) * wRate : 0;
@@ -152,6 +227,7 @@ export default function AgentDeliveryBookingPage() {
         weight_kg: form.weight_kg ? parseFloat(form.weight_kg) : null,
         declared_value: form.declared_value ? parseFloat(form.declared_value) : null,
         special_instructions: form.special_instructions,
+        payment_method: form.payment_method,
         status: 'pending',
       });
       if (err) throw err;
@@ -161,8 +237,24 @@ export default function AgentDeliveryBookingPage() {
     } finally { setLoading(false); }
   };
 
+  const handleNext = () => {
+    if (step === 1 && !form.delivery_type) { setError('Please select a delivery type to continue.'); return; }
+    if (step === 2 && (!form.sender_name || !form.sender_phone || !form.sender_address || !form.pickup_city)) { setError('Please fill in all sender fields.'); return; }
+    if (step === 3 && (!form.recipient_name || !form.recipient_phone || !form.recipient_address || !form.delivery_city)) { setError('Please fill in all recipient fields.'); return; }
+    if (step === 4 && !form.package_description) { setError('Please provide a package description.'); return; }
+    if (step === 5 && !form.payment_method) { setError('Please select a payment method to continue.'); return; }
+    setError('');
+    if (step === 3 && form.delivery_type === 'same_state' && form.pickup_city && form.delivery_city) {
+      calculateFee(form.pickup_city, form.delivery_city);
+    }
+    setStep(s => s + 1);
+  };
+
+  const selectedDt = DELIVERY_TYPES.find(d => d.value === form.delivery_type);
+  const selectedPm = PAYMENT_METHODS.find(p => p.value === form.payment_method);
+  const steps = ['Delivery Type', 'Sender Info', 'Recipient Info', 'Package Details', 'Payment', 'Review'];
+
   if (success) {
-    const dt = DELIVERY_TYPES.find(d => d.value === form.delivery_type);
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
         <div className="bg-white rounded-3xl p-10 max-w-md w-full text-center shadow-sm border border-gray-100">
@@ -170,10 +262,15 @@ export default function AgentDeliveryBookingPage() {
             <CheckCircle className="h-10 w-10 text-green-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Booking Created!</h2>
-          <p className="text-gray-500 mb-2">Your delivery booking has been submitted successfully.</p>
-          {dt && (
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-4 ${dt.bg} ${dt.color}`}>
-              <dt.icon className="h-3.5 w-3.5" /> {dt.label} Delivery
+          <p className="text-gray-500 mb-3">Your delivery booking has been submitted successfully.</p>
+          {selectedDt && (
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-2 ${selectedDt.bg} ${selectedDt.color}`}>
+              <selectedDt.icon className="h-3.5 w-3.5" /> {selectedDt.label} Delivery
+            </div>
+          )}
+          {selectedPm && (
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-4 ml-2 ${selectedPm.bg} ${selectedPm.color}`}>
+              <selectedPm.icon className="h-3.5 w-3.5" /> {selectedPm.label}
             </div>
           )}
           {hasTotal && (
@@ -200,22 +297,6 @@ export default function AgentDeliveryBookingPage() {
       </div>
     );
   }
-
-  const steps = ['Delivery Type', 'Sender Info', 'Recipient Info', 'Package Details', 'Review'];
-
-  const handleNext = () => {
-    if (step === 1 && !form.delivery_type) { setError('Please select a delivery type to continue.'); return; }
-    if (step === 2 && (!form.sender_name || !form.sender_phone || !form.sender_address || !form.pickup_city)) { setError('Please fill in all sender fields.'); return; }
-    if (step === 3 && (!form.recipient_name || !form.recipient_phone || !form.recipient_address || !form.delivery_city)) { setError('Please fill in all recipient fields.'); return; }
-    if (step === 4 && !form.package_description) { setError('Please provide a package description.'); return; }
-    setError('');
-    if (step === 3 && form.delivery_type === 'same_state' && form.pickup_city && form.delivery_city) {
-      calculateFee(form.pickup_city, form.delivery_city);
-    }
-    setStep(s => s + 1);
-  };
-
-  const selectedDt = DELIVERY_TYPES.find(d => d.value === form.delivery_type);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -276,7 +357,7 @@ export default function AgentDeliveryBookingPage() {
                       onClick={() => { setForm(p => ({ ...p, delivery_type: dt.value })); setError(''); }}
                       className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-200 flex items-center gap-5 group ${selected ? `${dt.activeBorder} ${dt.activeBg} shadow-sm` : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50'}`}
                     >
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${selected ? dt.bg : 'bg-gray-100 group-hover:bg-gray-200'}`}>
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${selected ? dt.bg : 'bg-gray-100 group-hover:bg-gray-200'}`}>
                         <dt.icon className={`h-6 w-6 ${selected ? dt.color : 'text-gray-500'}`} />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -323,7 +404,7 @@ export default function AgentDeliveryBookingPage() {
             </div>
           )}
 
-          {/* Step 4: Package */}
+          {/* Step 4: Package Details */}
           {step === 4 && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
@@ -331,7 +412,6 @@ export default function AgentDeliveryBookingPage() {
                 <div><h2 className="font-bold text-gray-900">Package Details</h2><p className="text-gray-500 text-sm">Tell us about the shipment</p></div>
               </div>
 
-              {/* Distance fee card — same_state only */}
               {form.delivery_type === 'same_state' && (
                 <div className="rounded-xl border-2 border-green-200 bg-green-50 overflow-hidden">
                   <div className="px-4 py-3 border-b border-green-200 flex items-center gap-2">
@@ -340,7 +420,7 @@ export default function AgentDeliveryBookingPage() {
                     {feeLoading && <RefreshCw className="h-3.5 w-3.5 text-green-600 animate-spin ml-auto" />}
                   </div>
                   <div className="p-4">
-                    {feeLoading && <p className="text-sm text-green-700 animate-pulse">Calculating road distance between {form.pickup_city} and {form.delivery_city}...</p>}
+                    {feeLoading && <p className="text-sm text-green-700 animate-pulse">Calculating road distance between {form.pickup_city} and {form.delivery_city}…</p>}
                     {feeError && !feeLoading && (
                       <div className="flex items-start gap-2">
                         <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
@@ -366,7 +446,6 @@ export default function AgentDeliveryBookingPage() {
                 </div>
               )}
 
-              {/* Package type selection with surcharges */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">Package Type</label>
                 <div className="grid grid-cols-2 gap-3">
@@ -378,7 +457,7 @@ export default function AgentDeliveryBookingPage() {
                     const selected = form.package_type === pt;
                     return (
                       <button key={pt} type="button" onClick={() => setForm(p => ({ ...p, package_type: pt }))}
-                        className={`p-4 rounded-xl border-2 text-left transition-all relative ${selected ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${selected ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
                       >
                         <div className="flex items-center gap-2 mb-1">
                           <Icon className={`h-4 w-4 ${selected ? 'text-orange-600' : 'text-gray-500'}`} />
@@ -423,7 +502,6 @@ export default function AgentDeliveryBookingPage() {
                   rows={3} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all resize-none" />
               </div>
 
-              {/* Live total estimate */}
               {hasTotal && (
                 <div className="bg-gray-900 rounded-xl p-4">
                   <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-3">Fee Breakdown</p>
@@ -441,8 +519,84 @@ export default function AgentDeliveryBookingPage() {
             </div>
           )}
 
-          {/* Step 5: Review */}
+          {/* Step 5: Payment Method */}
           {step === 5 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-orange-50 p-2.5 rounded-xl"><DollarSign className="h-5 w-5 text-orange-500" /></div>
+                <div><h2 className="font-bold text-gray-900">Payment Method</h2><p className="text-gray-500 text-sm">How would you like to pay for this delivery?</p></div>
+              </div>
+
+              {hasTotal && (
+                <div className="bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 mb-2 flex items-center justify-between">
+                  <span className="text-sm text-orange-700 font-medium">Amount due</span>
+                  <span className="text-lg font-bold text-orange-700">{fmt(totalEstimate)}</span>
+                </div>
+              )}
+
+              <div className="grid gap-3">
+                {PAYMENT_METHODS.map(pm => {
+                  const selected = form.payment_method === pm.value;
+                  return (
+                    <button key={pm.value} type="button"
+                      onClick={() => { setForm(p => ({ ...p, payment_method: pm.value })); setError(''); }}
+                      className={`w-full p-4 rounded-2xl border-2 text-left transition-all duration-200 flex items-center gap-4 group ${selected ? `${pm.activeBorder} ${pm.activeBg} shadow-sm` : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50'}`}
+                    >
+                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${selected ? pm.bg : 'bg-gray-100 group-hover:bg-gray-200'}`}>
+                        <pm.icon className={`h-5 w-5 ${selected ? pm.color : 'text-gray-500'}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className={`font-bold text-sm ${selected ? pm.color : 'text-gray-800'}`}>{pm.label}</p>
+                          {pm.badge && (
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${selected ? `${pm.bg} ${pm.color}` : 'bg-gray-100 text-gray-500'}`}>
+                              {pm.badge}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-0.5">{pm.desc}</p>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 transition-all ${selected ? `${pm.activeBorder} border-4` : 'border-gray-300'}`} />
+                    </button>
+                  );
+                })}
+              </div>
+
+              {(form.payment_method === 'bank_transfer_local' || form.payment_method === 'bank_transfer_international') && (
+                <div className="mt-2 rounded-xl border-2 border-gray-200 overflow-hidden">
+                  <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm font-bold text-gray-700">
+                      {form.payment_method === 'bank_transfer_local' ? 'Nigerian Bank Account Details' : 'International Wire Transfer Details'}
+                    </span>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    {(form.payment_method === 'bank_transfer_local' ? BANK_DETAILS_LOCAL : BANK_DETAILS_INTL).map(({ label, value }) => (
+                      <div key={label} className="flex items-start gap-3">
+                        <span className="text-xs text-gray-400 font-medium w-28 flex-shrink-0 pt-0.5">{label}</span>
+                        <span className="text-sm font-semibold text-gray-800 select-all">{value}</span>
+                      </div>
+                    ))}
+                    <p className="text-xs text-gray-400 pt-2 border-t border-gray-100">
+                      Use your booking reference as the payment description. Send proof of payment to confirm your booking.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {(form.payment_method === 'paystack' || form.payment_method === 'stripe') && (
+                <div className="mt-2 rounded-xl border-2 border-gray-100 bg-gray-50 p-4 flex items-start gap-3">
+                  <AlertCircle className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-gray-500">
+                    You will be redirected to the secure payment page after confirming your booking. Have your card details ready.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 6: Review */}
+          {step === 6 && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-green-50 p-2.5 rounded-xl"><CheckCircle className="h-5 w-5 text-green-600" /></div>
@@ -467,6 +621,21 @@ export default function AgentDeliveryBookingPage() {
                 </div>
               )}
 
+              {selectedPm && (
+                <div className={`flex items-center gap-3 p-4 rounded-xl border-2 ${selectedPm.activeBorder} ${selectedPm.activeBg}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${selectedPm.bg}`}>
+                    <selectedPm.icon className={`h-5 w-5 ${selectedPm.color}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-400 font-medium">Payment Method</p>
+                    <p className={`font-bold text-sm ${selectedPm.color}`}>{selectedPm.label}</p>
+                  </div>
+                  {selectedPm.badge && (
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${selectedPm.bg} ${selectedPm.color}`}>{selectedPm.badge}</span>
+                  )}
+                </div>
+              )}
+
               {[
                 { title: 'Sender', items: [['Name', form.sender_name], ['Phone', form.sender_phone], ['City', form.pickup_city], ['Address', form.sender_address]] },
                 { title: 'Recipient', items: [['Name', form.recipient_name], ['Phone', form.recipient_phone], ['City', form.delivery_city], ['Address', form.recipient_address]] },
@@ -485,7 +654,6 @@ export default function AgentDeliveryBookingPage() {
                 </div>
               ))}
 
-              {/* Total estimate in review */}
               {hasTotal && (
                 <div className="bg-gray-900 rounded-xl p-4">
                   <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-3">Fee Breakdown</p>
@@ -498,6 +666,13 @@ export default function AgentDeliveryBookingPage() {
                       <span className="text-orange-400 font-bold text-base">{fmt(totalEstimate)}</span>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {(form.payment_method === 'bank_transfer_local' || form.payment_method === 'bank_transfer_international') && (
+                <div className="rounded-xl border border-gray-200 p-4 bg-gray-50 text-xs text-gray-500">
+                  <p className="font-semibold text-gray-700 mb-1">Bank Transfer Reminder</p>
+                  <p>Transfer to the account provided and use your booking reference as the description. Send proof of payment to complete your booking.</p>
                 </div>
               )}
             </div>
@@ -516,7 +691,7 @@ export default function AgentDeliveryBookingPage() {
                 <ArrowLeft className="h-4 w-4" /> Cancel
               </Link>
             )}
-            {step < 5 ? (
+            {step < 6 ? (
               <button type="button" onClick={handleNext}
                 className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:from-orange-600 hover:to-red-600 transition-all hover:shadow-md hover:shadow-orange-500/20">
                 Continue <ChevronRight className="h-4 w-4" />
@@ -524,7 +699,7 @@ export default function AgentDeliveryBookingPage() {
             ) : (
               <button type="button" onClick={handleSubmit} disabled={loading}
                 className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-2.5 rounded-xl font-bold text-sm hover:from-orange-600 hover:to-red-600 transition-all hover:shadow-md hover:shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed">
-                {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Submitting...</> : <><CheckCircle className="h-4 w-4" /> Confirm Booking</>}
+                {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Submitting...</> : <><CheckCircle className="h-4 w-4" /> {paymentLabel(form.payment_method).startsWith('Pay Online') ? 'Confirm & Proceed to Payment' : 'Confirm Booking'}</>}
               </button>
             )}
           </div>
