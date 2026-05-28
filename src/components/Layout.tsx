@@ -83,19 +83,19 @@ export default function Layout({ children }: LayoutProps) {
 
         {/* ── Main nav bar ── */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-18">
+          <div className="flex items-center justify-between h-16">
 
             {/* Logo */}
             <Link to="/" className="flex items-center group flex-shrink-0" onClick={closeMobileMenu}>
               <img
                 src="/ChatGPT_Image_Mar_6,_2026,_06_30_55_PM.png"
                 alt="Danhausa Logistics"
-                className="h-12 sm:h-14 w-auto transition-transform duration-300 group-hover:scale-105"
+                className="h-10 sm:h-12 w-auto transition-transform duration-300 group-hover:scale-105"
               />
             </Link>
 
             {/* Desktop nav */}
-            <div className="hidden md:flex items-center gap-0.5">
+            <div className="hidden lg:flex items-center gap-0.5">
               <NavLink href="/#home" label="Home" />
               <NavLink href="/#logistics" label="Services" />
               <NavLink href="/marketplace" label="Marketplace" isRouter />
@@ -201,7 +201,7 @@ export default function Layout({ children }: LayoutProps) {
             <div className="flex items-center gap-3">
               <Link
                 to={isMarketplacePage ? '/#contact' : '/marketplace'}
-                className="hidden md:inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30"
+                className="hidden lg:inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30"
                 onClick={closeMobileMenu}
               >
                 <Truck className="h-4 w-4" />
@@ -209,7 +209,7 @@ export default function Layout({ children }: LayoutProps) {
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(p => !p)}
-                className="md:hidden p-2.5 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                className="lg:hidden p-2.5 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all"
                 aria-label="Toggle menu"
               >
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -219,7 +219,7 @@ export default function Layout({ children }: LayoutProps) {
         </div>
 
         {/* ── Mobile drawer ── */}
-        <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${mobileMenuOpen ? 'max-h-[700px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden ${mobileMenuOpen ? 'max-h-[90vh] overflow-y-auto opacity-100' : 'max-h-0 opacity-0'}`}>
           <div className="bg-slate-800 border-t border-white/5 divide-y divide-white/5">
 
             {/* Main nav links */}
@@ -228,6 +228,7 @@ export default function Layout({ children }: LayoutProps) {
                 { href: '/#home', label: 'Home', isRouter: false },
                 { href: '/#logistics', label: 'Services', isRouter: false },
                 { href: '/marketplace', label: 'Marketplace', isRouter: true },
+                { href: '/track', label: 'Track Order', isRouter: true },
                 { href: '/shipping-calculator', label: 'Price Calculator', isRouter: true },
                 { href: '/#about', label: 'About Us', isRouter: false },
                 { href: '/#gallery', label: 'Gallery', isRouter: false },
@@ -286,7 +287,7 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </nav>
 
-      <div className="pt-16 md:pt-[4.5rem] lg:pt-[6.25rem]">
+      <div className="pt-16 lg:pt-[6.25rem]">
         {children}
       </div>
 
