@@ -4,7 +4,7 @@ import {
   Calculator, MapPin, Navigation, Map, Globe, Package, FileText,
   Weight, Tag, ArrowRight, RefreshCw, AlertCircle, CheckCircle,
   Truck, Zap, Shield, Clock, ChevronDown, ChevronRight,
-  Banknote, TrendingUp, Info
+  Banknote, TrendingUp, Info, Hash, DollarSign
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -60,6 +60,8 @@ export default function ShippingCalculatorPage() {
   const [deliveryCity, setDeliveryCity] = useState('');
   const [packageType, setPackageType]   = useState<PackageType>('parcel');
   const [weightKg, setWeightKg]         = useState('');
+  const [quantity, setQuantity]         = useState('1');
+  const [declaredValue, setDeclaredValue] = useState('');
   const [faqOpen, setFaqOpen]           = useState<number | null>(null);
 
   const [estimate, setEstimate]   = useState<FeeEstimate | null>(null);
@@ -86,13 +88,16 @@ export default function ShippingCalculatorPage() {
     load();
   }, []);
 
-  const surcharge  = pkgCharges[packageType]?.surcharge ?? 0;
-  const settings   = feeSettings[deliveryType];
-  const wRate      = settings?.weight_fee_per_kg ?? 0;
-  const weightFee  = wRate > 0 && weightKg ? parseFloat(weightKg) * wRate : 0;
-  const distFee    = estimate?.estimated_fee ?? 0;
-  const total      = distFee + weightFee + surcharge;
-  const hasResult  = estimate !== null;
+  const surcharge    = pkgCharges[packageType]?.surcharge ?? 0;
+  const settings     = feeSettings[deliveryType];
+  const wRate        = settings?.weight_fee_per_kg ?? 0;
+  const weightFee    = wRate > 0 && weightKg ? parseFloat(weightKg) * wRate : 0;
+  const distFee      = estimate?.estimated_fee ?? 0;
+  const qty          = quantity && parseInt(quantity) > 0 ? parseInt(quantity) : 1;
+  const unitTotal    = distFee + weightFee + surcharge;
+  const total        = unitTotal * qty;
+  const declaredNum  = declaredValue ? parseFloat(declaredValue) : 0;
+  const hasResult    = estimate !== null;
 
   const calculate = async () => {
     if (!pickupCity.trim() || !deliveryCity.trim()) {
@@ -120,6 +125,7 @@ export default function ShippingCalculatorPage() {
   const reset = () => {
     setEstimate(null); setCalcError('');
     setPickupCity(''); setDeliveryCity(''); setWeightKg('');
+    setQuantity('1'); setDeclaredValue('');
     setDeliveryType('same_state'); setPackageType('parcel');
   };
 
@@ -327,6 +333,48 @@ export default function ShippingCalculatorPage() {
                   )}
                 </div>
 
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Quantity (items)</label>
+                  <div className="relative">
+                    <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="number" min="1" step="1"
+                      value={quantity}
+                      onChange={e => setQuantity(e.target.value)}
+                      placeholder="1"
+                      className="w-full pl-10 pr-4 py-3.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400 transition-colors placeholder:text-gray-300 font-medium"
+                    />
+                  </div>
+                  {qty > 1 && (
+                    <p className="text-xs text-orange-500 font-semibold mt-1.5 flex items-center gap-1">
+                      <TrendingUp className="h-3 w-3" />
+                      {qty} items × unit cost = total shown in results
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Declared Value (₦) — optional</label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="number" min="0" step="100"
+                      value={declaredValue}
+                      onChange={e => setDeclaredValue(e.target.value)}
+                      placeholder="e.g. 50000"
+                      className="w-full pl-10 pr-4 py-3.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400 transition-colors placeholder:text-gray-300 font-medium"
+                    />
+                  </div>
+                  {declaredNum > 0 && (
+                    <p className="text-xs text-blue-500 font-semibold mt-1.5 flex items-center gap-1">
+                      <Info className="h-3 w-3" />
+                      Declared at {fmt(declaredNum)} — used for insurance reference
+                    </p>
+                  )}
+                </div>
+
                 {/* Rate info card */}
                 {settings && (
                   <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
@@ -447,6 +495,34 @@ export default function ShippingCalculatorPage() {
                     </div>
                   )}
 
+                  {/* Quantity row */}
+                  {qty > 1 && (
+                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                      <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Hash className="h-5 w-5 text-gray-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-500 font-medium">Quantity Multiplier</p>
+                        <p className="font-bold text-gray-800">{qty} items × {fmt(unitTotal)} per item</p>
+                      </div>
+                      <p className="font-black text-gray-900 text-base">{fmt(total)}</p>
+                    </div>
+                  )}
+
+                  {/* Declared value row */}
+                  {declaredNum > 0 && (
+                    <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                      <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <DollarSign className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-500 font-medium">Declared Value</p>
+                        <p className="font-bold text-gray-800">Insurance / customs reference</p>
+                      </div>
+                      <p className="font-black text-blue-700 text-base">{fmt(declaredNum)}</p>
+                    </div>
+                  )}
+
                   {/* Min fee note */}
                   {estimate.estimated_fee === estimate.minimum_fee && (
                     <p className="text-xs text-gray-400 flex items-center gap-1.5 px-1">
@@ -487,15 +563,17 @@ export default function ShippingCalculatorPage() {
                 </div>
               </div>
 
-              {/* Share/save strip */}
-              <div className="mt-6 flex flex-wrap gap-3 items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <Banknote className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                <p className="text-xs text-gray-500 flex-1">
-                  <strong className="text-gray-700">{selectedDt.label} delivery</strong> from
-                  {' '}<strong className="text-gray-700">{pickupCity}</strong> to
-                  {' '}<strong className="text-gray-700">{deliveryCity}</strong>
-                  {' '}— estimated {fmt(total)}.
-                  Reference: {estimate.distance_km} km road distance.
+              {/* Summary strip */}
+              <div className="mt-6 flex flex-wrap gap-3 items-start p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                <Banknote className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-gray-500 flex-1 leading-relaxed">
+                  <strong className="text-gray-700">{selectedDt.label} delivery</strong> from{' '}
+                  <strong className="text-gray-700">{pickupCity}</strong> to{' '}
+                  <strong className="text-gray-700">{deliveryCity}</strong>
+                  {qty > 1 && <> · <strong className="text-gray-700">{qty} items</strong></>}
+                  {declaredNum > 0 && <> · declared value <strong className="text-gray-700">{fmt(declaredNum)}</strong></>}
+                  {' '}— estimated <strong className="text-orange-600">{fmt(total)}</strong>.
+                  {' '}Road distance: {estimate.distance_km} km.
                 </p>
               </div>
             </div>
@@ -649,3 +727,6 @@ export default function ShippingCalculatorPage() {
     </div>
   );
 }
+
+
+export default ShippingCalculatorPage
