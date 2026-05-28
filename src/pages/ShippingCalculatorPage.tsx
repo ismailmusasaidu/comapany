@@ -727,6 +727,3 @@ export default function ShippingCalculatorPage() {
     </div>
   );
 }
-
-
-export default ShippingCalculatorPage
