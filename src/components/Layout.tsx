@@ -1,4 +1,4 @@
-import { Menu, X, Truck, ArrowUp, ChevronDown, Package, MapPin, Users, Building2, UserCheck } from 'lucide-react';
+import { Menu, X, Truck, ArrowUp, ChevronDown, Package, MapPin, Users, Building2, UserCheck, Calculator } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 
@@ -100,6 +100,7 @@ export default function Layout({ children }: LayoutProps) {
               <NavLink href="/#logistics" label="Services" />
               <NavLink href="/marketplace" label="Marketplace" isRouter />
               <NavLink href="/track" label="Track Order" isRouter />
+              <NavLink href="/shipping-calculator" label="Price Calculator" isRouter />
 
               {/* Company dropdown */}
               <div className="relative" ref={companyRef}>
@@ -180,6 +181,16 @@ export default function Layout({ children }: LayoutProps) {
                           <p className="text-xs text-gray-500">Real-time shipment tracking</p>
                         </div>
                       </Link>
+                      <Link to="/shipping-calculator" onClick={() => setPortalsOpen(false)}
+                        className="flex items-start gap-3 px-3 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all group">
+                        <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/30 transition-colors">
+                          <Calculator className="h-4 w-4 text-orange-400" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">Price Calculator</p>
+                          <p className="text-xs text-gray-500">Instant shipping quotes</p>
+                        </div>
+                      </Link>
                     </div>
                   </div>
                 )}
@@ -217,6 +228,7 @@ export default function Layout({ children }: LayoutProps) {
                 { href: '/#home', label: 'Home', isRouter: false },
                 { href: '/#logistics', label: 'Services', isRouter: false },
                 { href: '/marketplace', label: 'Marketplace', isRouter: true },
+                { href: '/shipping-calculator', label: 'Price Calculator', isRouter: true },
                 { href: '/#about', label: 'About Us', isRouter: false },
                 { href: '/#gallery', label: 'Gallery', isRouter: false },
                 { href: '/#partners', label: 'Partners', isRouter: false },
@@ -303,6 +315,7 @@ export default function Layout({ children }: LayoutProps) {
                 <li><a href="/#logistics" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Freight Services</a></li>
                 <li><Link to="/marketplace" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Marketplace</Link></li>
                 <li><Link to="/track" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Track Package</Link></li>
+                <li><Link to="/shipping-calculator" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Price Calculator</Link></li>
               </ul>
             </div>
 

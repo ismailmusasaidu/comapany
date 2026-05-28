@@ -39,6 +39,7 @@ import BusinessMessagesPage from './pages/BusinessMessagesPage';
 import AgentOrdersPage from './pages/AgentOrdersPage';
 import BusinessOrdersPage from './pages/BusinessOrdersPage';
 import AdminWhatsAppPage from './pages/AdminWhatsAppPage';
+import ShippingCalculatorPage from './pages/ShippingCalculatorPage';
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -104,6 +105,7 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/marketplace" element={<MarketplacePage />} />
                 <Route path="/track" element={<OrderTrackingPage />} />
+                <Route path="/shipping-calculator" element={<ShippingCalculatorPage />} />
               </Routes>
             </Layout>
           }
