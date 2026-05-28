@@ -143,7 +143,7 @@ export default function ShippingCalculatorPage() {
     <div className="min-h-screen bg-gray-50">
 
       {/* ── Hero Banner ── */}
-      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 pt-12 pb-20 px-4 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 pt-10 pb-14 px-4 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
@@ -151,28 +151,27 @@ export default function ShippingCalculatorPage() {
         </div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 text-orange-300 text-xs font-semibold px-4 py-1.5 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 text-orange-300 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
             <Calculator className="h-3.5 w-3.5" />
             Free Shipping Calculator
           </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-5 leading-tight tracking-tight">
-            Calculate Shipping
-            <br />
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white mb-4 leading-tight tracking-tight">
+            Calculate Shipping{' '}
             <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">Price Instantly</span>
           </h1>
-          <p className="text-gray-300 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Get an accurate delivery quote in seconds. Enter your origin, destination, and package details — no signup needed.
+          <p className="text-gray-300 text-base sm:text-xl max-w-2xl mx-auto mb-8 leading-relaxed">
+            Get an accurate delivery quote in seconds — no signup needed.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-6">
+          <div className="flex flex-wrap justify-center gap-3">
             {FEATURES.map(f => (
-              <div key={f.label} className="flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5">
-                <div className="w-7 h-7 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <f.icon className="h-3.5 w-3.5 text-orange-400" />
+              <div key={f.label} className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+                <div className="w-6 h-6 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <f.icon className="h-3 w-3 text-orange-400" />
                 </div>
                 <div className="text-left">
                   <p className="text-white text-xs font-semibold leading-none">{f.label}</p>
-                  <p className="text-gray-400 text-xs mt-0.5">{f.desc}</p>
+                  <p className="text-gray-400 text-xs mt-0.5 hidden sm:block">{f.desc}</p>
                 </div>
               </div>
             ))}
@@ -180,27 +179,27 @@ export default function ShippingCalculatorPage() {
         </div>
       </section>
 
-      {/* ── Calculator Card (overlapping hero) ── */}
-      <section className="max-w-4xl mx-auto px-4 -mt-8 relative z-10">
+      {/* ── Calculator Card ── */}
+      <section className="max-w-4xl mx-auto px-4 mt-6 relative z-10">
         <div className="bg-white rounded-3xl shadow-2xl shadow-black/10 border border-gray-100 overflow-hidden">
 
           {/* Card header */}
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-5 flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-              <Calculator className="h-5 w-5 text-white" />
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 px-4 sm:px-6 py-4 flex items-center gap-3">
+            <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Calculator className="h-4 w-4 text-white" />
             </div>
-            <div>
-              <h2 className="font-black text-white text-lg">Shipping Quote Calculator</h2>
-              <p className="text-orange-100 text-xs">Fill in the details below for an instant estimate</p>
+            <div className="min-w-0">
+              <h2 className="font-black text-white text-base sm:text-lg leading-tight">Shipping Quote Calculator</h2>
+              <p className="text-orange-100 text-xs hidden sm:block">Fill in the details below for an instant estimate</p>
             </div>
             {hasResult && (
-              <button onClick={reset} className="ml-auto flex items-center gap-1.5 text-white/80 hover:text-white text-xs font-semibold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-all">
-                <RefreshCw className="h-3.5 w-3.5" /> New Quote
+              <button onClick={reset} className="ml-auto flex items-center gap-1.5 text-white/80 hover:text-white text-xs font-semibold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-all flex-shrink-0">
+                <RefreshCw className="h-3.5 w-3.5" /> <span className="hidden sm:inline">New Quote</span>
               </button>
             )}
           </div>
 
-          <div className="p-6 md:p-8 space-y-8">
+          <div className="p-4 sm:p-6 md:p-8 space-y-7">
 
             {/* Step 1: Delivery Type */}
             <div>
@@ -208,22 +207,21 @@ export default function ShippingCalculatorPage() {
                 <span className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xs font-black">1</span>
                 Delivery Type
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {DELIVERY_TYPES.map(dt => {
                   const active = deliveryType === dt.value;
                   return (
                     <button key={dt.value} type="button"
                       onClick={() => { setDeliveryType(dt.value); setEstimate(null); setCalcError(''); }}
-                      className={`flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition-all duration-200 group ${active ? `${dt.border} ${dt.bg} shadow-sm` : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}`}
+                      className={`flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-3 p-3 sm:p-4 rounded-2xl border-2 text-center sm:text-left transition-all duration-200 group ${active ? `${dt.border} ${dt.bg} shadow-sm` : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}`}
                     >
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${active ? dt.bg : 'bg-gray-100 group-hover:bg-gray-200'}`}>
-                        <dt.icon className={`h-5 w-5 ${active ? dt.color : 'text-gray-500'}`} />
+                      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${active ? dt.bg : 'bg-gray-100 group-hover:bg-gray-200'}`}>
+                        <dt.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${active ? dt.color : 'text-gray-500'}`} />
                       </div>
-                      <div>
-                        <p className={`font-bold text-sm ${active ? dt.color : 'text-gray-800'}`}>{dt.label}</p>
-                        <p className="text-xs text-gray-500">{dt.desc}</p>
+                      <div className="min-w-0">
+                        <p className={`font-bold text-xs sm:text-sm leading-tight ${active ? dt.color : 'text-gray-800'}`}>{dt.label}</p>
+                        <p className="text-xs text-gray-500 hidden sm:block">{dt.desc}</p>
                       </div>
-                      <div className={`w-4 h-4 rounded-full border-2 ml-auto flex-shrink-0 transition-all ${active ? `${dt.border} border-4` : 'border-gray-300'}`} />
                     </button>
                   );
                 })}
@@ -267,17 +265,17 @@ export default function ShippingCalculatorPage() {
 
               {/* Route visualiser */}
               {(pickupCity || deliveryCity) && (
-                <div className="mt-3 flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-100">
-                  <div className="flex items-center gap-1.5 text-orange-500">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full" />
-                    <span className="text-xs font-semibold text-gray-700 truncate max-w-[120px]">{pickupCity || '—'}</span>
+                <div className="mt-3 flex items-center gap-2 px-3 py-2.5 bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0" />
+                    <span className="text-xs font-semibold text-gray-700 truncate max-w-[80px] sm:max-w-[140px]">{pickupCity || '—'}</span>
                   </div>
-                  <div className="flex-1 h-0.5 bg-gradient-to-r from-orange-300 to-blue-300 rounded-full" />
-                  <Truck className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                  <div className="flex-1 h-0.5 bg-gradient-to-r from-orange-300 to-blue-300 rounded-full" />
-                  <div className="flex items-center gap-1.5 text-blue-500">
-                    <span className="text-xs font-semibold text-gray-700 truncate max-w-[120px]">{deliveryCity || '—'}</span>
-                    <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  <div className="flex-1 h-0.5 bg-gradient-to-r from-orange-300 to-blue-300 rounded-full min-w-[12px]" />
+                  <Truck className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                  <div className="flex-1 h-0.5 bg-gradient-to-r from-orange-300 to-blue-300 rounded-full min-w-[12px]" />
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-xs font-semibold text-gray-700 truncate max-w-[80px] sm:max-w-[140px]">{deliveryCity || '—'}</span>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
                   </div>
                 </div>
               )}
@@ -289,7 +287,7 @@ export default function ShippingCalculatorPage() {
                 <span className="w-5 h-5 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xs font-black">3</span>
                 Package Details
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
                 {PKG_TYPES.map(pt => {
                   const active = packageType === pt.value;
                   const charge = pkgCharges[pt.value];
@@ -297,13 +295,13 @@ export default function ShippingCalculatorPage() {
                   return (
                     <button key={pt.value} type="button"
                       onClick={() => setPackageType(pt.value)}
-                      className={`p-3.5 rounded-xl border-2 text-left transition-all ${active ? 'border-orange-400 bg-orange-50 shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                      className={`p-3 rounded-xl border-2 text-left transition-all ${active ? 'border-orange-400 bg-orange-50 shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'}`}
                     >
-                      <div className="flex items-center gap-2 mb-2">
-                        <pt.icon className={`h-4 w-4 ${active ? 'text-orange-500' : 'text-gray-400'}`} />
-                        <p className={`font-bold text-xs ${active ? 'text-orange-700' : 'text-gray-700'}`}>{charge?.label ?? pt.label}</p>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <pt.icon className={`h-3.5 w-3.5 flex-shrink-0 ${active ? 'text-orange-500' : 'text-gray-400'}`} />
+                        <p className={`font-bold text-xs leading-tight ${active ? 'text-orange-700' : 'text-gray-700'}`}>{charge?.label ?? pt.label}</p>
                       </div>
-                      <p className="text-xs text-gray-400 mb-2 leading-tight">{pt.desc}</p>
+                      <p className="text-xs text-gray-400 mb-1.5 leading-tight">{pt.desc}</p>
                       <p className={`text-xs font-bold ${s === 0 ? 'text-green-600' : 'text-orange-600'}`}>
                         {s === 0 ? 'No surcharge' : `+${fmt(s)}`}
                       </p>
@@ -428,98 +426,97 @@ export default function ShippingCalculatorPage() {
           <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
 
             {/* Results header */}
-            <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-5 flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-                <CheckCircle className="h-5 w-5 text-green-400" />
+            <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-4 sm:px-6 py-4 flex items-center gap-3">
+              <div className="w-9 h-9 bg-green-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="h-4 w-4 text-green-400" />
               </div>
-              <div>
-                <h3 className="font-black text-white text-base">Your Shipping Estimate</h3>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-black text-white text-sm sm:text-base">Your Shipping Estimate</h3>
                 {estimate.origin_name && estimate.destination_name && (
                   <p className="text-gray-400 text-xs mt-0.5 truncate">{estimate.origin_name} → {estimate.destination_name}</p>
                 )}
               </div>
-              <div className="ml-auto text-right">
-                <p className="text-xs text-gray-400">Delivery type</p>
-                <div className={`inline-flex items-center gap-1.5 mt-0.5 px-2.5 py-1 rounded-lg text-xs font-bold ${selectedDt.bg} ${selectedDt.color}`}>
+              <div className="flex-shrink-0 text-right">
+                <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold ${selectedDt.bg} ${selectedDt.color}`}>
                   <selectedDt.icon className="h-3 w-3" />
-                  {selectedDt.label}
+                  <span className="hidden sm:inline">{selectedDt.label}</span>
                 </div>
               </div>
             </div>
 
-            <div className="p-6 md:p-8">
-              <div className="grid md:grid-cols-2 gap-6">
+            <div className="p-4 sm:p-6 md:p-8">
+              <div className="grid md:grid-cols-2 gap-5">
 
                 {/* Left: breakdown */}
                 <div className="space-y-4">
                   <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest">Fee Breakdown</h4>
 
                   {/* Distance row */}
-                  <div className="flex items-center gap-3 p-4 bg-green-50 rounded-2xl border border-green-100">
-                    <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Map className="h-5 w-5 text-green-600" />
+                  <div className="flex items-center gap-3 p-3 sm:p-4 bg-green-50 rounded-2xl border border-green-100">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Map className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="text-xs text-gray-500 font-medium">Road Distance</p>
-                      <p className="font-black text-gray-900 text-lg">{estimate.distance_km} km</p>
+                      <p className="font-black text-gray-900 text-base sm:text-lg">{estimate.distance_km} km</p>
                       <p className="text-xs text-green-600 font-semibold">₦{estimate.fee_per_km}/km rate</p>
                     </div>
-                    <p className="font-black text-gray-900 text-base">{fmt(estimate.estimated_fee)}</p>
+                    <p className="font-black text-gray-900 text-sm sm:text-base flex-shrink-0">{fmt(estimate.estimated_fee)}</p>
                   </div>
 
                   {/* Weight row */}
                   {weightFee > 0 && (
-                    <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl border border-blue-100">
-                      <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Weight className="h-5 w-5 text-blue-600" />
+                    <div className="flex items-center gap-3 p-3 sm:p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Weight className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <p className="text-xs text-gray-500 font-medium">Weight Charge</p>
-                        <p className="font-bold text-gray-800">{weightKg} kg × ₦{wRate}/kg</p>
+                        <p className="font-bold text-gray-800 text-sm">{weightKg} kg × ₦{wRate}/kg</p>
                       </div>
-                      <p className="font-black text-gray-900 text-base">{fmt(weightFee)}</p>
+                      <p className="font-black text-gray-900 text-sm sm:text-base flex-shrink-0">{fmt(weightFee)}</p>
                     </div>
                   )}
 
                   {/* Package surcharge */}
                   {surcharge > 0 && (
-                    <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-2xl border border-orange-100">
-                      <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Package className="h-5 w-5 text-orange-500" />
+                    <div className="flex items-center gap-3 p-3 sm:p-4 bg-orange-50 rounded-2xl border border-orange-100">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Package className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <p className="text-xs text-gray-500 font-medium">Package Surcharge</p>
-                        <p className="font-bold text-gray-800">{pkgCharges[packageType]?.label ?? packageType} handling</p>
+                        <p className="font-bold text-gray-800 text-sm truncate">{pkgCharges[packageType]?.label ?? packageType} handling</p>
                       </div>
-                      <p className="font-black text-gray-900 text-base">{fmt(surcharge)}</p>
+                      <p className="font-black text-gray-900 text-sm sm:text-base flex-shrink-0">{fmt(surcharge)}</p>
                     </div>
                   )}
 
                   {/* Quantity row */}
                   {qty > 1 && (
-                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                      <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Hash className="h-5 w-5 text-gray-600" />
+                    <div className="flex items-center gap-3 p-3 sm:p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Hash className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <p className="text-xs text-gray-500 font-medium">Quantity Multiplier</p>
-                        <p className="font-bold text-gray-800">{qty} items × {fmt(unitTotal)} per item</p>
+                        <p className="font-bold text-gray-800 text-sm">{qty} items × {fmt(unitTotal)}</p>
                       </div>
-                      <p className="font-black text-gray-900 text-base">{fmt(total)}</p>
+                      <p className="font-black text-gray-900 text-sm sm:text-base flex-shrink-0">{fmt(total)}</p>
                     </div>
                   )}
 
                   {/* Declared value row */}
                   {declaredNum > 0 && (
-                    <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl border border-blue-100">
-                      <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <DollarSign className="h-5 w-5 text-blue-600" />
+                    <div className="flex items-center gap-3 p-3 sm:p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <p className="text-xs text-gray-500 font-medium">Declared Value</p>
-                        <p className="font-bold text-gray-800">Insurance / customs reference</p>
+                        <p className="font-bold text-gray-800 text-sm">Insurance / customs</p>
                       </div>
-                      <p className="font-black text-blue-700 text-base">{fmt(declaredNum)}</p>
+                      <p className="font-black text-blue-700 text-sm sm:text-base flex-shrink-0">{fmt(declaredNum)}</p>
                     </div>
                   )}
 
@@ -534,14 +531,14 @@ export default function ShippingCalculatorPage() {
 
                 {/* Right: total */}
                 <div className="flex flex-col">
-                  <div className="flex-1 bg-gradient-to-br from-gray-900 to-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                    <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-3">Estimated Total</p>
-                    <p className="text-5xl font-black text-white mb-1 leading-none">{fmt(total)}</p>
-                    <p className="text-orange-400 text-sm font-semibold mb-6">
+                  <div className="flex-1 bg-gradient-to-br from-gray-900 to-slate-800 rounded-2xl p-5 sm:p-6 flex flex-col items-center justify-center text-center">
+                    <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Estimated Total</p>
+                    <p className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-1 leading-none break-all">{fmt(total)}</p>
+                    <p className="text-orange-400 text-sm font-semibold mb-4">
                       {distFee > 0 && `${estimate.distance_km} km`}
                       {(weightFee > 0 || surcharge > 0) && ' + extras'}
                     </p>
-                    <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+                    <p className="text-xs text-gray-500 mb-4 leading-relaxed">
                       This is an estimate. Final price confirmed at booking based on exact addresses.
                     </p>
 
