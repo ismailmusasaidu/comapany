@@ -11,6 +11,7 @@ import { supabase } from '../lib/supabase';
 
 interface BookingForm {
   delivery_type: string;
+  vehicle_type: string;
   sender_name: string;
   sender_phone: string;
   sender_address: string;
@@ -28,7 +29,7 @@ interface BookingForm {
 }
 
 const EMPTY: BookingForm = {
-  delivery_type: '',
+  delivery_type: '', vehicle_type: '',
   sender_name: '', sender_phone: '', sender_address: '', pickup_city: '',
   recipient_name: '', recipient_phone: '', recipient_address: '', delivery_city: '',
   package_type: 'parcel', package_description: '',
@@ -42,77 +43,120 @@ const DELIVERY_TYPES = [
   { value: 'international', label: 'International', desc: 'Cross-border or international delivery',      icon: Globe,      color: 'text-blue-600',   bg: 'bg-blue-50',   activeBorder: 'border-blue-500',   activeBg: 'bg-blue-50' },
 ];
 
+const VEHICLES = [
+  {
+    value: 'motorbike',
+    label: 'Motor Bike',
+    desc: 'Ideal for lightweight items: Documents, human hair, phones, etc.',
+    icon: (
+      <svg viewBox="0 0 80 60" fill="currentColor" className="w-14 h-14">
+        <circle cx="18" cy="46" r="10" fill="none" stroke="currentColor" strokeWidth="4"/>
+        <circle cx="18" cy="46" r="3"/>
+        <circle cx="62" cy="46" r="10" fill="none" stroke="currentColor" strokeWidth="4"/>
+        <circle cx="62" cy="46" r="3"/>
+        <path d="M18 46 L30 30 L44 28 L52 36 L62 36" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+        <circle cx="40" cy="18" r="6" fill="currentColor"/>
+        <path d="M40 24 L36 36 L44 36" fill="currentColor"/>
+        <path d="M34 36 L38 42" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M44 28 L50 22 L56 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+      </svg>
+    ),
+    color: 'text-orange-600',
+    borderActive: 'border-orange-500',
+    bgActive: 'bg-orange-50',
+    labelColor: 'text-orange-600',
+    descColor: 'text-orange-500',
+  },
+  {
+    value: 'car',
+    label: 'Car',
+    desc: 'For items that will fit into a car boot: Bag of clothes and shoes, a microwave oven etc.',
+    icon: (
+      <svg viewBox="0 0 80 50" fill="currentColor" className="w-14 h-10">
+        <path d="M8 32 L8 20 L20 10 L60 10 L72 20 L72 32 Z" fill="none" stroke="currentColor" strokeWidth="3" strokeLinejoin="round"/>
+        <path d="M24 10 L28 18 L52 18 L56 10" fill="none" stroke="currentColor" strokeWidth="2.5"/>
+        <circle cx="22" cy="36" r="8" fill="none" stroke="currentColor" strokeWidth="3.5"/>
+        <circle cx="22" cy="36" r="3"/>
+        <circle cx="58" cy="36" r="8" fill="none" stroke="currentColor" strokeWidth="3.5"/>
+        <circle cx="58" cy="36" r="3"/>
+        <rect x="8" y="28" width="64" height="4" rx="2" fill="currentColor" opacity="0.15"/>
+        <path d="M6 24 L74 24" stroke="currentColor" strokeWidth="1.5" opacity="0.3"/>
+      </svg>
+    ),
+    color: 'text-gray-700',
+    borderActive: 'border-gray-700',
+    bgActive: 'bg-gray-50',
+    labelColor: 'text-gray-800',
+    descColor: 'text-gray-500',
+  },
+  {
+    value: 'minivan',
+    label: 'Mini Van',
+    desc: 'For items too large to fit in a car boot: Large Bag of clothes or shoes, a small fridge etc.',
+    icon: (
+      <svg viewBox="0 0 90 55" fill="currentColor" className="w-16 h-12">
+        <path d="M5 35 L5 20 L18 8 L70 8 L82 18 L85 35 Z" fill="none" stroke="currentColor" strokeWidth="3" strokeLinejoin="round"/>
+        <path d="M18 8 L18 26 L82 26" fill="none" stroke="currentColor" strokeWidth="2.5"/>
+        <path d="M18 8 L42 8 L42 26" fill="none" stroke="currentColor" strokeWidth="2"/>
+        <path d="M50 8 L50 26" stroke="currentColor" strokeWidth="2" opacity="0.4"/>
+        <circle cx="22" cy="39" r="9" fill="none" stroke="currentColor" strokeWidth="3.5"/>
+        <circle cx="22" cy="39" r="3.5"/>
+        <circle cx="68" cy="39" r="9" fill="none" stroke="currentColor" strokeWidth="3.5"/>
+        <circle cx="68" cy="39" r="3.5"/>
+        <rect x="5" y="30" width="80" height="5" rx="2" fill="currentColor" opacity="0.12"/>
+      </svg>
+    ),
+    color: 'text-orange-500',
+    borderActive: 'border-orange-500',
+    bgActive: 'bg-orange-50',
+    labelColor: 'text-orange-600',
+    descColor: 'text-orange-500',
+  },
+  {
+    value: 'truck',
+    label: 'Truck',
+    desc: 'Perfect for moving very large items: Furniture set, office equipment, etc.',
+    icon: (
+      <svg viewBox="0 0 90 55" fill="currentColor" className="w-16 h-12">
+        <rect x="4" y="10" width="54" height="32" rx="3" fill="none" stroke="currentColor" strokeWidth="3"/>
+        <path d="M58 22 L58 42 L82 42 L82 28 L72 16 L58 16 Z" fill="none" stroke="currentColor" strokeWidth="3" strokeLinejoin="round"/>
+        <path d="M60 16 L70 16 L78 26 L60 26 Z" fill="currentColor" opacity="0.2"/>
+        <circle cx="20" cy="44" r="8" fill="none" stroke="currentColor" strokeWidth="3.5"/>
+        <circle cx="20" cy="44" r="3"/>
+        <circle cx="70" cy="44" r="8" fill="none" stroke="currentColor" strokeWidth="3.5"/>
+        <circle cx="70" cy="44" r="3"/>
+        <path d="M4 32 L58 32" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
+      </svg>
+    ),
+    color: 'text-gray-700',
+    borderActive: 'border-gray-700',
+    bgActive: 'bg-gray-50',
+    labelColor: 'text-gray-800',
+    descColor: 'text-gray-500',
+  },
+];
+
 const PAYMENT_METHODS = [
-  {
-    value: 'cash_on_delivery',
-    label: 'Cash on Delivery',
-    desc: 'Pay in cash when your package arrives',
-    icon: Banknote,
-    color: 'text-green-700',
-    bg: 'bg-green-50',
-    activeBorder: 'border-green-500',
-    activeBg: 'bg-green-50',
-    badge: null,
-  },
-  {
-    value: 'paystack',
-    label: 'Pay Online — Paystack',
-    desc: 'Secure online payment via card, bank or USSD',
-    icon: Wifi,
-    color: 'text-teal-700',
-    bg: 'bg-teal-50',
-    activeBorder: 'border-teal-500',
-    activeBg: 'bg-teal-50',
-    badge: 'Instant',
-  },
-  {
-    value: 'stripe',
-    label: 'Pay Online — Stripe',
-    desc: 'Pay securely with card via Stripe',
-    icon: CreditCard,
-    color: 'text-sky-700',
-    bg: 'bg-sky-50',
-    activeBorder: 'border-sky-500',
-    activeBg: 'bg-sky-50',
-    badge: 'International',
-  },
-  {
-    value: 'bank_transfer_local',
-    label: 'Bank Transfer — Nigeria',
-    desc: 'Transfer to our Nigerian bank account',
-    icon: Building2,
-    color: 'text-orange-700',
-    bg: 'bg-orange-50',
-    activeBorder: 'border-orange-500',
-    activeBg: 'bg-orange-50',
-    badge: 'Local',
-  },
-  {
-    value: 'bank_transfer_international',
-    label: 'Bank Transfer — International',
-    desc: 'Wire transfer from any country worldwide',
-    icon: Building2,
-    color: 'text-blue-700',
-    bg: 'bg-blue-50',
-    activeBorder: 'border-blue-500',
-    activeBg: 'bg-blue-50',
-    badge: 'SWIFT / IBAN',
-  },
+  { value: 'cash_on_delivery', label: 'Cash on Delivery', desc: 'Pay in cash when your package arrives', icon: Banknote, color: 'text-green-700', bg: 'bg-green-50', activeBorder: 'border-green-500', activeBg: 'bg-green-50', badge: null },
+  { value: 'paystack', label: 'Pay Online — Paystack', desc: 'Secure online payment via card, bank or USSD', icon: Wifi, color: 'text-teal-700', bg: 'bg-teal-50', activeBorder: 'border-teal-500', activeBg: 'bg-teal-50', badge: 'Instant' },
+  { value: 'stripe', label: 'Pay Online — Stripe', desc: 'Pay securely with card via Stripe', icon: CreditCard, color: 'text-sky-700', bg: 'bg-sky-50', activeBorder: 'border-sky-500', activeBg: 'bg-sky-50', badge: 'International' },
+  { value: 'bank_transfer_local', label: 'Bank Transfer — Nigeria', desc: 'Transfer to our Nigerian bank account', icon: Building2, color: 'text-orange-700', bg: 'bg-orange-50', activeBorder: 'border-orange-500', activeBg: 'bg-orange-50', badge: 'Local' },
+  { value: 'bank_transfer_international', label: 'Bank Transfer — International', desc: 'Wire transfer from any country worldwide', icon: Building2, color: 'text-blue-700', bg: 'bg-blue-50', activeBorder: 'border-blue-500', activeBg: 'bg-blue-50', badge: 'SWIFT / IBAN' },
 ];
 
 const BANK_DETAILS_LOCAL = [
-  { label: 'Bank Name',      value: 'First Bank of Nigeria' },
-  { label: 'Account Name',   value: 'SwiftCargo Logistics Ltd' },
+  { label: 'Bank Name', value: 'First Bank of Nigeria' },
+  { label: 'Account Name', value: 'SwiftCargo Logistics Ltd' },
   { label: 'Account Number', value: '3012345678' },
-  { label: 'Sort Code',      value: '011' },
+  { label: 'Sort Code', value: '011' },
 ];
 
 const BANK_DETAILS_INTL = [
-  { label: 'Bank Name',      value: 'First Bank of Nigeria' },
-  { label: 'Account Name',   value: 'SwiftCargo Logistics Ltd' },
+  { label: 'Bank Name', value: 'First Bank of Nigeria' },
+  { label: 'Account Name', value: 'SwiftCargo Logistics Ltd' },
   { label: 'IBAN / Account', value: 'NG99 0011 0301 2345 6780 00' },
-  { label: 'SWIFT / BIC',    value: 'FBNINGLA' },
-  { label: 'Bank Address',   value: 'Samuel Asabia House, 35 Marina, Lagos, Nigeria' },
+  { label: 'SWIFT / BIC', value: 'FBNINGLA' },
+  { label: 'Bank Address', value: 'Samuel Asabia House, 35 Marina, Lagos, Nigeria' },
 ];
 
 const PKG_META: Record<string, { icon: React.ComponentType<{ className?: string }>; desc: string }> = {
@@ -132,10 +176,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 function generateRef() { return `BK-${Date.now().toString().slice(-6)}`; }
 function cap(s: string) { return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 function fmt(n: number) { return `₦${Math.round(n).toLocaleString('en-NG')}`; }
-
-function paymentLabel(value: string) {
-  return PAYMENT_METHODS.find(p => p.value === value)?.label ?? cap(value);
-}
+function paymentLabel(value: string) { return PAYMENT_METHODS.find(p => p.value === value)?.label ?? cap(value); }
 
 export default function IndividualDeliveryBookingPage() {
   const { user } = useIndividual();
@@ -167,6 +208,28 @@ export default function IndividualDeliveryBookingPage() {
     };
     load();
   }, []);
+
+  const isInternational = form.delivery_type === 'international';
+
+  // Steps: 1=Delivery Type, 2=Vehicle (non-intl only), 3=Sender, 4=Recipient, 5=Package, 6=Payment, 7=Review
+  // For international: 1=Delivery Type, 2=Sender, 3=Recipient, 4=Package, 5=Payment, 6=Review
+  const steps = isInternational
+    ? ['Delivery Type', 'Sender Info', 'Recipient Info', 'Package Details', 'Payment', 'Review']
+    : ['Delivery Type', 'Vehicle', 'Sender Info', 'Recipient Info', 'Package Details', 'Payment', 'Review'];
+
+  const totalSteps = steps.length;
+
+  // Map logical step to content
+  const getContent = () => {
+    if (isInternational) {
+      // steps: 1,2,3,4,5,6
+      return step; // same as before but shift: 1=type, 2=sender, 3=recip, 4=pkg, 5=pay, 6=review
+    }
+    // non-international: 1=type, 2=vehicle, 3=sender, 4=recip, 5=pkg, 6=pay, 7=review
+    return step;
+  };
+
+  const contentStep = getContent();
 
   const set = (key: keyof BookingForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [key]: e.target.value }));
@@ -203,6 +266,7 @@ export default function IndividualDeliveryBookingPage() {
       const { error: err } = await supabase.from('delivery_bookings').insert({
         booking_ref: ref, individual_id: user.id,
         delivery_type: form.delivery_type,
+        vehicle_type: form.vehicle_type || null,
         sender_name: form.sender_name, sender_phone: form.sender_phone,
         sender_address: form.sender_address, pickup_city: form.pickup_city,
         recipient_name: form.recipient_name, recipient_phone: form.recipient_phone,
@@ -223,20 +287,31 @@ export default function IndividualDeliveryBookingPage() {
 
   const handleNext = () => {
     if (step === 1 && !form.delivery_type) { setError('Please select a delivery type to continue.'); return; }
-    if (step === 2 && (!form.sender_name || !form.sender_phone || !form.sender_address || !form.pickup_city)) { setError('Please fill in all sender fields.'); return; }
-    if (step === 3 && (!form.recipient_name || !form.recipient_phone || !form.recipient_address || !form.delivery_city)) { setError('Please fill in all recipient fields.'); return; }
-    if (step === 4 && !form.package_description) { setError('Please provide a package description.'); return; }
-    if (step === 5 && !form.payment_method) { setError('Please select a payment method to continue.'); return; }
+    if (!isInternational && step === 2 && !form.vehicle_type) { setError('Please select a vehicle type to continue.'); return; }
+    const senderStep   = isInternational ? 2 : 3;
+    const recipStep    = isInternational ? 3 : 4;
+    const pkgStep      = isInternational ? 4 : 5;
+    const payStep      = isInternational ? 5 : 6;
+    if (step === senderStep && (!form.sender_name || !form.sender_phone || !form.sender_address || !form.pickup_city)) { setError('Please fill in all sender fields.'); return; }
+    if (step === recipStep && (!form.recipient_name || !form.recipient_phone || !form.recipient_address || !form.delivery_city)) { setError('Please fill in all recipient fields.'); return; }
+    if (step === pkgStep && !form.package_description) { setError('Please provide a package description.'); return; }
+    if (step === payStep && !form.payment_method) { setError('Please select a payment method to continue.'); return; }
     setError('');
-    if (step === 3 && form.delivery_type === 'same_state' && form.pickup_city && form.delivery_city) {
+    if (step === recipStep && form.delivery_type === 'same_state' && form.pickup_city && form.delivery_city) {
       calculateFee(form.pickup_city, form.delivery_city);
     }
     setStep(s => s + 1);
   };
 
   const selectedDt = DELIVERY_TYPES.find(d => d.value === form.delivery_type);
+  const selectedVehicle = VEHICLES.find(v => v.value === form.vehicle_type);
   const selectedPm = PAYMENT_METHODS.find(p => p.value === form.payment_method);
-  const steps = ['Delivery Type', 'Sender Info', 'Recipient Info', 'Package Details', 'Payment', 'Review'];
+
+  const senderStep = isInternational ? 2 : 3;
+  const recipStep  = isInternational ? 3 : 4;
+  const pkgStep    = isInternational ? 4 : 5;
+  const payStep    = isInternational ? 5 : 6;
+  const reviewStep = isInternational ? 6 : 7;
 
   if (success) {
     return (
@@ -250,6 +325,11 @@ export default function IndividualDeliveryBookingPage() {
           {selectedDt && (
             <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-2 ${selectedDt.bg} ${selectedDt.color}`}>
               <selectedDt.icon className="h-3.5 w-3.5" /> {selectedDt.label} Delivery
+            </div>
+          )}
+          {selectedVehicle && (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-2 ml-2 bg-orange-50 text-orange-700">
+              {selectedVehicle.label}
             </div>
           )}
           {selectedPm && (
@@ -291,7 +371,7 @@ export default function IndividualDeliveryBookingPage() {
           </Link>
           <div>
             <h1 className="text-lg font-bold text-gray-900">New Delivery Booking</h1>
-            <p className="text-gray-500 text-xs">Step {step} of {steps.length}</p>
+            <p className="text-gray-500 text-xs">Step {step} of {totalSteps}</p>
           </div>
           {selectedDt && step > 1 && (
             <div className={`ml-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${selectedDt.bg} ${selectedDt.color}`}>
@@ -327,7 +407,7 @@ export default function IndividualDeliveryBookingPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
 
           {/* Step 1: Delivery Type */}
-          {step === 1 && (
+          {contentStep === 1 && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-orange-50 p-2.5 rounded-xl"><Truck className="h-5 w-5 text-orange-500" /></div>
@@ -338,7 +418,7 @@ export default function IndividualDeliveryBookingPage() {
                   const selected = form.delivery_type === dt.value;
                   return (
                     <button key={dt.value} type="button"
-                      onClick={() => { setForm(p => ({ ...p, delivery_type: dt.value })); setError(''); }}
+                      onClick={() => { setForm(p => ({ ...p, delivery_type: dt.value, vehicle_type: '' })); setError(''); }}
                       className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-200 flex items-center gap-5 group ${selected ? `${dt.activeBorder} ${dt.activeBg} shadow-sm` : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50'}`}
                     >
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${selected ? dt.bg : 'bg-gray-100 group-hover:bg-gray-200'}`}>
@@ -356,8 +436,16 @@ export default function IndividualDeliveryBookingPage() {
             </div>
           )}
 
-          {/* Step 2: Sender */}
-          {step === 2 && (
+          {/* Step 2: Vehicle Selection (non-international only) */}
+          {!isInternational && contentStep === 2 && (
+            <VehicleSelectionStep
+              selected={form.vehicle_type}
+              onSelect={v => { setForm(p => ({ ...p, vehicle_type: v })); setError(''); }}
+            />
+          )}
+
+          {/* Sender Info */}
+          {contentStep === senderStep && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-orange-50 p-2.5 rounded-xl"><User className="h-5 w-5 text-orange-500" /></div>
@@ -372,8 +460,8 @@ export default function IndividualDeliveryBookingPage() {
             </div>
           )}
 
-          {/* Step 3: Recipient */}
-          {step === 3 && (
+          {/* Recipient Info */}
+          {contentStep === recipStep && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-blue-50 p-2.5 rounded-xl"><User className="h-5 w-5 text-blue-600" /></div>
@@ -388,8 +476,8 @@ export default function IndividualDeliveryBookingPage() {
             </div>
           )}
 
-          {/* Step 4: Package Details */}
-          {step === 4 && (
+          {/* Package Details */}
+          {contentStep === pkgStep && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-green-50 p-2.5 rounded-xl"><Package className="h-5 w-5 text-green-600" /></div>
@@ -503,8 +591,8 @@ export default function IndividualDeliveryBookingPage() {
             </div>
           )}
 
-          {/* Step 5: Payment Method */}
-          {step === 5 && (
+          {/* Payment Method */}
+          {contentStep === payStep && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-orange-50 p-2.5 rounded-xl"><DollarSign className="h-5 w-5 text-orange-500" /></div>
@@ -579,8 +667,8 @@ export default function IndividualDeliveryBookingPage() {
             </div>
           )}
 
-          {/* Step 6: Review */}
-          {step === 6 && (
+          {/* Review */}
+          {contentStep === reviewStep && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-green-50 p-2.5 rounded-xl"><CheckCircle className="h-5 w-5 text-green-600" /></div>
@@ -602,6 +690,18 @@ export default function IndividualDeliveryBookingPage() {
                       <p className="font-bold text-sm text-green-700">{fmt(feeEstimate.estimated_fee)} distance fee</p>
                     </div>
                   )}
+                </div>
+              )}
+
+              {selectedVehicle && (
+                <div className="flex items-center gap-3 p-4 rounded-xl border-2 border-orange-200 bg-orange-50">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-orange-100 text-orange-600 overflow-hidden">
+                    {selectedVehicle.icon}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-400 font-medium">Vehicle Type</p>
+                    <p className="font-bold text-sm text-orange-700">{selectedVehicle.label}</p>
+                  </div>
                 </div>
               )}
 
@@ -675,7 +775,7 @@ export default function IndividualDeliveryBookingPage() {
                 <ArrowLeft className="h-4 w-4" /> Cancel
               </Link>
             )}
-            {step < 6 ? (
+            {step < totalSteps ? (
               <button type="button" onClick={handleNext}
                 className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:from-orange-600 hover:to-red-600 transition-all hover:shadow-md hover:shadow-orange-500/20">
                 Continue <ChevronRight className="h-4 w-4" />
@@ -688,6 +788,51 @@ export default function IndividualDeliveryBookingPage() {
             )}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+export { VEHICLES as VEHICLES_LIST };
+
+export function VehicleSelectionStep({ selected, onSelect }: { selected: string; onSelect: (v: string) => void }) {
+  return (
+    <div className="space-y-5">
+      <div className="text-center mb-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-1">Select Vehicle Type</h2>
+        <p className="text-gray-500 text-sm">Please select the most suitable vehicle to pick up your item(s)</p>
+      </div>
+      <div className="grid grid-cols-2 gap-5">
+        {VEHICLES.map(v => {
+          const isSelected = selected === v.value;
+          return (
+            <button
+              key={v.value}
+              type="button"
+              onClick={() => onSelect(v.value)}
+              className={`relative flex flex-col items-center text-center p-6 rounded-2xl border-2 transition-all duration-200 group ${
+                isSelected
+                  ? `${v.borderActive} ${v.bgActive} shadow-md`
+                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+              }`}
+            >
+              {isSelected && (
+                <div className="absolute top-3 right-3 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                  <CheckCircle className="h-3.5 w-3.5 text-white" />
+                </div>
+              )}
+              <div className={`mb-4 transition-colors duration-200 ${isSelected ? v.color : 'text-gray-600 group-hover:text-gray-800'}`}>
+                {v.icon}
+              </div>
+              <p className={`text-lg font-bold mb-2 transition-colors duration-200 ${isSelected ? v.labelColor : 'text-gray-800'}`}>
+                {v.label}
+              </p>
+              <p className={`text-xs leading-relaxed transition-colors duration-200 ${isSelected ? v.descColor : 'text-gray-500'}`}>
+                {v.desc}
+              </p>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

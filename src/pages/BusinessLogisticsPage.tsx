@@ -6,10 +6,12 @@ import {
 } from 'lucide-react';
 import { useBusiness } from '../contexts/BusinessContext';
 import { supabase } from '../lib/supabase';
+import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
 
 interface RequestForm {
   title: string;
   service_type: string;
+  vehicle_type: string;
   description: string;
   origin: string;
   destination: string;
@@ -20,7 +22,7 @@ interface RequestForm {
 }
 
 const EMPTY: RequestForm = {
-  title: '', service_type: 'freight', description: '',
+  title: '', service_type: 'freight', vehicle_type: '', description: '',
   origin: '', destination: '', quantity: '', weight: '',
   preferred_date: '', budget_range: '',
 };
@@ -87,6 +89,7 @@ export default function BusinessLogisticsPage() {
         business_id: user.id,
         title: form.title,
         service_type: form.service_type,
+        vehicle_type: form.vehicle_type || null,
         description: form.description,
         origin: form.origin,
         destination: form.destination,
@@ -172,6 +175,23 @@ export default function BusinessLogisticsPage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Vehicle Selection */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <VehicleSelectionStep
+              selected={form.vehicle_type}
+              onSelect={v => setForm(p => ({ ...p, vehicle_type: p.vehicle_type === v ? '' : v }))}
+            />
+            {form.vehicle_type && (
+              <p className="text-xs text-center text-gray-400 mt-4">
+                Selected: <span className="text-orange-600 font-semibold">{VEHICLES_LIST.find(v => v.value === form.vehicle_type)?.label}</span> —
+                <button type="button" onClick={() => setForm(p => ({ ...p, vehicle_type: '' }))} className="text-gray-400 underline ml-1 hover:text-gray-600">clear</button>
+              </p>
+            )}
+            {!form.vehicle_type && (
+              <p className="text-xs text-center text-gray-400 mt-3">(Optional — select if you have a vehicle preference)</p>
+            )}
           </div>
 
           {/* Request Details */}
