@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { ArrowLeft } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -27,6 +28,12 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-slate-900 to-blue-900 flex items-center justify-center px-4">
+      <Link to="/" className="fixed top-5 left-5 z-50 flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+        <div className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+          <ArrowLeft className="h-4 w-4" />
+        </div>
+        <span className="text-sm font-medium hidden sm:block">Back</span>
+      </Link>
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Admin Login</h1>
         <p className="text-gray-600 mb-6">Sign in to manage website content</p>
