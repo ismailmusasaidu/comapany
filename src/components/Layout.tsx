@@ -94,7 +94,7 @@ export default function Layout({ children }: LayoutProps) {
               <img
                 src="/logo.png"
                 alt="Danhausa Logistics"
-                className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                className="h-16 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 style={{ mixBlendMode: 'screen' }}
               />
             </Link>
@@ -315,7 +315,7 @@ export default function Layout({ children }: LayoutProps) {
                 <img
                   src="/logo.png"
                   alt="Danhausa Logistics"
-                  className="h-14 w-auto object-contain"
+                  className="h-18 w-auto object-contain"
                   style={{ mixBlendMode: 'screen' }}
                 />
               </div>
