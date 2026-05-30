@@ -90,12 +90,18 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex items-center justify-between h-16">
 
             {/* Logo */}
-            <Link to="/" className="flex items-center group flex-shrink-0" onClick={closeMobileMenu}>
-              <img
-                src="/danhausa-icon.png"
-                alt="Danhausa Logistics"
-                className="h-10 sm:h-12 w-auto transition-transform duration-300 group-hover:scale-105"
-              />
+            <Link to="/" className="flex items-center gap-3 group flex-shrink-0" onClick={closeMobileMenu}>
+              <div className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-800 border border-white/10 shadow-lg shadow-black/30 overflow-hidden transition-all duration-300 group-hover:scale-105 group-hover:border-orange-500/40 group-hover:shadow-orange-500/20">
+                <img
+                  src="/danhausa-icon.png"
+                  alt="Danhausa Logistics"
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                />
+              </div>
+              <div className="hidden sm:flex flex-col leading-tight">
+                <span className="text-white font-bold text-base tracking-wide">Danhausa</span>
+                <span className="text-orange-400 text-xs font-medium tracking-widest uppercase">Logistics</span>
+              </div>
             </Link>
 
             {/* Desktop nav */}
@@ -310,11 +316,19 @@ export default function Layout({ children }: LayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-10 py-16 border-b border-white/10">
             <div className="md:col-span-1">
-              <img
-                src="/danhausa-icon.png"
-                alt="Danhausa Logistics"
-                className="h-16 w-auto mb-5"
-              />
+              <div className="flex items-center gap-3 mb-5">
+                <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-slate-800 border border-white/10 shadow-lg overflow-hidden flex-shrink-0">
+                  <img
+                    src="/danhausa-icon.png"
+                    alt="Danhausa Logistics"
+                    className="w-12 h-12 object-contain"
+                  />
+                </div>
+                <div className="flex flex-col leading-tight">
+                  <span className="text-white font-bold text-lg tracking-wide">Danhausa</span>
+                  <span className="text-orange-400 text-xs font-medium tracking-widest uppercase">Logistics</span>
+                </div>
+              </div>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
                 Your trusted partner for seamless logistics and marketplace solutions across Nigeria and beyond.
               </p>
