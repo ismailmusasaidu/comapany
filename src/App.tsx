@@ -40,6 +40,13 @@ import AgentOrdersPage from './pages/AgentOrdersPage';
 import BusinessOrdersPage from './pages/BusinessOrdersPage';
 import AdminWhatsAppPage from './pages/AdminWhatsAppPage';
 import ShippingCalculatorPage from './pages/ShippingCalculatorPage';
+import IndividualRegisterPage from './pages/IndividualRegisterPage';
+import IndividualLoginPage from './pages/IndividualLoginPage';
+import IndividualDashboardPage from './pages/IndividualDashboardPage';
+import IndividualOrdersPage from './pages/IndividualOrdersPage';
+import IndividualDeliveryBookingPage from './pages/IndividualDeliveryBookingPage';
+import IndividualLogisticsPage from './pages/IndividualLogisticsPage';
+import IndividualMessagesPage from './pages/IndividualMessagesPage';
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -96,6 +103,14 @@ function App() {
         <Route path="/business/orders" element={<BusinessOrdersPage />} />
         <Route path="/business/booking/new" element={<BusinessDeliveryBookingPage />} />
         <Route path="/business/logistics/new" element={<BusinessLogisticsPage />} />
+
+        <Route path="/individual/register" element={<IndividualRegisterPage />} />
+        <Route path="/individual/login" element={<IndividualLoginPage />} />
+        <Route path="/individual/dashboard" element={<IndividualDashboardPage />} />
+        <Route path="/individual/orders" element={<IndividualOrdersPage />} />
+        <Route path="/individual/booking/new" element={<IndividualDeliveryBookingPage />} />
+        <Route path="/individual/logistics/new" element={<IndividualLogisticsPage />} />
+        <Route path="/individual/messages" element={<IndividualMessagesPage />} />
 
         <Route
           path="/*"

@@ -4,6 +4,7 @@ import App from './App.tsx';
 import { AuthProvider } from './contexts/AuthContext.tsx';
 import { AgentProvider } from './contexts/AgentContext.tsx';
 import { BusinessProvider } from './contexts/BusinessContext.tsx';
+import { IndividualProvider } from './contexts/IndividualContext.tsx';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -11,7 +12,9 @@ createRoot(document.getElementById('root')!).render(
     <AuthProvider>
       <AgentProvider>
         <BusinessProvider>
-          <App />
+          <IndividualProvider>
+            <App />
+          </IndividualProvider>
         </BusinessProvider>
       </AgentProvider>
     </AuthProvider>
