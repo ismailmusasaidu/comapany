@@ -92,7 +92,7 @@ export default function Layout({ children }: LayoutProps) {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group flex-shrink-0" onClick={closeMobileMenu}>
               <img
-                src="/danhausa-icon.png"
+                src="/logo.png"
                 alt="Danhausa Logistics"
                 className="h-12 sm:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 style={{ mixBlendMode: 'screen' }}
@@ -317,7 +317,7 @@ export default function Layout({ children }: LayoutProps) {
             <div className="md:col-span-1">
               <div className="flex items-center gap-3 mb-5">
                 <img
-                  src="/danhausa-icon.png"
+                  src="/logo.png"
                   alt="Danhausa Logistics"
                   className="h-14 w-auto object-contain flex-shrink-0"
                   style={{ mixBlendMode: 'screen' }}
