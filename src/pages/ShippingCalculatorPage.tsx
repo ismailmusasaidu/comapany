@@ -143,21 +143,16 @@ export default function ShippingCalculatorPage() {
     <div className="min-h-screen bg-gray-50">
 
       {/* ── Hero Banner ── */}
-      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 pt-10 pb-14 px-4 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
-        </div>
+      <section className="bg-gradient-to-b from-slate-900 to-slate-800 pt-10 pb-14 px-4">
 
-        <div className="max-w-4xl mx-auto text-center relative z-10">
+        <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 text-orange-300 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
             <Calculator className="h-3.5 w-3.5" />
             Free Shipping Calculator
           </div>
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white mb-4 leading-tight tracking-tight">
             Calculate Shipping{' '}
-            <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">Price Instantly</span>
+            <span className="text-orange-400">Price Instantly</span>
           </h1>
           <p className="text-gray-300 text-base sm:text-xl max-w-2xl mx-auto mb-8 leading-relaxed">
             Get an accurate delivery quote in seconds — no signup needed.
@@ -698,9 +693,8 @@ export default function ShippingCalculatorPage() {
 
       {/* ── CTA ── */}
       <section className="max-w-4xl mx-auto px-4 mt-12 mb-20">
-        <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl p-8 md:p-10 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none" />
-          <div className="relative z-10">
+        <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl p-8 md:p-10 text-center">
+          <div>
             <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-5">
               <Truck className="h-8 w-8 text-white" />
             </div>
