@@ -2,11 +2,15 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Building2, Package, MapPin, Phone, User, Weight,
-  DollarSign, FileText, CheckCircle, ArrowLeft, ArrowRight, ChevronRight
+  DollarSign, FileText, CheckCircle, ArrowLeft, ArrowRight, ChevronRight,
+  Globe, Map, Navigation
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
 
 interface BookingForm {
+  delivery_type: string;
+  vehicle_type: string;
   sender_name: string;
   sender_phone: string;
   sender_address: string;
@@ -23,17 +27,25 @@ interface BookingForm {
 }
 
 const EMPTY: BookingForm = {
+  delivery_type: '',
+  vehicle_type: '',
   sender_name: '', sender_phone: '', sender_address: '', pickup_city: '',
   recipient_name: '', recipient_phone: '', recipient_address: '', delivery_city: '',
   package_type: 'parcel', package_description: '',
   weight_kg: '', declared_value: '', special_instructions: '',
 };
 
+const DELIVERY_TYPES = [
+  { value: 'same_state',    label: 'Same State',    desc: 'Pickup and delivery within the same state',   icon: Navigation, color: 'text-green-600',  bg: 'bg-green-50',  activeBorder: 'border-green-500',  activeBg: 'bg-green-50' },
+  { value: 'inter_state',   label: 'Inter-State',   desc: 'Delivery across different Nigerian states',   icon: Map,        color: 'text-orange-600', bg: 'bg-orange-50', activeBorder: 'border-orange-500', activeBg: 'bg-orange-50' },
+  { value: 'international', label: 'International', desc: 'Cross-border or international delivery',      icon: Globe,      color: 'text-blue-600',   bg: 'bg-blue-50',   activeBorder: 'border-blue-500',   activeBg: 'bg-blue-50' },
+];
+
 const PACKAGE_TYPES = [
-  { value: 'document', label: 'Document', desc: 'Papers, certificates, letters' },
-  { value: 'parcel', label: 'Parcel', desc: 'Standard packages & boxes' },
-  { value: 'fragile', label: 'Fragile', desc: 'Glass, electronics, delicates' },
-  { value: 'heavy', label: 'Heavy Cargo', desc: 'Over 25kg, bulk items' },
+  { value: 'document', label: 'Document',    desc: 'Papers, certificates, letters' },
+  { value: 'parcel',   label: 'Parcel',      desc: 'Standard packages & boxes' },
+  { value: 'fragile',  label: 'Fragile',     desc: 'Glass, electronics, delicates' },
+  { value: 'heavy',    label: 'Heavy Cargo', desc: 'Over 25kg, bulk items' },
 ];
 
 function generateRef() {
@@ -54,6 +66,29 @@ export default function AdminDeliveryRequestPage() {
     setError('');
   };
 
+  const isInternational = form.delivery_type === 'international';
+  const steps = isInternational
+    ? ['Delivery Type', 'Sender Info', 'Recipient Info', 'Package Details', 'Review']
+    : ['Delivery Type', 'Vehicle', 'Sender Info', 'Recipient Info', 'Package Details', 'Review'];
+  const totalSteps = steps.length;
+  const senderStep = isInternational ? 2 : 3;
+  const recipStep  = isInternational ? 3 : 4;
+  const pkgStep    = isInternational ? 4 : 5;
+  const reviewStep = isInternational ? 5 : 6;
+
+  const selectedDt = DELIVERY_TYPES.find(d => d.value === form.delivery_type);
+  const selectedVehicle = VEHICLES_LIST.find(v => v.value === form.vehicle_type);
+
+  const handleNext = () => {
+    if (step === 1 && !form.delivery_type) { setError('Please select a delivery type to continue.'); return; }
+    if (!isInternational && step === 2 && !form.vehicle_type) { setError('Please select a vehicle type to continue.'); return; }
+    if (step === senderStep && (!form.sender_name || !form.sender_phone || !form.sender_address || !form.pickup_city)) { setError('Please fill in all sender fields.'); return; }
+    if (step === recipStep && (!form.recipient_name || !form.recipient_phone || !form.recipient_address || !form.delivery_city)) { setError('Please fill in all recipient fields.'); return; }
+    if (step === pkgStep && !form.package_description) { setError('Please provide a package description.'); return; }
+    setError('');
+    setStep(s => s + 1);
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
     setError('');
@@ -62,6 +97,8 @@ export default function AdminDeliveryRequestPage() {
       const { error: err } = await supabase.from('business_delivery_bookings').insert({
         booking_ref: ref,
         business_id: null,
+        delivery_type: form.delivery_type,
+        vehicle_type: form.vehicle_type || null,
         sender_name: form.sender_name,
         sender_phone: form.sender_phone,
         sender_address: form.sender_address,
@@ -95,7 +132,17 @@ export default function AdminDeliveryRequestPage() {
             <CheckCircle className="h-10 w-10 text-green-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Request Created!</h2>
-          <p className="text-gray-500 mb-2">Delivery request has been submitted successfully.</p>
+          <p className="text-gray-500 mb-3">Delivery request has been submitted successfully.</p>
+          {selectedDt && (
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-2 ${selectedDt.bg} ${selectedDt.color}`}>
+              <selectedDt.icon className="h-3.5 w-3.5" /> {selectedDt.label} Delivery
+            </div>
+          )}
+          {selectedVehicle && (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-4 ml-2 bg-gray-100 text-gray-700">
+              <span className="text-gray-600 [&>svg]:w-3 [&>svg]:h-3">{selectedVehicle.icon}</span> {selectedVehicle.label}
+            </div>
+          )}
           <div className="bg-orange-50 border border-orange-100 rounded-xl px-6 py-3 inline-block mb-8">
             <p className="text-xs text-orange-600 font-medium">Request Reference</p>
             <p className="text-xl font-bold text-orange-700">{createdRef}</p>
@@ -119,8 +166,6 @@ export default function AdminDeliveryRequestPage() {
     );
   }
 
-  const steps = ['Sender Info', 'Recipient Info', 'Package Details', 'Review'];
-
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-100 sticky top-0 z-20">
@@ -134,9 +179,14 @@ export default function AdminDeliveryRequestPage() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-gray-900">New Delivery Request</h1>
-              <p className="text-gray-500 text-xs">Admin — Step {step} of {steps.length}</p>
+              <p className="text-gray-500 text-xs">Admin — Step {step} of {totalSteps}</p>
             </div>
           </div>
+          {selectedDt && step > 1 && (
+            <div className={`ml-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${selectedDt.bg} ${selectedDt.color}`}>
+              <selectedDt.icon className="h-3 w-3" /> {selectedDt.label}
+            </div>
+          )}
         </div>
       </header>
 
@@ -176,7 +226,53 @@ export default function AdminDeliveryRequestPage() {
         )}
 
         <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+
+          {/* Step 1: Delivery Type */}
           {step === 1 && (
+            <div className="space-y-5">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-blue-50 p-2.5 rounded-xl"><Building2 className="h-5 w-5 text-blue-600" /></div>
+                <div><h2 className="font-bold text-gray-900">Delivery Type</h2><p className="text-gray-500 text-sm">Where is this shipment going?</p></div>
+              </div>
+              <div className="grid gap-4">
+                {DELIVERY_TYPES.map(dt => {
+                  const selected = form.delivery_type === dt.value;
+                  return (
+                    <button key={dt.value} type="button"
+                      onClick={() => { setForm(p => ({ ...p, delivery_type: dt.value, vehicle_type: '' })); setError(''); }}
+                      className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-200 flex items-center gap-5 group ${selected ? `${dt.activeBorder} ${dt.activeBg} shadow-sm` : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50'}`}
+                    >
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${selected ? dt.bg : 'bg-gray-100 group-hover:bg-gray-200'}`}>
+                        <dt.icon className={`h-6 w-6 ${selected ? dt.color : 'text-gray-500'}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-bold text-base ${selected ? dt.color : 'text-gray-800'}`}>{dt.label}</p>
+                        <p className="text-sm text-gray-500 mt-0.5">{dt.desc}</p>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 transition-all ${selected ? `${dt.activeBorder} border-4` : 'border-gray-300'}`} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Vehicle (non-international only) */}
+          {!isInternational && step === 2 && (
+            <div className="space-y-5">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-blue-50 p-2.5 rounded-xl"><Building2 className="h-5 w-5 text-blue-600" /></div>
+                <div><h2 className="font-bold text-gray-900">Select Vehicle</h2><p className="text-gray-500 text-sm">Choose the most suitable vehicle for this delivery</p></div>
+              </div>
+              <VehicleSelectionStep
+                selected={form.vehicle_type}
+                onSelect={v => { setForm(p => ({ ...p, vehicle_type: v })); setError(''); }}
+              />
+            </div>
+          )}
+
+          {/* Sender Info */}
+          {step === senderStep && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-blue-50 p-2.5 rounded-xl"><User className="h-5 w-5 text-blue-600" /></div>
@@ -191,7 +287,8 @@ export default function AdminDeliveryRequestPage() {
             </div>
           )}
 
-          {step === 2 && (
+          {/* Recipient Info */}
+          {step === recipStep && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-green-50 p-2.5 rounded-xl"><User className="h-5 w-5 text-green-600" /></div>
@@ -201,12 +298,13 @@ export default function AdminDeliveryRequestPage() {
                 <Field label="Recipient Name" icon={User} placeholder="Full name" value={form.recipient_name} onChange={set('recipient_name')} required accent="blue" />
                 <Field label="Recipient Phone" icon={Phone} placeholder="+234..." value={form.recipient_phone} onChange={set('recipient_phone')} required accent="blue" />
               </div>
-              <Field label="Delivery City" icon={MapPin} placeholder="City of delivery" value={form.delivery_city} onChange={set('delivery_city')} required accent="blue" />
+              <Field label="Delivery City" icon={MapPin} placeholder={isInternational ? 'Country / City' : 'City of delivery'} value={form.delivery_city} onChange={set('delivery_city')} required accent="blue" />
               <Field label="Delivery Address" icon={MapPin} placeholder="Full delivery address" value={form.recipient_address} onChange={set('recipient_address')} required accent="blue" />
             </div>
           )}
 
-          {step === 3 && (
+          {/* Package Details */}
+          {step === pkgStep && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-blue-50 p-2.5 rounded-xl"><Package className="h-5 w-5 text-blue-600" /></div>
@@ -242,12 +340,38 @@ export default function AdminDeliveryRequestPage() {
             </div>
           )}
 
-          {step === 4 && (
+          {/* Review */}
+          {step === reviewStep && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-green-50 p-2.5 rounded-xl"><CheckCircle className="h-5 w-5 text-green-600" /></div>
                 <div><h2 className="font-bold text-gray-900">Review & Confirm</h2><p className="text-gray-500 text-sm">Double-check before submitting</p></div>
               </div>
+
+              {selectedDt && (
+                <div className={`flex items-center gap-3 p-4 rounded-xl border-2 ${selectedDt.activeBorder} ${selectedDt.activeBg}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${selectedDt.bg}`}>
+                    <selectedDt.icon className={`h-5 w-5 ${selectedDt.color}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-400 font-medium">Delivery Type</p>
+                    <p className={`font-bold text-sm ${selectedDt.color}`}>{selectedDt.label}</p>
+                  </div>
+                </div>
+              )}
+
+              {selectedVehicle && (
+                <div className="flex items-center gap-3 p-4 rounded-xl border-2 border-gray-200 bg-gray-50">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 text-gray-600">
+                    {selectedVehicle.icon}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-400 font-medium">Vehicle Type</p>
+                    <p className="font-bold text-sm text-gray-800">{selectedVehicle.label}</p>
+                  </div>
+                </div>
+              )}
+
               {[
                 { title: 'Sender', items: [['Name', form.sender_name], ['Phone', form.sender_phone], ['City', form.pickup_city], ['Address', form.sender_address]] },
                 { title: 'Recipient', items: [['Name', form.recipient_name], ['Phone', form.recipient_phone], ['City', form.delivery_city], ['Address', form.recipient_address]] },
@@ -270,7 +394,7 @@ export default function AdminDeliveryRequestPage() {
 
           <div className="flex justify-between mt-8 pt-6 border-t border-gray-100">
             {step > 1 ? (
-              <button type="button" onClick={() => setStep(s => s - 1)}
+              <button type="button" onClick={() => { setStep(s => s - 1); setError(''); }}
                 className="flex items-center gap-2 px-5 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 font-semibold text-sm transition-all">
                 <ArrowLeft className="h-4 w-4" /> Back
               </button>
@@ -281,20 +405,8 @@ export default function AdminDeliveryRequestPage() {
               </Link>
             )}
 
-            {step < 4 ? (
-              <button type="button"
-                onClick={() => {
-                  if (step === 1 && (!form.sender_name || !form.sender_phone || !form.sender_address || !form.pickup_city)) {
-                    setError('Please fill in all sender fields.'); return;
-                  }
-                  if (step === 2 && (!form.recipient_name || !form.recipient_phone || !form.recipient_address || !form.delivery_city)) {
-                    setError('Please fill in all recipient fields.'); return;
-                  }
-                  if (step === 3 && !form.package_description) {
-                    setError('Please provide a package description.'); return;
-                  }
-                  setError(''); setStep(s => s + 1);
-                }}
+            {step < totalSteps ? (
+              <button type="button" onClick={handleNext}
                 className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:from-blue-700 hover:to-blue-800 transition-all hover:shadow-md hover:shadow-blue-500/20">
                 Continue <ChevronRight className="h-4 w-4" />
               </button>

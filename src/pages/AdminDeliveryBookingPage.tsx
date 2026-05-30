@@ -7,9 +7,11 @@ import {
   Banknote, CreditCard, Building2, Wifi
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
 
 interface BookingForm {
   delivery_type: string;
+  vehicle_type: string;
   sender_name: string;
   sender_phone: string;
   sender_address: string;
@@ -28,6 +30,7 @@ interface BookingForm {
 
 const EMPTY: BookingForm = {
   delivery_type: '',
+  vehicle_type: '',
   sender_name: '', sender_phone: '', sender_address: '', pickup_city: '',
   recipient_name: '', recipient_phone: '', recipient_address: '', delivery_city: '',
   package_type: 'parcel', package_description: '',
@@ -203,6 +206,7 @@ export default function AdminDeliveryBookingPage() {
         booking_ref: ref,
         agent_id: null,
         delivery_type: form.delivery_type,
+        vehicle_type: form.vehicle_type || null,
         sender_name: form.sender_name, sender_phone: form.sender_phone,
         sender_address: form.sender_address, pickup_city: form.pickup_city,
         recipient_name: form.recipient_name, recipient_phone: form.recipient_phone,
@@ -223,12 +227,13 @@ export default function AdminDeliveryBookingPage() {
 
   const handleNext = () => {
     if (step === 1 && !form.delivery_type) { setError('Please select a delivery type to continue.'); return; }
-    if (step === 2 && (!form.sender_name || !form.sender_phone || !form.sender_address || !form.pickup_city)) { setError('Please fill in all sender fields.'); return; }
-    if (step === 3 && (!form.recipient_name || !form.recipient_phone || !form.recipient_address || !form.delivery_city)) { setError('Please fill in all recipient fields.'); return; }
-    if (step === 4 && !form.package_description) { setError('Please provide a package description.'); return; }
-    if (step === 5 && !form.payment_method) { setError('Please select a payment method to continue.'); return; }
+    if (!isInternational && step === 2 && !form.vehicle_type) { setError('Please select a vehicle type to continue.'); return; }
+    if (step === senderStep && (!form.sender_name || !form.sender_phone || !form.sender_address || !form.pickup_city)) { setError('Please fill in all sender fields.'); return; }
+    if (step === recipStep && (!form.recipient_name || !form.recipient_phone || !form.recipient_address || !form.delivery_city)) { setError('Please fill in all recipient fields.'); return; }
+    if (step === pkgStep && !form.package_description) { setError('Please provide a package description.'); return; }
+    if (step === payStep && !form.payment_method) { setError('Please select a payment method to continue.'); return; }
     setError('');
-    if (step === 3 && form.delivery_type === 'same_state' && form.pickup_city && form.delivery_city) {
+    if (step === recipStep && form.delivery_type === 'same_state' && form.pickup_city && form.delivery_city) {
       calculateFee(form.pickup_city, form.delivery_city);
     }
     setStep(s => s + 1);
@@ -236,7 +241,17 @@ export default function AdminDeliveryBookingPage() {
 
   const selectedDt = DELIVERY_TYPES.find(d => d.value === form.delivery_type);
   const selectedPm = PAYMENT_METHODS.find(p => p.value === form.payment_method);
-  const steps = ['Delivery Type', 'Sender Info', 'Recipient Info', 'Package Details', 'Payment', 'Review'];
+  const isInternational = form.delivery_type === 'international';
+  const steps = isInternational
+    ? ['Delivery Type', 'Sender Info', 'Recipient Info', 'Package Details', 'Payment', 'Review']
+    : ['Delivery Type', 'Vehicle', 'Sender Info', 'Recipient Info', 'Package Details', 'Payment', 'Review'];
+  const totalSteps = steps.length;
+  const senderStep = isInternational ? 2 : 3;
+  const recipStep  = isInternational ? 3 : 4;
+  const pkgStep    = isInternational ? 4 : 5;
+  const payStep    = isInternational ? 5 : 6;
+  const reviewStep = isInternational ? 6 : 7;
+  const selectedVehicle = VEHICLES_LIST.find(v => v.value === form.vehicle_type);
 
   if (success) {
     return (
@@ -250,6 +265,11 @@ export default function AdminDeliveryBookingPage() {
           {selectedDt && (
             <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-2 ${selectedDt.bg} ${selectedDt.color}`}>
               <selectedDt.icon className="h-3.5 w-3.5" /> {selectedDt.label} Delivery
+            </div>
+          )}
+          {selectedVehicle && (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-2 ml-2 bg-gray-100 text-gray-700">
+              <span className="text-gray-600 [&>svg]:w-3 [&>svg]:h-3">{selectedVehicle.icon}</span> {selectedVehicle.label}
             </div>
           )}
           {selectedPm && (
@@ -269,8 +289,7 @@ export default function AdminDeliveryBookingPage() {
           </div>
           <div className="flex gap-3 justify-center">
             <button
-              onClick={() => { setSuccess(false); setForm(EMPTY); setStep(1); setFeeEstimate(null); }}
-              className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+              onClick={() => { setSuccess(false); setForm(EMPTY); setStep(1); setFeeEstimate(null); }}              className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
             >
               <Package className="h-4 w-4" /> New Booking
             </button>
@@ -299,7 +318,7 @@ export default function AdminDeliveryBookingPage() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-gray-900">New Delivery Booking</h1>
-              <p className="text-gray-500 text-xs">Admin — Step {step} of {steps.length}</p>
+              <p className="text-gray-500 text-xs">Admin — Step {step} of {totalSteps}</p>
             </div>
           </div>
           {selectedDt && step > 1 && (
@@ -328,8 +347,7 @@ export default function AdminDeliveryBookingPage() {
                     </div>
                     <p className={`text-xs mt-1 font-medium hidden sm:block ${active ? 'text-orange-600' : done ? 'text-green-600' : 'text-gray-400'}`}>{label}</p>
                   </div>
-                  {idx < steps.length - 1 && <div className={`flex-1 h-0.5 mx-2 ${done ? 'bg-green-400' : 'bg-gray-200'}`} />}
-                </div>
+                  {idx < steps.length - 1 && <div className={`flex-1 h-0.5 mx-2 ${done ? 'bg-green-400' : 'bg-gray-200'}`} />}                </div>
               );
             })}
           </div>
@@ -355,7 +373,7 @@ export default function AdminDeliveryBookingPage() {
                   const selected = form.delivery_type === dt.value;
                   return (
                     <button key={dt.value} type="button"
-                      onClick={() => { setForm(p => ({ ...p, delivery_type: dt.value })); setError(''); }}
+                      onClick={() => { setForm(p => ({ ...p, delivery_type: dt.value, vehicle_type: '' })); setError(''); }}
                       className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-200 flex items-center gap-5 group ${selected ? `${dt.activeBorder} ${dt.activeBg} shadow-sm` : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50'}`}
                     >
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${selected ? dt.bg : 'bg-gray-100 group-hover:bg-gray-200'}`}>
@@ -373,8 +391,22 @@ export default function AdminDeliveryBookingPage() {
             </div>
           )}
 
-          {/* Step 2: Sender */}
-          {step === 2 && (
+          {/* Step 2: Vehicle (non-international only) */}
+          {!isInternational && step === 2 && (
+            <div className="space-y-5">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-orange-50 p-2.5 rounded-xl"><Truck className="h-5 w-5 text-orange-500" /></div>
+                <div><h2 className="font-bold text-gray-900">Select Vehicle</h2><p className="text-gray-500 text-sm">Choose the most suitable vehicle for this delivery</p></div>
+              </div>
+              <VehicleSelectionStep
+                selected={form.vehicle_type}
+                onSelect={v => { setForm(p => ({ ...p, vehicle_type: v })); setError(''); }}
+              />
+            </div>
+          )}
+
+          {/* Step 2/3: Sender */}
+          {step === senderStep && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-orange-50 p-2.5 rounded-xl"><User className="h-5 w-5 text-orange-500" /></div>
@@ -389,8 +421,8 @@ export default function AdminDeliveryBookingPage() {
             </div>
           )}
 
-          {/* Step 3: Recipient */}
-          {step === 3 && (
+          {/* Step 3/4: Recipient */}
+          {step === recipStep && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-blue-50 p-2.5 rounded-xl"><User className="h-5 w-5 text-blue-600" /></div>
@@ -405,8 +437,8 @@ export default function AdminDeliveryBookingPage() {
             </div>
           )}
 
-          {/* Step 4: Package Details */}
-          {step === 4 && (
+          {/* Step 4/5: Package Details */}
+          {step === pkgStep && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-green-50 p-2.5 rounded-xl"><Package className="h-5 w-5 text-green-600" /></div>
@@ -520,8 +552,8 @@ export default function AdminDeliveryBookingPage() {
             </div>
           )}
 
-          {/* Step 5: Payment Method */}
-          {step === 5 && (
+          {/* Step 5/6: Payment Method */}
+          {step === payStep && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-orange-50 p-2.5 rounded-xl"><DollarSign className="h-5 w-5 text-orange-500" /></div>
@@ -597,8 +629,8 @@ export default function AdminDeliveryBookingPage() {
             </div>
           )}
 
-          {/* Step 6: Review */}
-          {step === 6 && (
+          {/* Step 6/7: Review */}
+          {step === reviewStep && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-green-50 p-2.5 rounded-xl"><CheckCircle className="h-5 w-5 text-green-600" /></div>
@@ -620,6 +652,18 @@ export default function AdminDeliveryBookingPage() {
                       <p className="font-bold text-sm text-green-700">{fmt(feeEstimate.estimated_fee)} distance fee</p>
                     </div>
                   )}
+                </div>
+              )}
+
+              {selectedVehicle && (
+                <div className="flex items-center gap-3 p-4 rounded-xl border-2 border-gray-200 bg-gray-50">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 text-gray-600">
+                    {selectedVehicle.icon}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-400 font-medium">Vehicle Type</p>
+                    <p className="font-bold text-sm text-gray-800">{selectedVehicle.label}</p>
+                  </div>
                 </div>
               )}
 
@@ -694,7 +738,7 @@ export default function AdminDeliveryBookingPage() {
                 <ArrowLeft className="h-4 w-4" /> Cancel
               </Link>
             )}
-            {step < 6 ? (
+            {step < totalSteps ? (
               <button type="button" onClick={handleNext}
                 className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:from-orange-600 hover:to-red-600 transition-all hover:shadow-md hover:shadow-orange-500/20">
                 Continue <ChevronRight className="h-4 w-4" />
