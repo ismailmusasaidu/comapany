@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Truck, Mail, Lock, Eye, EyeOff, ArrowRight, User, ArrowLeft } from 'lucide-react';
+import { Truck, Mail, Lock, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 import { useIndividual } from '../contexts/IndividualContext';
 
 export default function IndividualLoginPage() {
@@ -28,12 +28,6 @@ export default function IndividualLoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center px-4">
-      <Link to="/" className="fixed top-5 left-5 z-50 flex items-center gap-2 text-white/70 hover:text-white transition-colors group">
-        <div className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
-          <ArrowLeft className="h-4 w-4" />
-        </div>
-        <span className="text-sm font-medium hidden sm:block">Back</span>
-      </Link>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
