@@ -34,6 +34,7 @@ const SERVICE_TYPES = [
   { value: 'bulk', label: 'Bulk Cargo', desc: 'Large volume shipments', icon: '📦' },
   { value: 'customs', label: 'Customs Clearance', desc: 'Import/export documentation', icon: '🛃' },
   { value: 'last_mile', label: 'Last-Mile Delivery', desc: 'Final destination delivery', icon: '📍' },
+  { value: 'relocation', label: 'Relocation Services', desc: 'Residential, office & intercity moves — packing, loading, transport, unloading & setup', icon: '🏠' },
 ];
 
 const BUDGET_RANGES = [

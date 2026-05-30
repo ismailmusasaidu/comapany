@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Truck, MapPin, FileText, CheckCircle, ArrowLeft, ArrowRight,
-  Package, Warehouse, Zap, BarChart3, Globe, Navigation, Weight, Calendar, DollarSign
+  Package, Warehouse, Zap, BarChart3, Globe, Navigation, Weight, Calendar, DollarSign, Home
 } from 'lucide-react';
 import { useAgent } from '../contexts/AgentContext';
 import { supabase } from '../lib/supabase';
@@ -34,6 +34,7 @@ const SERVICES = [
   { value: 'bulk', label: 'Bulk Transport', desc: 'High-volume order fulfillment', icon: BarChart3, color: 'text-green-600', bg: 'bg-green-50' },
   { value: 'customs', label: 'Customs Clearance', desc: 'Import & export documentation', icon: Globe, color: 'text-orange-600', bg: 'bg-orange-50' },
   { value: 'last_mile', label: 'Last Mile Delivery', desc: 'Final delivery to end customer', icon: Navigation, color: 'text-red-600', bg: 'bg-red-50' },
+  { value: 'relocation', label: 'Relocation Services', desc: 'Residential, office & intercity moves — packing, loading, transport, unloading & setup', icon: Home, color: 'text-teal-600', bg: 'bg-teal-50' },
 ];
 
 const BUDGET_RANGES = ['Under ₦50,000', '₦50,000 – ₦150,000', '₦150,000 – ₦500,000', '₦500,000 – ₦1,000,000', 'Above ₦1,000,000', 'To be discussed'];
