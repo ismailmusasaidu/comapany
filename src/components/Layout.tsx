@@ -91,13 +91,12 @@ export default function Layout({ children }: LayoutProps) {
 
             {/* Logo */}
             <Link to="/" className="flex items-center group flex-shrink-0" onClick={closeMobileMenu}>
-              <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-105 shadow-md">
-                <img
-                  src="/logo.png"
-                  alt="Danhausa Logistics"
-                  className="w-9 h-9 object-contain"
-                />
-              </div>
+              <img
+                src="/logo.png"
+                alt="Danhausa Logistics"
+                className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                style={{ mixBlendMode: 'screen' }}
+              />
             </Link>
 
             {/* Desktop nav */}
@@ -313,13 +312,12 @@ export default function Layout({ children }: LayoutProps) {
           <div className="grid md:grid-cols-4 gap-10 py-16 border-b border-white/10">
             <div className="md:col-span-1">
               <div className="flex items-center mb-5">
-                <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-md">
-                  <img
-                    src="/logo.png"
-                    alt="Danhausa Logistics"
-                    className="w-10 h-10 object-contain"
-                  />
-                </div>
+                <img
+                  src="/logo.png"
+                  alt="Danhausa Logistics"
+                  className="h-14 w-auto object-contain"
+                  style={{ mixBlendMode: 'screen' }}
+                />
               </div>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
                 Your trusted partner for seamless logistics and marketplace solutions across Nigeria and beyond.
