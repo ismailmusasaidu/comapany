@@ -1,4 +1,4 @@
-import { Menu, X, Truck, ArrowUp, ChevronDown, Package, MapPin, Users, Building2, UserCheck, Calculator } from 'lucide-react';
+import { Menu, X, Truck, ArrowUp, ChevronDown, Package, MapPin, Users, Building2, UserCheck, Calculator, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 
@@ -75,6 +75,10 @@ export default function Layout({ children }: LayoutProps) {
                 <span className="text-gray-700">|</span>
                 <Link to="/business/login" className="hover:text-orange-400 transition-colors flex items-center gap-1">
                   <Building2 className="h-3 w-3" /> Business Portal
+                </Link>
+                <span className="text-gray-700">|</span>
+                <Link to="/individual/login" className="hover:text-orange-400 transition-colors flex items-center gap-1">
+                  <User className="h-3 w-3" /> Individual Portal
                 </Link>
               </div>
             </div>
@@ -171,6 +175,16 @@ export default function Layout({ children }: LayoutProps) {
                           <p className="text-xs text-gray-500">Companies & enterprises</p>
                         </div>
                       </Link>
+                      <Link to="/individual/login" onClick={() => setPortalsOpen(false)}
+                        className="flex items-start gap-3 px-3 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all group">
+                        <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/30 transition-colors">
+                          <User className="h-4 w-4 text-orange-400" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">Individual Portal</p>
+                          <p className="text-xs text-gray-500">Personal deliveries</p>
+                        </div>
+                      </Link>
                       <Link to="/track" onClick={() => setPortalsOpen(false)}
                         className="flex items-start gap-3 px-3 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all group">
                         <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-orange-500/30 transition-colors">
@@ -254,11 +268,12 @@ export default function Layout({ children }: LayoutProps) {
             {/* Portals — 3 equal cards */}
             <div className="px-3 py-3">
               <p className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2.5 px-1">Portals</p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {[
                   { to: '/track', icon: MapPin, label: 'Track Order', sub: 'Track shipment' },
                   { to: '/agent/login', icon: UserCheck, label: 'Agent', sub: 'Agents & couriers' },
                   { to: '/business/login', icon: Building2, label: 'Business', sub: 'Companies' },
+                  { to: '/individual/login', icon: User, label: 'Individual', sub: 'Personal deliveries' },
                 ].map(({ to, icon: Icon, label, sub }) => (
                   <Link key={to} to={to} onClick={closeMobileMenu}
                     className="flex flex-col items-center gap-1.5 p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-center">
