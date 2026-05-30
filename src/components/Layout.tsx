@@ -90,14 +90,15 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex items-center justify-between h-16">
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group flex-shrink-0" onClick={closeMobileMenu}>
-              <img
-                src="/logo.png"
-                alt="Danhausa Logistics"
-                className="h-12 sm:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-                style={{ mixBlendMode: 'screen' }}
-              />
-              <div className="hidden sm:flex flex-col leading-tight">
+            <Link to="/" className="flex items-center gap-2 group flex-shrink-0" onClick={closeMobileMenu}>
+              <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl bg-white flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-105 shadow-md" style={{ width: '2.75rem', height: '2.75rem' }}>
+                <img
+                  src="/logo.png"
+                  alt="Danhausa Logistics"
+                  className="w-9 h-9 object-contain"
+                />
+              </div>
+              <div className="flex flex-col leading-tight">
                 <span className="text-white font-bold text-base tracking-wide">Danhausa</span>
                 <span className="text-orange-400 text-xs font-medium tracking-widest uppercase">Logistics</span>
               </div>
@@ -316,12 +317,13 @@ export default function Layout({ children }: LayoutProps) {
           <div className="grid md:grid-cols-4 gap-10 py-16 border-b border-white/10">
             <div className="md:col-span-1">
               <div className="flex items-center gap-3 mb-5">
-                <img
-                  src="/logo.png"
-                  alt="Danhausa Logistics"
-                  className="h-14 w-auto object-contain flex-shrink-0"
-                  style={{ mixBlendMode: 'screen' }}
-                />
+                <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-md">
+                  <img
+                    src="/logo.png"
+                    alt="Danhausa Logistics"
+                    className="w-10 h-10 object-contain"
+                  />
+                </div>
                 <div className="flex flex-col leading-tight">
                   <span className="text-white font-bold text-lg tracking-wide">Danhausa</span>
                   <span className="text-orange-400 text-xs font-medium tracking-widest uppercase">Logistics</span>
