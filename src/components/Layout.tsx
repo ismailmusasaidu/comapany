@@ -92,7 +92,7 @@ export default function Layout({ children }: LayoutProps) {
             {/* Logo */}
             <Link to="/" className="flex items-center group flex-shrink-0" onClick={closeMobileMenu}>
               <img
-                src="/ChatGPT_Image_Mar_6,_2026,_06_30_55_PM.png"
+                src="/danhausa-icon.png"
                 alt="Danhausa Logistics"
                 className="h-10 sm:h-12 w-auto transition-transform duration-300 group-hover:scale-105"
               />
@@ -311,7 +311,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="grid md:grid-cols-4 gap-10 py-16 border-b border-white/10">
             <div className="md:col-span-1">
               <img
-                src="/ChatGPT_Image_Mar_6,_2026,_06_30_55_PM.png"
+                src="/danhausa-icon.png"
                 alt="Danhausa Logistics"
                 className="h-16 w-auto mb-5"
               />
