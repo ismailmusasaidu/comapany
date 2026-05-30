@@ -48,6 +48,8 @@ interface Booking {
   declared_value: number | null;
   special_instructions: string;
   status: string;
+  delivery_type?: string | null;
+  vehicle_type?: string | null;
   created_at: string;
   updated_at: string;
   business_profiles: { company_name: string; contact_person: string; phone: string; email: string } | null;
@@ -63,6 +65,7 @@ interface Request {
   status: string;
   created_at: string;
   admin_notes: string;
+  vehicle_type?: string | null;
   business_profiles: { company_name: string; contact_person: string } | null;
 }
 
@@ -835,6 +838,7 @@ export default function AdminBusinessesPage() {
                             <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-gray-500 mb-2">
                               <span>{r.request_ref}</span>
                               <span className="font-medium text-gray-700">{cap(r.service_type)}</span>
+                              {(r as Request).vehicle_type && <span className="text-gray-400"> · {cap((r as Request).vehicle_type!)}</span>}
                               <span>{r.business_profiles?.company_name ?? '—'}</span>
                               <span>{r.origin} → {r.destination}</span>
                               <span>{fmt(r.created_at)}</span>
@@ -852,7 +856,7 @@ export default function AdminBusinessesPage() {
                               className={`text-xs font-medium px-2.5 py-1.5 rounded-xl border cursor-pointer focus:outline-none ${STATUS_BADGE[r.status] ?? ''}`}>
                               {REQUEST_STATUS_OPTIONS.map(s => <option key={s} value={s}>{cap(s)}</option>)}
                             </select>
-                            <button onClick={() => setInvoiceData({ type: 'request', ...r, business_name: r.business_profiles?.company_name, business_contact: r.business_profiles?.contact_person })}
+                            <button onClick={() => setInvoiceData({ type: 'request', ...r, business_name: r.business_profiles?.company_name, business_contact: r.business_profiles?.contact_person, vehicle_type: r.vehicle_type ?? undefined })}
                               title="Generate Invoice"
                               className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors border border-gray-200">
                               <FileDown className="h-3.5 w-3.5" />

@@ -7,6 +7,8 @@ export interface BookingInvoiceData {
   booking_ref: string;
   created_at: string;
   status: string;
+  delivery_type?: string | null;
+  vehicle_type?: string | null;
   sender_name: string;
   sender_phone: string;
   sender_address: string;
@@ -39,6 +41,7 @@ export interface RequestInvoiceData {
   title: string;
   description: string;
   service_type: string;
+  vehicle_type?: string | null;
   origin: string;
   destination: string;
   quantity?: string | number | null;
@@ -85,6 +88,19 @@ const STATUS_COLOR: Record<string, { bg: string; text: string; border: string }>
   in_progress:       { bg: '#fff7ed', text: '#9a3412', border: '#fed7aa' },
   completed:         { bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
   rejected:          { bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },
+};
+
+const DELIVERY_TYPE_LABELS: Record<string, string> = {
+  same_state: 'Same State',
+  inter_state: 'Inter-State',
+  international: 'International',
+};
+
+const VEHICLE_LABELS: Record<string, string> = {
+  motorbike: 'Motor Bike',
+  car: 'Car',
+  minivan: 'Mini Van',
+  truck: 'Truck',
 };
 
 export default function InvoiceModal({ data, onClose }: Props) {
@@ -224,15 +240,37 @@ export default function InvoiceModal({ data, onClose }: Props) {
                       <span style={{ fontWeight: '600' }}>{isBooking ? 'Delivery Booking' : 'Logistics Request'}</span>
                     </div>
                     {isBooking ? (
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#6b7280' }}>Package Type:</span>
-                        <span style={{ fontWeight: '600' }}>{cap((data as BookingInvoiceData).package_type)}</span>
-                      </div>
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#6b7280' }}>Package Type:</span>
+                          <span style={{ fontWeight: '600' }}>{cap((data as BookingInvoiceData).package_type)}</span>
+                        </div>
+                        {(data as BookingInvoiceData).delivery_type && (
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: '#6b7280' }}>Delivery Type:</span>
+                            <span style={{ fontWeight: '600' }}>{DELIVERY_TYPE_LABELS[(data as BookingInvoiceData).delivery_type!] ?? cap((data as BookingInvoiceData).delivery_type!)}</span>
+                          </div>
+                        )}
+                        {(data as BookingInvoiceData).vehicle_type && (
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: '#6b7280' }}>Vehicle Type:</span>
+                            <span style={{ fontWeight: '600' }}>{VEHICLE_LABELS[(data as BookingInvoiceData).vehicle_type!] ?? cap((data as BookingInvoiceData).vehicle_type!)}</span>
+                          </div>
+                        )}
+                      </>
                     ) : (
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#6b7280' }}>Service:</span>
-                        <span style={{ fontWeight: '600' }}>{cap((data as RequestInvoiceData).service_type)}</span>
-                      </div>
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#6b7280' }}>Service:</span>
+                          <span style={{ fontWeight: '600' }}>{cap((data as RequestInvoiceData).service_type)}</span>
+                        </div>
+                        {(data as RequestInvoiceData).vehicle_type && (
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: '#6b7280' }}>Vehicle Type:</span>
+                            <span style={{ fontWeight: '600' }}>{VEHICLE_LABELS[(data as RequestInvoiceData).vehicle_type!] ?? cap((data as RequestInvoiceData).vehicle_type!)}</span>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

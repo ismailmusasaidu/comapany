@@ -13,6 +13,8 @@ import InvoiceModal, { type InvoiceData } from '../components/InvoiceModal';
 interface Booking {
   id: string;
   booking_ref: string;
+  delivery_type?: string | null;
+  vehicle_type?: string | null;
   sender_name: string;
   sender_phone: string;
   sender_address: string;
@@ -37,6 +39,7 @@ interface LogisticsRequest {
   title: string;
   description: string;
   service_type: string;
+  vehicle_type?: string | null;
   origin: string;
   destination: string;
   quantity: string | null;
@@ -124,7 +127,7 @@ export default function BusinessOrdersPage() {
     setLoading(true);
     const [bRes, rRes] = await Promise.all([
       supabase.from('business_delivery_bookings').select('*').eq('business_id', user.id).order('created_at', { ascending: false }),
-      supabase.from('business_logistics_requests').select('id, request_ref, title, description, service_type, origin, destination, quantity, weight, preferred_date, budget_range, status, created_at').eq('business_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('business_logistics_requests').select('id, request_ref, title, description, service_type, vehicle_type, origin, destination, quantity, weight, preferred_date, budget_range, status, created_at').eq('business_id', user.id).order('created_at', { ascending: false }),
     ]);
     setBookings(bRes.data ?? []);
     setRequests(rRes.data ?? []);
@@ -605,6 +608,7 @@ export default function BusinessOrdersPage() {
                                 </td>
                                 <td className="px-4 py-3.5">
                                   <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium">{cap(r.service_type)}</span>
+                                  {r.vehicle_type && <p className="text-xs text-gray-400 mt-0.5">{cap(r.vehicle_type)}</p>}
                                 </td>
                                 <td className="px-4 py-3.5">
                                   <p className="text-gray-700 text-xs truncate max-w-28">{r.origin}</p>
@@ -696,6 +700,8 @@ export default function BusinessOrdersPage() {
             <div className="space-y-3 text-sm">
               {[
                 { label: 'Status', value: cap(selectedBooking.status) },
+                ...(selectedBooking.delivery_type ? [{ label: 'Delivery Type', value: cap(selectedBooking.delivery_type) }] : []),
+                ...(selectedBooking.vehicle_type ? [{ label: 'Vehicle Type', value: cap(selectedBooking.vehicle_type) }] : []),
                 { label: 'Sender', value: `${selectedBooking.sender_name} — ${selectedBooking.sender_phone}` },
                 { label: 'Sender Address', value: `${selectedBooking.sender_address}, ${selectedBooking.pickup_city}` },
                 { label: 'Recipient', value: `${selectedBooking.recipient_name} — ${selectedBooking.recipient_phone}` },

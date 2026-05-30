@@ -14,6 +14,8 @@ import InvoiceModal, { type InvoiceData } from '../components/InvoiceModal';
 interface Booking {
   id: string;
   booking_ref: string;
+  delivery_type?: string | null;
+  vehicle_type?: string | null;
   sender_name: string;
   sender_phone: string;
   sender_address: string;
@@ -38,6 +40,7 @@ interface LogisticsRequest {
   title: string;
   description: string;
   service_type: string;
+  vehicle_type?: string | null;
   origin: string;
   destination: string;
   quantity: number | null;
@@ -122,7 +125,7 @@ export default function IndividualOrdersPage() {
     setLoading(true);
     const [bRes, rRes] = await Promise.all([
       supabase.from('delivery_bookings').select('*').eq('individual_id', user.id).order('created_at', { ascending: false }),
-      supabase.from('logistics_requests').select('id, request_ref, title, description, service_type, origin, destination, quantity, weight_kg, preferred_date, budget_range, status, created_at').eq('individual_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('logistics_requests').select('id, request_ref, title, description, service_type, vehicle_type, origin, destination, quantity, weight_kg, preferred_date, budget_range, status, created_at').eq('individual_id', user.id).order('created_at', { ascending: false }),
     ]);
     setBookings(bRes.data ?? []);
     setRequests(rRes.data ?? []);
@@ -458,7 +461,7 @@ export default function IndividualOrdersPage() {
                               <tr key={r.id} className="hover:bg-blue-50/20 transition-colors">
                                 <td className="px-4 py-3.5"><span className="font-mono font-semibold text-gray-900 text-xs">{r.request_ref}</span></td>
                                 <td className="px-4 py-3.5"><p className="font-medium text-gray-900 truncate max-w-40">{r.title}</p><p className="text-xs text-gray-400 truncate max-w-40">{r.description}</p></td>
-                                <td className="px-4 py-3.5"><span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium">{cap(r.service_type)}</span></td>
+                                <td className="px-4 py-3.5"><span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium">{cap(r.service_type)}</span>{r.vehicle_type && <p className="text-xs text-gray-400 mt-0.5">{cap(r.vehicle_type)}</p>}</td>
                                 <td className="px-4 py-3.5"><p className="text-gray-700 text-xs truncate max-w-28">{r.origin}</p><p className="text-gray-400 text-xs truncate max-w-28">→ {r.destination}</p></td>
                                 <td className="px-4 py-3.5"><span className="text-xs text-gray-600">{cap(r.budget_range)}</span></td>
                                 <td className="px-4 py-3.5"><span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${REQUEST_STATUS_STYLES[r.status] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>{cap(r.status)}</span></td>

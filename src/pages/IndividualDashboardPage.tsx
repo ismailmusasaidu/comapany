@@ -222,7 +222,7 @@ export default function IndividualDashboardPage() {
       supabase.from('delivery_bookings').select('status, package_type, created_at').eq('individual_id', user.id),
       supabase.from('logistics_requests').select('status, service_type, created_at').eq('individual_id', user.id),
       supabase.from('delivery_bookings').select('*').eq('individual_id', user.id).order('created_at', { ascending: false }).limit(6),
-      supabase.from('logistics_requests').select('id, request_ref, title, description, service_type, origin, destination, quantity, weight_kg, preferred_date, budget_range, status, created_at').eq('individual_id', user.id).order('created_at', { ascending: false }).limit(6),
+      supabase.from('logistics_requests').select('id, request_ref, title, description, service_type, vehicle_type, origin, destination, quantity, weight_kg, preferred_date, budget_range, status, created_at').eq('individual_id', user.id).order('created_at', { ascending: false }).limit(6),
     ]);
 
     const bAll = bookingsRes.data ?? [];

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   X, Package, MapPin, Phone, User, Weight, DollarSign,
   FileText, CheckCircle, Truck, Clock, XCircle, ChevronRight,
-  Building2, Calendar, Hash, StickyNote, FileDown
+  Building2, Calendar, Hash, StickyNote, FileDown, Globe, Map, Navigation
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import InvoiceModal, { type BookingInvoiceData } from './InvoiceModal';
@@ -10,6 +10,8 @@ import InvoiceModal, { type BookingInvoiceData } from './InvoiceModal';
 interface BookingDetail {
   id: string;
   booking_ref: string;
+  delivery_type?: string | null;
+  vehicle_type?: string | null;
   sender_name: string;
   sender_phone: string;
   sender_address: string;
@@ -48,7 +50,20 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   cancelled:         { label: 'Cancelled',         color: 'text-red-700',    bg: 'bg-red-50',     border: 'border-red-200',    icon: XCircle },
 };
 
-const BOOKING_STATUS_OPTIONS = ['pending', 'confirmed', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled'];
+const DELIVERY_TYPE_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; icon: React.ComponentType<{ className?: string }> }> = {
+  same_state:    { label: 'Same State',    color: 'text-green-700',  bg: 'bg-green-50',  border: 'border-green-200',  icon: Navigation },
+  inter_state:   { label: 'Inter-State',   color: 'text-orange-700', bg: 'bg-orange-50', border: 'border-orange-200', icon: Map },
+  international: { label: 'International', color: 'text-blue-700',   bg: 'bg-blue-50',   border: 'border-blue-200',   icon: Globe },
+};
+
+const VEHICLE_LABELS: Record<string, string> = {
+  motorbike: 'Motor Bike',
+  car: 'Car',
+  minivan: 'Mini Van',
+  truck: 'Truck',
+};
+
+
 
 function cap(s: string) { return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 function fmtDate(d: string) {
@@ -64,6 +79,8 @@ export default function BookingDetailModal({ booking, onClose, isAdmin = false, 
   const Icon = cfg.icon;
   const currentStepIdx = STATUS_STEPS.indexOf(status);
   const isCancelled = status === 'cancelled';
+  const dtCfg = booking.delivery_type ? DELIVERY_TYPE_CONFIG[booking.delivery_type] : null;
+  const DtIcon = dtCfg?.icon;
 
   const handleStatusChange = async (newStatus: string) => {
     setSaving(true);
@@ -140,6 +157,30 @@ export default function BookingDetailModal({ booking, onClose, isAdmin = false, 
                   })}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Delivery Type + Vehicle */}
+          {(dtCfg || booking.vehicle_type) && (
+            <div className="flex flex-wrap gap-3">
+              {dtCfg && DtIcon && (
+                <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border ${dtCfg.border} ${dtCfg.bg}`}>
+                  <DtIcon className={`h-4 w-4 ${dtCfg.color}`} />
+                  <div>
+                    <p className="text-xs text-gray-400 leading-none mb-0.5">Delivery Type</p>
+                    <p className={`text-sm font-bold ${dtCfg.color}`}>{dtCfg.label}</p>
+                  </div>
+                </div>
+              )}
+              {booking.vehicle_type && (
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50">
+                  <Truck className="h-4 w-4 text-gray-500" />
+                  <div>
+                    <p className="text-xs text-gray-400 leading-none mb-0.5">Vehicle Type</p>
+                    <p className="text-sm font-bold text-gray-800">{VEHICLE_LABELS[booking.vehicle_type] ?? cap(booking.vehicle_type)}</p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -268,6 +309,8 @@ export default function BookingDetailModal({ booking, onClose, isAdmin = false, 
         data={{
           type: 'booking',
           ...booking,
+          delivery_type: booking.delivery_type ?? undefined,
+          vehicle_type: booking.vehicle_type ?? undefined,
           agent_name: booking.agent_profiles?.full_name,
           agent_company: booking.agent_profiles?.company_name,
           agent_phone: booking.agent_profiles?.phone,

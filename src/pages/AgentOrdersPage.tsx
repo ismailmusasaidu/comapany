@@ -14,6 +14,8 @@ import InvoiceModal, { type InvoiceData } from '../components/InvoiceModal';
 interface Booking {
   id: string;
   booking_ref: string;
+  delivery_type?: string | null;
+  vehicle_type?: string | null;
   sender_name: string;
   sender_phone: string;
   sender_address: string;
@@ -38,6 +40,7 @@ interface LogisticsRequest {
   title: string;
   description: string;
   service_type: string;
+  vehicle_type?: string | null;
   origin: string;
   destination: string;
   quantity: number | null;
@@ -126,7 +129,7 @@ export default function AgentOrdersPage() {
     setLoading(true);
     const [bRes, rRes] = await Promise.all([
       supabase.from('delivery_bookings').select('*').eq('agent_id', user.id).order('created_at', { ascending: false }),
-      supabase.from('logistics_requests').select('id, request_ref, title, description, service_type, origin, destination, quantity, weight_kg, preferred_date, budget_range, status, created_at').eq('agent_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('logistics_requests').select('id, request_ref, title, description, service_type, vehicle_type, origin, destination, quantity, weight_kg, preferred_date, budget_range, status, created_at').eq('agent_id', user.id).order('created_at', { ascending: false }),
     ]);
     setBookings(bRes.data ?? []);
     setRequests(rRes.data ?? []);
@@ -607,6 +610,7 @@ export default function AgentOrdersPage() {
                                 </td>
                                 <td className="px-4 py-3.5">
                                   <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium">{cap(r.service_type)}</span>
+                                  {r.vehicle_type && <p className="text-xs text-gray-400 mt-0.5">{cap(r.vehicle_type)}</p>}
                                 </td>
                                 <td className="px-4 py-3.5">
                                   <p className="text-gray-700 text-xs truncate max-w-28">{r.origin}</p>

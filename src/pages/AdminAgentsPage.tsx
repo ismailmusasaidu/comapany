@@ -46,6 +46,8 @@ interface Booking {
   declared_value: number | null;
   special_instructions: string;
   status: string;
+  delivery_type?: string | null;
+  vehicle_type?: string | null;
   created_at: string;
   updated_at: string;
   agent_profiles: { full_name: string; company_name: string; phone: string; email: string } | null;
@@ -61,6 +63,7 @@ interface Request {
   status: string;
   created_at: string;
   admin_notes: string;
+  vehicle_type?: string | null;
   agent_profiles: { full_name: string; company_name: string } | null;
 }
 
@@ -839,7 +842,10 @@ export default function AdminAgentsPage() {
                             <p className="font-medium text-gray-800 text-xs">{r.agent_profiles?.full_name ?? '—'}</p>
                             <p className="text-xs text-gray-400">{r.agent_profiles?.company_name ?? ''}</p>
                           </td>
-                          <td className="px-6 py-4"><span className="capitalize text-xs text-gray-600">{cap(r.service_type)}</span></td>
+                          <td className="px-6 py-4">
+                            <span className="capitalize text-xs text-gray-600">{cap(r.service_type)}</span>
+                            {r.vehicle_type && <p className="text-xs text-gray-400 mt-0.5">{cap(r.vehicle_type)}</p>}
+                          </td>
                           <td className="px-6 py-4"><p className="text-xs text-gray-700">{r.origin} → {r.destination}</p></td>
                           <td className="px-6 py-4">
                             <select value={r.status} onChange={e => updateRequestStatus(r.id, e.target.value)}
@@ -853,7 +859,7 @@ export default function AdminAgentsPage() {
                               <input type="text" placeholder="Add notes..." defaultValue={r.admin_notes}
                                 onBlur={e => updateRequestStatus(r.id, r.status, e.target.value)}
                                 className="text-xs px-2.5 py-1.5 border border-gray-200 rounded-lg w-28 focus:outline-none focus:ring-1 focus:ring-orange-400" />
-                              <button onClick={() => setInvoiceData({ type: 'request', ...r, budget_range: (r as Request & { budget_range?: string }).budget_range ?? '', agent_name: r.agent_profiles?.full_name, agent_company: r.agent_profiles?.company_name })}
+                              <button onClick={() => setInvoiceData({ type: 'request', ...r, budget_range: (r as Request & { budget_range?: string }).budget_range ?? '', agent_name: r.agent_profiles?.full_name, agent_company: r.agent_profiles?.company_name, vehicle_type: r.vehicle_type ?? undefined })}
                                 title="Generate Invoice"
                                 className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors border border-gray-200 flex-shrink-0">
                                 <FileDown className="h-3.5 w-3.5" />
