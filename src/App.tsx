@@ -48,6 +48,7 @@ import IndividualDeliveryBookingPage from './pages/IndividualDeliveryBookingPage
 import IndividualLogisticsPage from './pages/IndividualLogisticsPage';
 import IndividualMessagesPage from './pages/IndividualMessagesPage';
 import AdminOrdersAnalyticsPage from './pages/AdminOrdersAnalyticsPage';
+import AdminInvoiceGeneratorPage from './pages/AdminInvoiceGeneratorPage';
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -88,6 +89,7 @@ function App() {
         <Route path="/admin/delivery-fees" element={<ProtectedRoute element={<AdminDeliveryFeesPage />} />} />
         <Route path="/admin/whatsapp" element={<ProtectedRoute element={<AdminWhatsAppPage />} />} />
         <Route path="/admin/orders-analytics" element={<ProtectedRoute element={<AdminOrdersAnalyticsPage />} />} />
+        <Route path="/admin/invoice-generator" element={<ProtectedRoute element={<AdminInvoiceGeneratorPage />} />} />
 
         <Route path="/agent/messages" element={<AgentMessagesPage />} />
         <Route path="/business/messages" element={<BusinessMessagesPage />} />

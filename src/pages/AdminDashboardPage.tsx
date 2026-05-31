@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock, Plus, Send, DollarSign, MessageCircle, BarChart3 } from 'lucide-react';
+import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock, Plus, Send, DollarSign, MessageCircle, BarChart3, FileText } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { user, signOut } = useAuth();
@@ -189,7 +189,19 @@ export default function AdminDashboardPage() {
             </button>
 
             <button
-              onClick={() => navigate('/admin/orders-analytics')}
+              onClick={() => navigate('/admin/invoice-generator')}
+              className="relative bg-gradient-to-br from-gray-800 to-slate-900 border border-slate-700 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                  <FileText className="h-4 w-4 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">Invoice Generator</h3>
+              </div>
+              <p className="text-gray-300 text-sm">Generate daily, weekly, monthly or custom period invoices for deliveries and logistics</p>
+            </button>
+
+            <button
               className="relative bg-gradient-to-br from-slate-50 to-gray-100 border border-slate-200 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
             >
               <div className="flex items-center space-x-3 mb-2">
