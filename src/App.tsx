@@ -47,6 +47,7 @@ import IndividualOrdersPage from './pages/IndividualOrdersPage';
 import IndividualDeliveryBookingPage from './pages/IndividualDeliveryBookingPage';
 import IndividualLogisticsPage from './pages/IndividualLogisticsPage';
 import IndividualMessagesPage from './pages/IndividualMessagesPage';
+import AdminOrdersAnalyticsPage from './pages/AdminOrdersAnalyticsPage';
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -86,6 +87,7 @@ function App() {
         <Route path="/admin/private-messages" element={<ProtectedRoute element={<AdminMessagingPage />} />} />
         <Route path="/admin/delivery-fees" element={<ProtectedRoute element={<AdminDeliveryFeesPage />} />} />
         <Route path="/admin/whatsapp" element={<ProtectedRoute element={<AdminWhatsAppPage />} />} />
+        <Route path="/admin/orders-analytics" element={<ProtectedRoute element={<AdminOrdersAnalyticsPage />} />} />
 
         <Route path="/agent/messages" element={<AgentMessagesPage />} />
         <Route path="/business/messages" element={<BusinessMessagesPage />} />

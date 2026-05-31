@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock, Plus, Send, DollarSign, MessageCircle } from 'lucide-react';
+import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock, Plus, Send, DollarSign, MessageCircle, BarChart3 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { user, signOut } = useAuth();
@@ -189,7 +189,19 @@ export default function AdminDashboardPage() {
             </button>
 
             <button
-              onClick={() => navigate('/admin/whatsapp')}
+              onClick={() => navigate('/admin/orders-analytics')}
+              className="relative bg-gradient-to-br from-slate-50 to-gray-100 border border-slate-200 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="h-4 w-4 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900">Orders Analytics</h3>
+              </div>
+              <p className="text-gray-600 text-sm">View delivery and logistics stats across Individual, Agent, and Business portals</p>
+            </button>
+
+            <button
               className="relative bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
             >
               <div className="flex items-center space-x-3 mb-2">
