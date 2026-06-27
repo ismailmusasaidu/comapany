@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Truck, User, Mail, Phone, MapPin, Lock, Eye, EyeOff, CheckCircle, ArrowRight, Building2 } from 'lucide-react';
+import { Truck, User, Mail, Phone, MapPin, Lock, Eye, EyeOff, Building2, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface FormData {
@@ -27,7 +27,6 @@ export default function IndividualRegisterPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
 
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(prev => ({ ...prev, [key]: e.target.value }));
@@ -52,6 +51,7 @@ export default function IndividualRegisterPage() {
       const { data, error: authErr } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       });
       if (authErr) throw authErr;
       if (!data.user) throw new Error('Registration failed. Please try again.');
@@ -67,44 +67,13 @@ export default function IndividualRegisterPage() {
       });
       if (profileErr) throw profileErr;
 
-      setSuccess(true);
+      navigate(`/verify-email?email=${encodeURIComponent(form.email)}&type=individual`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Registration failed.');
     } finally {
       setLoading(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center px-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-green-50 border-2 border-green-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="h-10 w-10 text-green-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Account Created!</h2>
-          <p className="text-gray-500 mb-8 leading-relaxed">
-            Your individual account is ready. Sign in to start booking deliveries right away.
-          </p>
-          <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-8 text-left">
-            <p className="text-sm text-orange-700 font-medium">What you can do now:</p>
-            <ul className="mt-2 space-y-1 text-sm text-orange-600 list-disc list-inside">
-              <li>Book delivery orders instantly</li>
-              <li>Submit logistics requests</li>
-              <li>Track your shipments</li>
-              <li>Message our support team</li>
-            </ul>
-          </div>
-          <button
-            onClick={() => navigate('/individual/login')}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all hover:scale-105"
-          >
-            Go to Login <ArrowRight className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-12 px-4">

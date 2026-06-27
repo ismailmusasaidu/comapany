@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Truck, Mail, Lock, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
+import { Truck, Mail, Lock, Eye, EyeOff, ArrowRight, User, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import { useIndividual } from '../contexts/IndividualContext';
+import { supabase } from '../lib/supabase';
 
 export default function IndividualLoginPage() {
   const { signIn } = useIndividual();
@@ -11,18 +12,42 @@ export default function IndividualLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [emailUnconfirmed, setEmailUnconfirmed] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setEmailUnconfirmed(false);
+    setResent(false);
     setLoading(true);
     try {
       await signIn(email, password);
       navigate('/individual/dashboard');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Invalid email or password.');
+      const msg = err instanceof Error ? err.message : 'Invalid email or password.';
+      if (msg.toLowerCase().includes('email not confirmed')) {
+        setEmailUnconfirmed(true);
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    setResent(false);
+    try {
+      const { error: resendErr } = await supabase.auth.resend({ type: 'signup', email });
+      if (resendErr) throw resendErr;
+      setResent(true);
+    } catch {
+      setError('Failed to resend confirmation email. Please try again.');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -48,6 +73,33 @@ export default function IndividualLoginPage() {
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
                 {error}
+              </div>
+            )}
+
+            {emailUnconfirmed && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <div className="flex items-start gap-3 mb-3">
+                  <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-amber-800">Email not confirmed</p>
+                    <p className="text-xs text-amber-700 mt-0.5">Please check your inbox and click the confirmation link before signing in.</p>
+                  </div>
+                </div>
+                {resent ? (
+                  <div className="flex items-center gap-2 text-green-700 text-xs font-medium">
+                    <CheckCircle className="h-4 w-4" /> Confirmation email resent!
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resending || !email}
+                    className="flex items-center gap-2 text-amber-700 text-xs font-semibold hover:text-amber-900 disabled:opacity-60"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${resending ? 'animate-spin' : ''}`} />
+                    {resending ? 'Sending...' : 'Resend confirmation email'}
+                  </button>
+                )}
               </div>
             )}
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Truck, Building2, Mail, Phone, MapPin, CreditCard,
-  Lock, Eye, EyeOff, CheckCircle, ArrowRight, Briefcase, Users, Globe
+  Lock, Eye, EyeOff, ArrowRight, Briefcase, Users, Globe
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -56,7 +56,6 @@ export default function BusinessRegisterPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
 
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [key]: e.target.value }));
@@ -81,6 +80,7 @@ export default function BusinessRegisterPage() {
       const { data, error: authErr } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       });
       if (authErr) throw authErr;
       if (!data.user) throw new Error('Registration failed. Please try again.');
@@ -101,44 +101,13 @@ export default function BusinessRegisterPage() {
       });
       if (profileErr) throw profileErr;
 
-      setSuccess(true);
+      navigate(`/verify-email?email=${encodeURIComponent(form.email)}&type=business`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Registration failed.');
     } finally {
       setLoading(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center px-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-green-50 border-2 border-green-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="h-10 w-10 text-green-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Application Submitted!</h2>
-          <p className="text-gray-500 mb-8 leading-relaxed">
-            Your business registration has been received. Our team will review your application and notify you by email once approved.
-          </p>
-          <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-8 text-left">
-            <p className="text-sm text-orange-700 font-medium">What happens next?</p>
-            <ul className="mt-2 space-y-1 text-sm text-orange-600 list-disc list-inside">
-              <li>Admin reviews your business profile</li>
-              <li>You receive approval notification</li>
-              <li>Log in to access your business dashboard</li>
-              <li>Start creating bookings and logistics requests</li>
-            </ul>
-          </div>
-          <Link
-            to="/business/login"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all hover:scale-105"
-          >
-            Go to Login <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-12 px-4">
