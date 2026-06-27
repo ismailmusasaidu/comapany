@@ -1,4 +1,4 @@
-import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, Users, TrendingUp, ArrowRight, Star, Zap, CheckCircle, ChevronLeft, ChevronRight, Bike, Store, FileText, CreditCard, BadgeCheck, Upload, X, MessageCircle } from 'lucide-react';
+import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, Users, TrendingUp, ArrowRight, Star, Zap, CheckCircle, ChevronLeft, ChevronRight, Bike, Store, FileText, CreditCard, BadgeCheck, Upload, X, MessageCircle, Quote, ChevronDown, ChevronUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
@@ -90,6 +90,7 @@ export default function HomePage() {
     vision: 'Punctuality is our promise. We pride ourselves on meeting deadlines and exceeding expectations.',
   });
   const [whatsapp, setWhatsapp] = useState<WhatsAppSettings | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -1087,6 +1088,284 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      {/* ── TESTIMONIALS ── */}
+      <section id="testimonials" className="py-20 lg:py-28 bg-gray-50 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2 pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <div className="flex justify-center">
+              <span className="section-badge bg-orange-100 text-orange-600">What Clients Say</span>
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+              Trusted by <span className="text-gradient">Thousands</span>
+            </h2>
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+              Hear from businesses and individuals who rely on Danhausa every day for their logistics needs.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                name: 'Chukwuemeka Obi',
+                role: 'E-commerce Business Owner, Lagos',
+                avatar: 'CO',
+                rating: 5,
+                text: "Danhausa has completely transformed how I handle deliveries. My customers receive their orders on time, every time. The business portal makes bulk booking incredibly simple.",
+                tag: 'Business Portal',
+                color: 'from-orange-500 to-red-500',
+              },
+              {
+                name: 'Amina Yusuf',
+                role: 'Online Fashion Vendor, Kano',
+                avatar: 'AY',
+                rating: 5,
+                text: "I ship clothes to customers across Nigeria weekly. The inter-state delivery is fast and the real-time tracking keeps my customers informed. Highly recommend!",
+                tag: 'Inter-State Delivery',
+                color: 'from-blue-600 to-blue-800',
+              },
+              {
+                name: 'Tunde Adeyemi',
+                role: 'Import/Export Trader, Abuja',
+                avatar: 'TA',
+                rating: 5,
+                text: "The international shipping service handled my cargo from Dubai seamlessly. Customs clearance was smooth and I was updated at every step. Top-class service.",
+                tag: 'International Shipping',
+                color: 'from-slate-700 to-slate-900',
+              },
+              {
+                name: 'Grace Eze',
+                role: 'Pharmaceutical Distributor, Port Harcourt',
+                avatar: 'GE',
+                rating: 5,
+                text: "Fragile goods need special care — Danhausa gets it right. My medical supplies always arrive intact. The fragile package handling is exceptional.",
+                tag: 'Fragile Delivery',
+                color: 'from-orange-500 to-red-500',
+              },
+              {
+                name: 'Ibrahim Suleiman',
+                role: 'Delivery Agent, Kaduna',
+                avatar: 'IS',
+                rating: 5,
+                text: "I joined as a rider six months ago and the experience has been great. The platform is easy to use, payouts are prompt, and the support team is always available.",
+                tag: 'Agent Portal',
+                color: 'from-blue-600 to-blue-800',
+              },
+              {
+                name: 'Ngozi Okonkwo',
+                role: 'HR Manager, Enugu',
+                avatar: 'NO',
+                rating: 5,
+                text: "We use Danhausa for all our official document deliveries across the country. The price calculator is very useful and the bookings are always confirmed quickly.",
+                tag: 'Express Shipping',
+                color: 'from-slate-700 to-slate-900',
+              },
+            ].map((t, i) => (
+              <div key={i} className="bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
+                <div className="flex items-start gap-3 mb-5">
+                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${t.color} flex items-center justify-center flex-shrink-0 shadow-md`}>
+                    <span className="text-white text-sm font-bold">{t.avatar}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-slate-900 text-sm leading-tight">{t.name}</p>
+                    <p className="text-gray-500 text-xs mt-0.5 leading-tight">{t.role}</p>
+                  </div>
+                  <Quote className="h-6 w-6 text-orange-200 flex-shrink-0 mt-0.5" />
+                </div>
+                <div className="flex gap-0.5 mb-4">
+                  {Array.from({ length: t.rating }).map((_, s) => (
+                    <Star key={s} className="h-3.5 w-3.5 text-orange-400 fill-orange-400" />
+                  ))}
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed flex-1">{t.text}</p>
+                <div className="mt-5 pt-4 border-t border-gray-50">
+                  <span className="inline-block bg-orange-50 text-orange-600 text-xs font-semibold px-3 py-1 rounded-full border border-orange-100">
+                    {t.tag}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-14 text-center">
+            <div className="inline-flex items-center gap-8 bg-white rounded-2xl px-10 py-6 border border-gray-100 shadow-sm">
+              {[
+                { value: '4.9/5', label: 'Average Rating' },
+                { value: '2,400+', label: 'Reviews' },
+                { value: '98%', label: 'Would Recommend' },
+              ].map((s) => (
+                <div key={s.label} className="text-center">
+                  <div className="text-2xl font-bold text-gradient">{s.value}</div>
+                  <div className="text-gray-500 text-xs mt-0.5">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── COVERAGE MAP ── */}
+      <section id="coverage" className="py-20 lg:py-28 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <div className="flex justify-center mb-4">
+              <span className="section-badge bg-white/10 text-orange-300 border border-orange-500/20">Coverage</span>
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-bold mb-4">
+              We Deliver <span className="text-gradient">Everywhere</span>
+            </h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              From Lagos to London, Kano to Kuala Lumpur — our network spans all 36 Nigerian states and key international destinations.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8 mb-14">
+            {[
+              {
+                icon: <MapPin className="h-7 w-7 text-white" />,
+                label: 'Same-State Delivery',
+                color: 'from-orange-500 to-red-500',
+                desc: 'Fast, same-day and next-day delivery within any Nigerian state.',
+                zones: ['Lagos', 'Kano', 'Abuja', 'Rivers', 'Kaduna', 'Oyo', 'Enugu', 'Delta', '+ All 36 States'],
+              },
+              {
+                icon: <Truck className="h-7 w-7 text-white" />,
+                label: 'Inter-State Delivery',
+                color: 'from-blue-600 to-blue-800',
+                desc: 'Reliable door-to-door delivery connecting all Nigerian states.',
+                zones: ['Lagos → Kano', 'Abuja → PH', 'Ibadan → Enugu', 'Kaduna → Lagos', 'Aba → Abuja', 'Benin → Kano', '+ 200+ Routes'],
+              },
+              {
+                icon: <Globe className="h-7 w-7 text-white" />,
+                label: 'International Shipping',
+                color: 'from-slate-600 to-slate-800',
+                desc: 'Import and export to major global destinations with customs support.',
+                zones: ['United Kingdom', 'United States', 'United Arab Emirates', 'China', 'India', 'Germany', '+ 50+ Countries'],
+              },
+            ].map((c, i) => (
+              <div key={i} className="glass rounded-2xl p-7 hover:bg-white/15 transition-all duration-300 hover:-translate-y-1">
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${c.color} flex items-center justify-center mb-5 shadow-lg`}>
+                  {c.icon}
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">{c.label}</h3>
+                <p className="text-gray-400 text-sm mb-5 leading-relaxed">{c.desc}</p>
+                <ul className="space-y-2">
+                  {c.zones.map((z) => (
+                    <li key={z} className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="h-3.5 w-3.5 text-orange-400 flex-shrink-0" />
+                      <span className="text-gray-300">{z}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Visual stats strip */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { value: '36', label: 'Nigerian States' },
+              { value: '50+', label: 'Countries Reached' },
+              { value: '200+', label: 'Delivery Routes' },
+              { value: '24/7', label: 'Operations' },
+            ].map((s) => (
+              <div key={s.label} className="glass rounded-2xl p-5 text-center hover:bg-white/20 transition-all">
+                <div className="text-3xl font-bold text-gradient mb-1">{s.value}</div>
+                <div className="text-gray-400 text-sm">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section id="faq" className="py-20 lg:py-28 bg-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-14">
+            <div className="flex justify-center">
+              <span className="section-badge bg-blue-100 text-blue-800">FAQ</span>
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+              Common <span className="text-gradient">Questions</span>
+            </h2>
+            <p className="text-lg text-gray-500 max-w-xl mx-auto">
+              Everything you need to know before your first delivery.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              {
+                q: 'How do I track my package?',
+                a: 'Visit our Track Order page and enter your order ID. Order IDs start with BK- (agent bookings), BB- (business bookings), LR- (logistics requests), or BR- (business requests). You\'ll see real-time status updates including pickup, transit, and delivery confirmation.',
+              },
+              {
+                q: 'How long does inter-state delivery take?',
+                a: 'Inter-state deliveries typically take 1–3 business days depending on origin and destination. Major routes like Lagos–Abuja and Kano–Lagos are usually completed within 24–48 hours. Express options are available for urgent shipments.',
+              },
+              {
+                q: 'What items cannot be shipped?',
+                a: 'We do not ship illegal substances, weapons, counterfeit goods, live animals (without proper documentation), or hazardous materials not declared and cleared for transport. For international shipments, additional customs restrictions may apply.',
+              },
+              {
+                q: 'How is the delivery fee calculated?',
+                a: 'Delivery fees are calculated based on distance between pickup and delivery locations, package type (document, parcel, fragile, heavy), and weight. Use our free Shipping Calculator to get an instant quote before booking.',
+              },
+              {
+                q: 'Can I book for someone else to receive the package?',
+                a: 'Yes. When booking, provide the recipient\'s name, phone number, and delivery address. Our team will contact the recipient upon arrival. No account is required for the recipient.',
+              },
+              {
+                q: 'Do you handle customs for international shipments?',
+                a: 'Yes. For international shipments, our team assists with customs documentation and clearance. You\'ll need to provide an accurate description and declared value of the goods. Our tracking system also shows customs clearance status in real-time.',
+              },
+              {
+                q: 'What is the difference between Agent, Business, and Individual portals?',
+                a: 'The Individual Portal is for personal deliveries — anyone can sign up and book. The Business Portal is for companies with regular logistics needs and includes bulk booking and invoicing. The Agent Portal is for our certified delivery couriers who carry out deliveries on our behalf.',
+              },
+              {
+                q: 'Is there insurance for lost or damaged packages?',
+                a: 'All shipments carry basic liability coverage. For high-value items, we recommend declaring the full value during booking for extended coverage. Contact our support team for large-value or sensitive shipments that need specific insurance arrangements.',
+              },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="border border-gray-200 rounded-2xl overflow-hidden hover:border-orange-200 transition-colors"
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between px-6 py-4 text-left gap-4 group"
+                >
+                  <span className="font-semibold text-slate-800 text-sm leading-snug group-hover:text-orange-600 transition-colors">
+                    {item.q}
+                  </span>
+                  <div className={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-300 ${openFaq === i ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-orange-50 group-hover:text-orange-500'}`}>
+                    {openFaq === i ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </div>
+                </button>
+                <div className={`overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-48' : 'max-h-0'}`}>
+                  <p className="px-6 pb-5 text-gray-500 text-sm leading-relaxed">{item.a}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 bg-gradient-to-br from-orange-50 to-red-50 border border-orange-100 rounded-2xl p-7 text-center">
+            <p className="font-bold text-slate-900 mb-1">Still have questions?</p>
+            <p className="text-gray-500 text-sm mb-4">Our team is available Mon–Fri 9AM–6PM to help you.</p>
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-all hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25"
+            >
+              Contact Support <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* ── CONTACT ── */}
       <section id="contact" className="py-20 lg:py-28 bg-gray-50 relative overflow-hidden">

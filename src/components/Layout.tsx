@@ -1,6 +1,7 @@
 import { Menu, X, Truck, ArrowUp, ChevronDown, Package, MapPin, Users, Building2, UserCheck, Calculator, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
+import AIChatbot from './AIChatbot';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -380,6 +381,8 @@ export default function Layout({ children }: LayoutProps) {
       >
         <ArrowUp className="h-5 w-5" />
       </button>
+
+      <AIChatbot />
     </div>
   );
 }
