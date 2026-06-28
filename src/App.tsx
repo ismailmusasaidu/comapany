@@ -49,8 +49,6 @@ import IndividualLogisticsPage from './pages/IndividualLogisticsPage';
 import IndividualMessagesPage from './pages/IndividualMessagesPage';
 import AdminOrdersAnalyticsPage from './pages/AdminOrdersAnalyticsPage';
 import AdminInvoiceGeneratorPage from './pages/AdminInvoiceGeneratorPage';
-import EmailVerificationPage from './pages/EmailVerificationPage';
-import AuthCallbackPage from './pages/AuthCallbackPage';
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -117,9 +115,6 @@ function App() {
         <Route path="/individual/booking/new" element={<IndividualDeliveryBookingPage />} />
         <Route path="/individual/logistics/new" element={<IndividualLogisticsPage />} />
         <Route path="/individual/messages" element={<IndividualMessagesPage />} />
-
-        <Route path="/verify-email" element={<EmailVerificationPage />} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
         <Route
           path="/*"
