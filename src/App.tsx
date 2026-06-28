@@ -49,6 +49,8 @@ import IndividualLogisticsPage from './pages/IndividualLogisticsPage';
 import IndividualMessagesPage from './pages/IndividualMessagesPage';
 import AdminOrdersAnalyticsPage from './pages/AdminOrdersAnalyticsPage';
 import AdminInvoiceGeneratorPage from './pages/AdminInvoiceGeneratorPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -115,6 +117,9 @@ function App() {
         <Route path="/individual/booking/new" element={<IndividualDeliveryBookingPage />} />
         <Route path="/individual/logistics/new" element={<IndividualLogisticsPage />} />
         <Route path="/individual/messages" element={<IndividualMessagesPage />} />
+
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route
           path="/*"
