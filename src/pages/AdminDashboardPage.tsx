@@ -202,6 +202,7 @@ export default function AdminDashboardPage() {
             </button>
 
             <button
+              onClick={() => navigate('/admin/orders-analytics')}
               className="relative bg-gradient-to-br from-slate-50 to-gray-100 border border-slate-200 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
             >
               <div className="flex items-center space-x-3 mb-2">
