@@ -199,6 +199,9 @@ export default function AdminAgentsPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [bPage, setBPage] = useState(1);
+  const [rPage, setRPage] = useState(1);
+  const PAGE_SIZE = 15;
 
   // ── Messaging state ──
   const [msgThreads, setMsgThreads] = useState<MsgThread[]>([]);
@@ -352,6 +355,11 @@ export default function AdminAgentsPage() {
 
   const PKG_COLORS: Record<string, string> = { document: 'bg-blue-400', parcel: 'bg-orange-400', fragile: 'bg-yellow-400', heavy: 'bg-slate-500' };
   const SVC_COLORS: Record<string, string> = { freight: 'bg-blue-500', warehousing: 'bg-purple-500', express: 'bg-yellow-500', bulk: 'bg-green-500', customs: 'bg-orange-500', last_mile: 'bg-red-500' };
+
+  const bTotalPages = Math.max(1, Math.ceil(bookings.length / PAGE_SIZE));
+  const rTotalPages = Math.max(1, Math.ceil(requests.length / PAGE_SIZE));
+  const bSlice = bookings.slice((bPage - 1) * PAGE_SIZE, bPage * PAGE_SIZE);
+  const rSlice = requests.slice((rPage - 1) * PAGE_SIZE, rPage * PAGE_SIZE);
 
   const TABS = [
     { key: 'overview' as Tab, label: 'Overview', icon: BarChart3 },
@@ -765,7 +773,7 @@ export default function AdminAgentsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                      {bookings.map(b => (
+                      {bSlice.map(b => (
                         <tr key={b.id} className="hover:bg-gray-50/50 transition-colors cursor-pointer" onClick={() => setSelectedBooking(b)}>
                           <td className="px-6 py-4">
                             <p className="font-bold text-orange-600">{b.booking_ref}</p>
@@ -807,6 +815,29 @@ export default function AdminAgentsPage() {
                   </table>
                 </div>
               )}
+              {bTotalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-gray-100 mt-3">
+                  <p className="text-xs text-gray-500">
+                    Showing {(bPage - 1) * PAGE_SIZE + 1}–{Math.min(bPage * PAGE_SIZE, bookings.length)} of {bookings.length}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => setBPage(p => Math.max(1, p - 1))} disabled={bPage === 1}
+                      className="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Prev</button>
+                    {Array.from({ length: Math.min(5, bTotalPages) }, (_, i) => {
+                      const start = Math.max(1, Math.min(bPage - 2, bTotalPages - 4));
+                      const pg = start + i;
+                      return (
+                        <button key={pg} onClick={() => setBPage(pg)}
+                          className={`w-8 h-7 text-xs rounded-lg border transition-colors ${pg === bPage ? 'bg-orange-500 border-orange-500 text-white font-bold' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                          {pg}
+                        </button>
+                      );
+                    })}
+                    <button onClick={() => setBPage(p => Math.min(bTotalPages, p + 1))} disabled={bPage === bTotalPages}
+                      className="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Next</button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -832,7 +863,7 @@ export default function AdminAgentsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                      {requests.map(r => (
+                      {rSlice.map(r => (
                         <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
                           <td className="px-6 py-4">
                             <p className="font-bold text-blue-600">{r.request_ref}</p>
@@ -870,6 +901,29 @@ export default function AdminAgentsPage() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              )}
+              {rTotalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-gray-100 mt-3">
+                  <p className="text-xs text-gray-500">
+                    Showing {(rPage - 1) * PAGE_SIZE + 1}–{Math.min(rPage * PAGE_SIZE, requests.length)} of {requests.length}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => setRPage(p => Math.max(1, p - 1))} disabled={rPage === 1}
+                      className="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Prev</button>
+                    {Array.from({ length: Math.min(5, rTotalPages) }, (_, i) => {
+                      const start = Math.max(1, Math.min(rPage - 2, rTotalPages - 4));
+                      const pg = start + i;
+                      return (
+                        <button key={pg} onClick={() => setRPage(pg)}
+                          className={`w-8 h-7 text-xs rounded-lg border transition-colors ${pg === rPage ? 'bg-orange-500 border-orange-500 text-white font-bold' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                          {pg}
+                        </button>
+                      );
+                    })}
+                    <button onClick={() => setRPage(p => Math.min(rTotalPages, p + 1))} disabled={rPage === rTotalPages}
+                      className="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Next</button>
+                  </div>
                 </div>
               )}
             </div>

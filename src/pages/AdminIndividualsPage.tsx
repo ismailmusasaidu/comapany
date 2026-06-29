@@ -138,6 +138,9 @@ export default function AdminIndividualsPage() {
   const [bStatusFilter, setBStatusFilter] = useState('all');
   const [rStatusFilter, setRStatusFilter] = useState('all');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [bPage, setBPage] = useState(1);
+  const [rPage, setRPage] = useState(1);
+  const PAGE_SIZE = 15;
 
   // booking detail / invoice modals
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -298,6 +301,11 @@ export default function AdminIndividualsPage() {
       || r.individual_profiles?.full_name?.toLowerCase().includes(q);
     return matchStatus && matchSearch;
   });
+
+  const bTotalPages = Math.max(1, Math.ceil(filteredBookings.length / PAGE_SIZE));
+  const rTotalPages = Math.max(1, Math.ceil(filteredRequests.length / PAGE_SIZE));
+  const bSlice = filteredBookings.slice((bPage - 1) * PAGE_SIZE, bPage * PAGE_SIZE);
+  const rSlice = filteredRequests.slice((rPage - 1) * PAGE_SIZE, rPage * PAGE_SIZE);
 
   const openRequestModal = (r: Request) => {
     setSelectedRequest(r);
@@ -529,7 +537,7 @@ export default function AdminIndividualsPage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
-                  value={search} onChange={e => setSearch(e.target.value)}
+                  value={search} onChange={e => { setSearch(e.target.value); setBPage(1); setRPage(1); }}
                   placeholder="Search by ref, name or city..."
                   className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
@@ -537,7 +545,7 @@ export default function AdminIndividualsPage() {
               <div className="relative">
                 <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" style={{ display: 'inline' }} />
                 <select
-                  value={bStatusFilter} onChange={e => setBStatusFilter(e.target.value)}
+                  value={bStatusFilter} onChange={e => { setBStatusFilter(e.target.value); setBPage(1); }}
                   className="pl-9 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none"
                 >
                   <option value="all">All Statuses</option>
@@ -568,7 +576,7 @@ export default function AdminIndividualsPage() {
                       </td></tr>
                     ) : filteredBookings.length === 0 ? (
                       <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-400">No bookings found</td></tr>
-                    ) : filteredBookings.map(b => (
+                    ) : bSlice.map(b => (
                       <tr key={b.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-4 py-3 font-mono text-xs text-gray-700">{b.booking_ref}</td>
                         <td className="px-4 py-3">
@@ -645,24 +653,45 @@ export default function AdminIndividualsPage() {
                 </table>
               </div>
             </div>
+            {bTotalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-gray-100 mt-3">
+                <p className="text-xs text-gray-500">
+                  Showing {(bPage - 1) * PAGE_SIZE + 1}–{Math.min(bPage * PAGE_SIZE, filteredBookings.length)} of {filteredBookings.length}
+                </p>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => setBPage(p => Math.max(1, p - 1))} disabled={bPage === 1}
+                    className="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Prev</button>
+                  {Array.from({ length: Math.min(5, bTotalPages) }, (_, i) => {
+                    const start = Math.max(1, Math.min(bPage - 2, bTotalPages - 4));
+                    const pg = start + i;
+                    return (
+                      <button key={pg} onClick={() => setBPage(pg)}
+                        className={`w-8 h-7 text-xs rounded-lg border transition-colors ${pg === bPage ? 'bg-orange-500 border-orange-500 text-white font-bold' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                        {pg}
+                      </button>
+                    );
+                  })}
+                  <button onClick={() => setBPage(p => Math.min(bTotalPages, p + 1))} disabled={bPage === bTotalPages}
+                    className="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Next</button>
+                </div>
+              </div>
+            )}
           </div>
         )}
-
-        {/* ── REQUESTS TAB ── */}
         {tab === 'requests' && (
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
-                  value={search} onChange={e => setSearch(e.target.value)}
+                  value={search} onChange={e => { setSearch(e.target.value); setBPage(1); setRPage(1); }}
                   placeholder="Search by ref, title, customer or route..."
                   className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
               <div className="relative">
                 <select
-                  value={rStatusFilter} onChange={e => setRStatusFilter(e.target.value)}
+                  value={rStatusFilter} onChange={e => { setRStatusFilter(e.target.value); setRPage(1); }}
                   className="pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none"
                 >
                   <option value="all">All Statuses</option>
@@ -694,7 +723,7 @@ export default function AdminIndividualsPage() {
                       </td></tr>
                     ) : filteredRequests.length === 0 ? (
                       <tr><td colSpan={8} className="px-4 py-12 text-center text-gray-400">No requests found</td></tr>
-                    ) : filteredRequests.map(r => (
+                    ) : rSlice.map(r => (
                       <tr key={r.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-4 py-3 font-mono text-xs text-gray-700">{r.request_ref}</td>
                         <td className="px-4 py-3">
@@ -725,6 +754,29 @@ export default function AdminIndividualsPage() {
                 </table>
               </div>
             </div>
+            {rTotalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-gray-100 mt-3">
+                <p className="text-xs text-gray-500">
+                  Showing {(rPage - 1) * PAGE_SIZE + 1}–{Math.min(rPage * PAGE_SIZE, filteredRequests.length)} of {filteredRequests.length}
+                </p>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => setRPage(p => Math.max(1, p - 1))} disabled={rPage === 1}
+                    className="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Prev</button>
+                  {Array.from({ length: Math.min(5, rTotalPages) }, (_, i) => {
+                    const start = Math.max(1, Math.min(rPage - 2, rTotalPages - 4));
+                    const pg = start + i;
+                    return (
+                      <button key={pg} onClick={() => setRPage(pg)}
+                        className={`w-8 h-7 text-xs rounded-lg border transition-colors ${pg === rPage ? 'bg-orange-500 border-orange-500 text-white font-bold' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                        {pg}
+                      </button>
+                    );
+                  })}
+                  <button onClick={() => setRPage(p => Math.min(rTotalPages, p + 1))} disabled={rPage === rTotalPages}
+                    className="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Next</button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
