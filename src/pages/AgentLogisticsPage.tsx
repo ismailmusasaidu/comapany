@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Truck, MapPin, FileText, CheckCircle, ArrowLeft, ArrowRight,
+  Truck, MapPin, FileText, CheckCircle, ArrowLeft, ArrowRight, LogOut,
   Package, Warehouse, Zap, BarChart3, Globe, Navigation, Weight, Calendar, DollarSign, Home
 } from 'lucide-react';
 import { useAgent } from '../contexts/AgentContext';
@@ -44,8 +44,9 @@ function generateRef() {
 }
 
 export default function AgentLogisticsPage() {
-  const { user, profile } = useAgent();
+  const { user, profile, signOut } = useAgent();
   const navigate = useNavigate();
+  const handleLogout = async () => { await signOut(); navigate('/agent/login'); };
   const [form, setForm] = useState<RequestForm>(EMPTY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -154,6 +155,13 @@ export default function AgentLogisticsPage() {
             <h1 className="text-lg font-bold text-gray-900">Request Logistics Service</h1>
             <p className="text-gray-500 text-xs">Submit a service request to our logistics team</p>
           </div>
+          <button
+            onClick={handleLogout}
+            className="ml-auto p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-colors"
+            title="Sign out"
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
         </div>
       </header>
 

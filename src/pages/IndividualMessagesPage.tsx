@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Send, MessageSquare, Check, CheckCheck } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Send, MessageSquare, Check, CheckCheck, LogOut } from 'lucide-react';
 import { useIndividual } from '../contexts/IndividualContext';
 import { supabase } from '../lib/supabase';
 
@@ -24,7 +24,9 @@ interface Message {
 }
 
 export default function IndividualMessagesPage() {
-  const { user } = useIndividual();
+  const { user, signOut } = useIndividual();
+  const navigate = useNavigate();
+  const handleLogout = async () => { await signOut(); navigate('/individual/login'); };
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeThread, setActiveThread] = useState<Thread | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -242,6 +244,13 @@ export default function IndividualMessagesPage() {
             </div>
             <h1 className="text-base sm:text-lg font-bold text-gray-900">Messages from Admin</h1>
           </div>
+          <button
+            onClick={handleLogout}
+            className="ml-auto p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-colors"
+            title="Sign out"
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
         </div>
       </header>
 

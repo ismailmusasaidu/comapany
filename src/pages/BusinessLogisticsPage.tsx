@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Truck, Package, MapPin, Calendar, DollarSign, FileText,
-  CheckCircle, ArrowLeft, ArrowRight, Weight
+  CheckCircle, ArrowLeft, ArrowRight, Weight, LogOut
 } from 'lucide-react';
 import { useBusiness } from '../contexts/BusinessContext';
 import { supabase } from '../lib/supabase';
@@ -47,7 +47,9 @@ function generateRef() {
 }
 
 export default function BusinessLogisticsPage() {
-  const { user, profile } = useBusiness();
+  const { user, profile, signOut } = useBusiness();
+  const navigate = useNavigate();
+  const handleLogout = async () => { await signOut(); navigate('/business/login'); };
   const [form, setForm] = useState<RequestForm>(EMPTY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -149,6 +151,13 @@ export default function BusinessLogisticsPage() {
             <h1 className="text-lg font-bold text-gray-900">Request Logistics Service</h1>
             <p className="text-gray-500 text-xs">Submit a new enterprise logistics request</p>
           </div>
+          <button
+            onClick={handleLogout}
+            className="ml-auto p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-colors"
+            title="Sign out"
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
         </div>
       </header>
 

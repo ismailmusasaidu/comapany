@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Truck, Package, MapPin, Phone, User, Weight,
   DollarSign, FileText, CheckCircle, ArrowLeft, ArrowRight, ChevronRight,
   Globe, Map, Navigation, Ruler, RefreshCw, AlertCircle, Tag,
-  Banknote, CreditCard, Building2, Wifi
+  Banknote, CreditCard, Building2, Wifi, LogOut
 } from 'lucide-react';
 import { useAgent } from '../contexts/AgentContext';
 import { supabase } from '../lib/supabase';
@@ -87,7 +87,9 @@ function fmt(n: number) { return `₦${Math.round(n).toLocaleString('en-NG')}`; 
 function paymentLabel(value: string) { return PAYMENT_METHODS.find(p => p.value === value)?.label ?? cap(value); }
 
 export default function AgentDeliveryBookingPage() {
-  const { user, profile } = useAgent();
+  const { user, profile, signOut } = useAgent();
+  const navigate = useNavigate();
+  const handleLogout = async () => { await signOut(); navigate('/agent/login'); };
   const [form, setForm] = useState<BookingForm>(EMPTY);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -277,11 +279,20 @@ export default function AgentDeliveryBookingPage() {
             <h1 className="text-lg font-bold text-gray-900">New Delivery Booking</h1>
             <p className="text-gray-500 text-xs">Step {step} of {totalSteps}</p>
           </div>
-          {selectedDt && step > 1 && (
-            <div className={`ml-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${selectedDt.bg} ${selectedDt.color}`}>
-              <selectedDt.icon className="h-3 w-3" /> {selectedDt.label}
-            </div>
-          )}
+          <div className="ml-auto flex items-center gap-2">
+            {selectedDt && step > 1 && (
+              <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${selectedDt.bg} ${selectedDt.color}`}>
+                <selectedDt.icon className="h-3 w-3" /> {selectedDt.label}
+              </div>
+            )}
+            <button
+              onClick={handleLogout}
+              className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-colors"
+              title="Sign out"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </header>
 
