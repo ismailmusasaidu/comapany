@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock, Plus, Send, DollarSign, MessageCircle, BarChart3, FileText } from 'lucide-react';
+import { LogOut, Settings, Users, Package, Image, MessageSquare, Home, ShoppingCart, Star, Building2, Inbox, Truck, Clock, Plus, Send, DollarSign, MessageCircle, BarChart3, FileText, User } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { user, signOut } = useAuth();
@@ -199,6 +199,19 @@ export default function AdminDashboardPage() {
                 <h3 className="text-lg font-semibold text-white">Invoice Generator</h3>
               </div>
               <p className="text-gray-300 text-sm">Generate daily, weekly, monthly or custom period invoices for deliveries and logistics</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/individuals')}
+              className="relative bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                  <User className="h-4 w-4 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900">Individual Customers</h3>
+              </div>
+              <p className="text-gray-600 text-sm">Manage individual delivery bookings, logistics requests & messaging</p>
             </button>
 
             <button
