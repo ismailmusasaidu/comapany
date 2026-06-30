@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Truck, Lock, Eye, EyeOff, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -7,6 +7,7 @@ type PageState = 'loading' | 'ready' | 'success' | 'error';
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [pageState, setPageState] = useState<PageState>('loading');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,8 +18,23 @@ export default function ResetPasswordPage() {
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    // Supabase fires PASSWORD_RECOVERY event when the reset link is clicked.
-    // Wait briefly for the SDK to process the URL hash / PKCE tokens.
+    const tokenHash = searchParams.get('token_hash');
+    const type = searchParams.get('type');
+
+    if (tokenHash && type === 'recovery') {
+      // PKCE flow: token arrives as query params, must call verifyOtp to establish session
+      supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' }).then(({ error: verifyErr }) => {
+        if (verifyErr) {
+          setErrorMsg('This reset link is invalid or has expired. Please request a new one.');
+          setPageState('error');
+        } else {
+          setPageState('ready');
+        }
+      });
+      return;
+    }
+
+    // Implicit flow: Supabase fires PASSWORD_RECOVERY after processing hash fragment
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
         setPageState('ready');
@@ -30,7 +46,6 @@ export default function ResetPasswordPage() {
       if (session) {
         setPageState('ready');
       } else {
-        // Give Supabase 3s to process the URL token before giving up
         setTimeout(() => {
           supabase.auth.getSession().then(({ data: { session: s } }) => {
             if (s) {
@@ -45,7 +60,7 @@ export default function ResetPasswordPage() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
