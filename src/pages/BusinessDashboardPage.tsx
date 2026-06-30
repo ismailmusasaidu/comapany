@@ -5,7 +5,8 @@ import {
   LogOut, Plus, ChevronRight, AlertTriangle, Building2,
   MapPin, Phone, Mail, TrendingUp, Activity, FileText,
   Target, ArrowUpRight, ArrowDownRight, Minus, Award, Zap,
-  Users, Globe, Briefcase, MessageSquare, FileDown, SlidersHorizontal
+  Users, Globe, Briefcase, MessageSquare, FileDown, SlidersHorizontal,
+  Menu, X
 } from 'lucide-react';
 import { useBusiness } from '../contexts/BusinessContext';
 import { supabase } from '../lib/supabase';
@@ -186,6 +187,7 @@ export default function BusinessDashboardPage() {
   const [dataLoading, setDataLoading] = useState(true);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => { refreshProfile(); }, []);
   useEffect(() => {
@@ -282,8 +284,12 @@ export default function BusinessDashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex min-h-screen">
+        {/* Mobile overlay */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 bg-black/50 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        )}
         {/* Sidebar */}
-        <aside className="w-64 bg-slate-900 text-white flex flex-col fixed h-full z-30 hidden lg:flex">
+        <aside className={`w-64 bg-slate-900 text-white flex flex-col fixed h-full z-30 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
           <div className="p-6 border-b border-white/10">
             <Link to="/" className="flex items-center gap-3">
               <div className="bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-xl">
@@ -291,6 +297,9 @@ export default function BusinessDashboardPage() {
               </div>
               <span className="font-bold text-sm">Danhausa Logistics</span>
             </Link>
+            <button onClick={() => setSidebarOpen(false)} className="lg:hidden absolute top-5 right-4 p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all">
+              <X className="h-5 w-5" />
+            </button>
           </div>
 
           <div className="p-4 border-b border-white/10">
@@ -373,11 +382,16 @@ export default function BusinessDashboardPage() {
 
         <main className="flex-1 lg:ml-64">
           <header className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Business Dashboard</h1>
-              <p className="text-gray-500 text-sm flex items-center gap-1.5">
-                <Building2 className="h-3.5 w-3.5" /> {profile.company_name}
-              </p>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all">
+                <Menu className="h-5 w-5" />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Business Dashboard</h1>
+                <p className="text-gray-500 text-sm flex items-center gap-1.5">
+                  <Building2 className="h-3.5 w-3.5" /> {profile.company_name}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={handleLogout} disabled={loggingOut} className="lg:hidden flex items-center gap-1.5 text-red-500 hover:text-red-600 text-sm font-medium">
