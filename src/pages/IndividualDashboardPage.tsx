@@ -310,8 +310,8 @@ export default function IndividualDashboardPage() {
           <div className="fixed inset-0 bg-black/50 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />
         )}
         {/* Sidebar */}
-        <aside className={`w-64 bg-slate-900 text-white flex flex-col fixed h-full z-30 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-          <div className="p-6 border-b border-white/10">
+        <aside className={`w-64 bg-slate-900 text-white flex flex-col fixed h-full z-30 overflow-hidden transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+          <div className="p-6 border-b border-white/10 flex-shrink-0 relative">
             <Link to="/" className="flex items-center gap-3">
               <div className="bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-xl">
                 <Truck className="h-5 w-5 text-white" />
@@ -323,7 +323,7 @@ export default function IndividualDashboardPage() {
             </button>
           </div>
 
-          <div className="p-4 border-b border-white/10">
+          <div className="p-4 border-b border-white/10 flex-shrink-0">
             <div className="bg-white/5 rounded-xl p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -341,7 +341,7 @@ export default function IndividualDashboardPage() {
             </div>
           </div>
 
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 overflow-y-auto p-4 space-y-1">
             <p className="text-gray-500 text-xs font-bold uppercase tracking-wider px-3 mb-2">Navigation</p>
             <Link to="/individual/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/10 text-white font-medium text-sm">
               <BarChart3 className="h-4 w-4" /> Dashboard
@@ -363,7 +363,7 @@ export default function IndividualDashboardPage() {
             </Link>
           </nav>
 
-          <div className="p-4 border-t border-white/10 space-y-3">
+          <div className="p-4 border-t border-white/10 space-y-3 flex-shrink-0">
             <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">Quick Stats</p>
             <div className="space-y-2">
               <div className="flex justify-between text-xs">
@@ -379,7 +379,7 @@ export default function IndividualDashboardPage() {
             </div>
           </div>
 
-          <div className="p-4 border-t border-white/10">
+          <div className="p-4 border-t border-white/10 flex-shrink-0">
             <button onClick={handleLogout} disabled={loggingOut}
               className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-500/10 transition-all text-sm font-medium">
               <LogOut className="h-4 w-4" />
