@@ -51,6 +51,8 @@ import AdminOrdersAnalyticsPage from './pages/AdminOrdersAnalyticsPage';
 import AdminInvoiceGeneratorPage from './pages/AdminInvoiceGeneratorPage';
 import AdminIndividualsPage from './pages/AdminIndividualsPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -99,6 +101,8 @@ function App() {
 
         <Route path="/agent/register" element={<AgentRegisterPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
         <Route path="/agent/login" element={<AgentLoginPage />} />
         <Route path="/agent/dashboard" element={<AgentDashboardPage />} />
         <Route path="/agent/orders" element={<AgentOrdersPage />} />
