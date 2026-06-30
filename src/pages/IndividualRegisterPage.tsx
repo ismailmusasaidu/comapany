@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Truck, User, Mail, Phone, MapPin, Lock, Eye, EyeOff, CheckCircle, ArrowRight, Building2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Truck, User, Mail, Phone, MapPin, Lock, Eye, EyeOff, ArrowRight, Building2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 interface FormData {
   full_name: string;
@@ -21,13 +24,13 @@ const INITIAL: FormData = {
 };
 
 export default function IndividualRegisterPage() {
-  const navigate = useNavigate();
   const [form, setForm] = useState<FormData>(INITIAL);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(prev => ({ ...prev, [key]: e.target.value }));
@@ -52,6 +55,7 @@ export default function IndividualRegisterPage() {
       const { data, error: authErr } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       });
       if (authErr) throw authErr;
       if (!data.user) throw new Error('Registration failed. Please try again.');
@@ -67,6 +71,20 @@ export default function IndividualRegisterPage() {
       });
       if (profileErr) throw profileErr;
 
+      // Send branded verification email via Resend
+      const origin = window.location.origin;
+      await fetch(`${SUPABASE_URL}/functions/v1/send-verification-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
+        body: JSON.stringify({
+          email: form.email,
+          name: form.full_name,
+          portal: 'individual',
+          confirmationUrl: `${origin}/auth/callback`,
+        }),
+      });
+
+      setRegisteredEmail(form.email);
       setSuccess(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Registration failed.');
@@ -79,24 +97,24 @@ export default function IndividualRegisterPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center px-4">
         <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-green-50 border-2 border-green-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="h-10 w-10 text-green-500" />
+          <div className="w-20 h-20 bg-blue-50 border-2 border-blue-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Mail className="h-10 w-10 text-blue-500" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Account Created!</h2>
-          <p className="text-gray-500 mb-8 leading-relaxed">
-            Your individual account is ready. Sign in to start booking deliveries right away.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Check Your Email</h2>
+          <p className="text-gray-500 mb-2 leading-relaxed">We sent a verification link to:</p>
+          <p className="text-orange-500 font-semibold mb-6 text-sm">{registeredEmail}</p>
           <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-8 text-left">
             <p className="text-sm text-orange-700 font-medium">What you can do now:</p>
             <ul className="mt-2 space-y-1 text-sm text-orange-600 list-disc list-inside">
-              <li>Book delivery orders instantly</li>
+              <li>Open the email and click "Verify My Email Address"</li>
+              <li>Sign in to start booking deliveries</li>
               <li>Submit logistics requests</li>
               <li>Track your shipments</li>
-              <li>Message our support team</li>
             </ul>
           </div>
+          <p className="text-xs text-gray-400 mb-4">Didn't receive it? Check your spam folder or try registering again.</p>
           <button
-            onClick={() => navigate('/individual/login')}
+            onClick={() => window.location.href = '/individual/login'}
             className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all hover:scale-105"
           >
             Go to Login <ArrowRight className="h-4 w-4" />

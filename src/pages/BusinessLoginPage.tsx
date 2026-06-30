@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Truck, Mail, Lock, Eye, EyeOff, Building2 } from 'lucide-react';
 import { useBusiness } from '../contexts/BusinessContext';
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+
 export default function BusinessLoginPage() {
   const { signIn } = useBusiness();
   const navigate = useNavigate();
@@ -11,19 +14,44 @@ export default function BusinessLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [unverified, setUnverified] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendDone, setResendDone] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setUnverified(false);
     setLoading(true);
     try {
       await signIn(email, password);
       navigate('/business/dashboard');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.');
+      const msg = err instanceof Error ? err.message : 'Login failed. Please check your credentials.';
+      if (msg.toLowerCase().includes('email not confirmed') || msg.toLowerCase().includes('email_not_confirmed')) {
+        setUnverified(true);
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleResend = async () => {
+    setResendLoading(true);
+    await fetch(`${SUPABASE_URL}/functions/v1/send-verification-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
+      body: JSON.stringify({
+        email,
+        name: email,
+        portal: 'business',
+        confirmationUrl: `${window.location.origin}/auth/callback`,
+      }),
+    });
+    setResendLoading(false);
+    setResendDone(true);
   };
 
   return (
@@ -50,6 +78,19 @@ export default function BusinessLoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="p-8 space-y-5">
+            {unverified && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <p className="text-amber-800 font-semibold text-sm mb-1">Email not verified</p>
+                <p className="text-amber-700 text-sm mb-3">Please check your inbox and click the verification link before signing in.</p>
+                {resendDone ? (
+                  <p className="text-green-600 text-sm font-medium">Verification email resent!</p>
+                ) : (
+                  <button onClick={handleResend} disabled={resendLoading || !email} className="text-sm font-semibold text-orange-600 hover:text-orange-700 underline underline-offset-2 disabled:opacity-50">
+                    {resendLoading ? 'Sending...' : 'Resend verification email'}
+                  </button>
+                )}
+              </div>
+            )}
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
                 {error}
