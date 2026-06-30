@@ -813,7 +813,7 @@ export function VehicleSelectionStep({ selected, onSelect }: { selected: string;
         <h2 className="text-xl font-bold text-gray-900 mb-1">Select Vehicle Type</h2>
         <p className="text-gray-500 text-sm">Please select the most suitable vehicle to pick up your item(s)</p>
       </div>
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {VEHICLES.map(v => {
           const isSelected = selected === v.value;
           return (
@@ -821,7 +821,7 @@ export function VehicleSelectionStep({ selected, onSelect }: { selected: string;
               key={v.value}
               type="button"
               onClick={() => onSelect(v.value)}
-              className={`relative flex flex-col items-center text-center p-6 rounded-2xl border-2 transition-all duration-200 group ${
+              className={`relative flex flex-col sm:flex-col items-center text-center p-5 rounded-2xl border-2 transition-all duration-200 group ${
                 isSelected
                   ? `${v.borderActive} ${v.bgActive} shadow-md`
                   : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'

@@ -58,17 +58,17 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-600">{user?.email}</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center gap-3">
+          <h1 className="text-lg sm:text-2xl font-bold text-slate-900 flex-shrink-0">Admin Dashboard</h1>
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <span className="text-gray-600 text-sm truncate hidden sm:block">{user?.email}</span>
             <button
               onClick={handleLogout}
               disabled={isLoading}
-              className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white px-3 py-2 rounded-lg transition-colors flex-shrink-0 text-sm"
             >
               <LogOut className="h-4 w-4" />
-              <span>Logout</span>
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>

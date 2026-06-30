@@ -319,14 +319,14 @@ export default function IndividualOrdersPage() {
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
               <div className="px-5 pt-4 pb-0 border-b border-gray-100">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 overflow-x-auto">
                     <button onClick={() => setTab('bookings')}
-                      className={`px-4 py-2 rounded-t-xl text-sm font-semibold transition-colors border-b-2 ${tab === 'bookings' ? 'text-orange-600 border-orange-500 bg-orange-50/50' : 'text-gray-500 border-transparent hover:text-gray-700'}`}>
+                      className={`px-3 sm:px-4 py-2 rounded-t-xl text-xs sm:text-sm font-semibold transition-colors border-b-2 whitespace-nowrap ${tab === 'bookings' ? 'text-orange-600 border-orange-500 bg-orange-50/50' : 'text-gray-500 border-transparent hover:text-gray-700'}`}>
                       Delivery Bookings
                       <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full font-bold ${tab === 'bookings' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-500'}`}>{filteredBookings.length}</span>
                     </button>
                     <button onClick={() => setTab('requests')}
-                      className={`px-4 py-2 rounded-t-xl text-sm font-semibold transition-colors border-b-2 ${tab === 'requests' ? 'text-blue-600 border-blue-500 bg-blue-50/50' : 'text-gray-500 border-transparent hover:text-gray-700'}`}>
+                      className={`px-3 sm:px-4 py-2 rounded-t-xl text-xs sm:text-sm font-semibold transition-colors border-b-2 whitespace-nowrap ${tab === 'requests' ? 'text-blue-600 border-blue-500 bg-blue-50/50' : 'text-gray-500 border-transparent hover:text-gray-700'}`}>
                       Logistics Requests
                       <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full font-bold ${tab === 'requests' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>{filteredRequests.length}</span>
                     </button>

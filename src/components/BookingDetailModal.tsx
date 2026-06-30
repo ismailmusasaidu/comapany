@@ -95,15 +95,15 @@ export default function BookingDetailModal({ booking, onClose, isAdmin = false, 
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className={`px-6 py-5 border-b ${cfg.border} ${cfg.bg} flex items-center justify-between flex-shrink-0`}>
-          <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl bg-white/60 border ${cfg.border}`}>
-              <Icon className={`h-5 w-5 ${cfg.color}`} />
+        <div className={`px-4 sm:px-6 py-4 sm:py-5 border-b ${cfg.border} ${cfg.bg} flex items-center justify-between flex-shrink-0 gap-2`}>
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className={`p-2 sm:p-2.5 rounded-xl bg-white/60 border ${cfg.border} flex-shrink-0`}>
+              <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${cfg.color}`} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="font-bold text-gray-900 text-lg">{booking.booking_ref}</p>
-                <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border ${cfg.color} ${cfg.bg} ${cfg.border}`}>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-bold text-gray-900 text-base sm:text-lg truncate">{booking.booking_ref}</p>
+                <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border flex-shrink-0 ${cfg.color} ${cfg.bg} ${cfg.border}`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${status === 'delivered' ? 'bg-green-500' : status === 'cancelled' ? 'bg-red-500' : 'bg-orange-500 animate-pulse'}`} />
                   {cfg.label}
                 </span>
@@ -275,29 +275,27 @@ export default function BookingDetailModal({ booking, onClose, isAdmin = false, 
 
         {/* Footer — admin status control */}
         {isAdmin && (
-          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex-shrink-0">
-            <div className="flex items-center justify-between gap-4">
-              <p className="text-sm font-medium text-gray-700">Update Status:</p>
-              <div className="flex items-center gap-2 flex-wrap justify-end">
-                {BOOKING_STATUS_OPTIONS.map(s => {
-                  const scfg = STATUS_CONFIG[s];
-                  const active = status === s;
-                  return (
-                    <button
-                      key={s}
-                      onClick={() => handleStatusChange(s)}
-                      disabled={saving || active}
-                      className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all ${
-                        active
-                          ? `${scfg.bg} ${scfg.border} ${scfg.color} cursor-default`
-                          : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-100'
-                      }`}
-                    >
-                      {saving && active ? '...' : scfg.label}
-                    </button>
-                  );
-                })}
-              </div>
+          <div className="px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50 flex-shrink-0">
+            <p className="text-sm font-medium text-gray-700 mb-2">Update Status:</p>
+            <div className="flex flex-wrap gap-2">
+              {STATUS_STEPS.map(s => {
+                const scfg = STATUS_CONFIG[s];
+                const active = status === s;
+                return (
+                  <button
+                    key={s}
+                    onClick={() => handleStatusChange(s)}
+                    disabled={saving || active}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all ${
+                      active
+                        ? `${scfg.bg} ${scfg.border} ${scfg.color} cursor-default`
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    {saving && active ? '...' : scfg.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

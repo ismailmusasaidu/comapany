@@ -356,10 +356,10 @@ export default function AgentOrdersPage() {
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
               <div className="px-5 pt-4 pb-0 border-b border-gray-100">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 overflow-x-auto">
                     <button
                       onClick={() => setTab('bookings')}
-                      className={`px-4 py-2 rounded-t-xl text-sm font-semibold transition-colors border-b-2 ${
+                      className={`px-3 sm:px-4 py-2 rounded-t-xl text-xs sm:text-sm font-semibold transition-colors border-b-2 whitespace-nowrap ${
                         tab === 'bookings'
                           ? 'text-orange-600 border-orange-500 bg-orange-50/50'
                           : 'text-gray-500 border-transparent hover:text-gray-700'
@@ -372,7 +372,7 @@ export default function AgentOrdersPage() {
                     </button>
                     <button
                       onClick={() => setTab('requests')}
-                      className={`px-4 py-2 rounded-t-xl text-sm font-semibold transition-colors border-b-2 ${
+                      className={`px-3 sm:px-4 py-2 rounded-t-xl text-xs sm:text-sm font-semibold transition-colors border-b-2 whitespace-nowrap ${
                         tab === 'requests'
                           ? 'text-blue-600 border-blue-500 bg-blue-50/50'
                           : 'text-gray-500 border-transparent hover:text-gray-700'

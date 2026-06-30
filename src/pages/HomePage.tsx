@@ -728,7 +728,7 @@ export default function HomePage() {
                 { value: '98%', label: 'Client Retention', color: 'text-red-500' },
               ].map((stat) => (
                 <div key={stat.label} className="group">
-                  <div className={`text-5xl font-bold ${stat.color} mb-2 group-hover:scale-110 transition-transform inline-block`}>{stat.value}</div>
+                  <div className={`text-3xl sm:text-4xl md:text-5xl font-bold ${stat.color} mb-2 group-hover:scale-110 transition-transform inline-block`}>{stat.value}</div>
                   <p className="text-gray-500 font-medium">{stat.label}</p>
                 </div>
               ))}
