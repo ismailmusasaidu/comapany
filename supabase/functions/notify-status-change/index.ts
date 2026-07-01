@@ -126,7 +126,7 @@ async function sendEmail(to: string, name: string, subject: string, html: string
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      from: "Danhausa Logistics <notifications@danhausa.com>",
+      from: "Danhausa Logistics <notifications@danhausalogistics.com>",
       to: [{ email: to, name }],
       subject,
       html,

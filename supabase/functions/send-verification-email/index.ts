@@ -88,7 +88,7 @@ Deno.serve(async (req: Request) => {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: "Danhausa Logistics <notifications@danhausa.com>",
+        from: "Danhausa Logistics <notifications@danhausalogistics.com>",
         to: [{ email, name }],
         subject: `Verify your email — Danhausa ${portalLabel}`,
         html,
