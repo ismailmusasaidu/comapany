@@ -176,6 +176,19 @@ export default function AdminDashboardPage() {
             </button>
 
             <button
+              onClick={() => navigate('/admin/logistics-fees')}
+              className="relative bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                  <DollarSign className="h-4 w-4 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900">Logistics Request Fees</h3>
+              </div>
+              <p className="text-gray-600 text-sm">Set pricing for freight, warehousing, express, bulk, customs, last-mile & relocation</p>
+            </button>
+
+            <button
               onClick={() => navigate('/admin/delivery-fees')}
               className="relative bg-gradient-to-br from-green-50 to-teal-50 border border-green-200 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
             >

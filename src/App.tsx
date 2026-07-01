@@ -52,6 +52,7 @@ const IndividualMessagesPage = lazy(() => import('./pages/IndividualMessagesPage
 const AdminOrdersAnalyticsPage = lazy(() => import('./pages/AdminOrdersAnalyticsPage'));
 const AdminInvoiceGeneratorPage = lazy(() => import('./pages/AdminInvoiceGeneratorPage'));
 const AdminIndividualsPage = lazy(() => import('./pages/AdminIndividualsPage'));
+const AdminLogisticsFeesPage = lazy(() => import('./pages/AdminLogisticsFeesPage'));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
@@ -104,6 +105,7 @@ function App() {
           <Route path="/admin/orders-analytics" element={<ProtectedRoute element={<AdminOrdersAnalyticsPage />} />} />
           <Route path="/admin/invoice-generator" element={<ProtectedRoute element={<AdminInvoiceGeneratorPage />} />} />
           <Route path="/admin/individuals" element={<ProtectedRoute element={<AdminIndividualsPage />} />} />
+          <Route path="/admin/logistics-fees" element={<ProtectedRoute element={<AdminLogisticsFeesPage />} />} />
 
           <Route path="/agent/messages" element={<AgentMessagesPage />} />
           <Route path="/business/messages" element={<BusinessMessagesPage />} />
