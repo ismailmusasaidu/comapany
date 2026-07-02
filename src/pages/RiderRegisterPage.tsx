@@ -3,9 +3,6 @@ import { Link } from 'react-router-dom';
 import { Bike, User, Mail, Phone, MapPin, CreditCard, Lock, Eye, EyeOff, ArrowRight, Car } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-
 interface FormData {
   full_name: string;
   email: string;
@@ -83,17 +80,6 @@ export default function RiderRegisterPage() {
         status: 'pending',
       });
       if (profileErr) throw profileErr;
-
-      await fetch(`${SUPABASE_URL}/functions/v1/send-verification-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
-        body: JSON.stringify({
-          email: form.email,
-          name: form.full_name,
-          portal: 'rider',
-          confirmationUrl: `${window.location.origin}/auth/callback`,
-        }),
-      });
 
       setRegisteredEmail(form.email);
       setSuccess(true);

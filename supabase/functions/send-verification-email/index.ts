@@ -24,6 +24,8 @@ Deno.serve(async (req: Request) => {
 
     const portalLabel = portal === "agent"
       ? "Agent Portal"
+      : portal === "rider"
+      ? "Rider Portal"
       : portal === "business"
       ? "Business Portal"
       : "Individual Portal";
