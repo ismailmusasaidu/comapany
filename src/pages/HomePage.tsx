@@ -921,12 +921,12 @@ export default function HomePage() {
                 <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5">
                   <p className="text-sm text-orange-800 font-medium">Ready to start earning?</p>
                   <p className="text-xs text-orange-600 mt-1 mb-4">Applications are reviewed within 1-2 business days.</p>
-                  <a
-                    href="#contact"
+                  <Link
+                    to="/agent/register"
                     className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-orange-500/30"
                   >
                     Apply as Rider <ArrowRight className="h-4 w-4" />
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -989,12 +989,12 @@ export default function HomePage() {
                 <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
                   <p className="text-sm text-blue-900 font-medium">Ready to grow your business?</p>
                   <p className="text-xs text-blue-600 mt-1 mb-4">Our vendor support team will guide you through every step.</p>
-                  <a
-                    href="#contact"
+                  <Link
+                    to="/business/register"
                     className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-blue-700/30"
                   >
                     Apply as Vendor <ArrowRight className="h-4 w-4" />
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
