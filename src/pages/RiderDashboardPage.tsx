@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bike, LogOut, MessageSquare, User, MapPin, Phone, Mail, CreditCard, Clock, CheckCircle, XCircle, ChevronRight, Menu, X } from 'lucide-react';
+import { Bike, LogOut, MessageSquare, User, MapPin, Phone, Mail, CreditCard, Clock, CheckCircle, XCircle, ChevronRight, Menu, AlertCircle, RefreshCw } from 'lucide-react';
 import { useRider } from '../contexts/RiderContext';
 import { supabase } from '../lib/supabase';
 
@@ -12,10 +12,11 @@ const VEHICLE_LABEL: Record<string, string> = {
 };
 
 export default function RiderDashboardPage() {
-  const { user, profile, isLoading, signOut } = useRider();
+  const { user, profile, isLoading, signOut, refreshProfile } = useRider();
   const navigate = useNavigate();
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -50,12 +51,78 @@ export default function RiderDashboardPage() {
     );
   }
 
-  if (!profile) {
+  if (!isLoading && !profile) {
+    const emailConfirmed = !!user?.email_confirmed_at;
+
+    const handleRefresh = async () => {
+      setRefreshing(true);
+      await refreshProfile();
+      setRefreshing(false);
+    };
+
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl shadow p-8 max-w-sm text-center">
-          <p className="text-gray-600 mb-4">Profile not found.</p>
-          <button onClick={handleLogout} className="text-orange-500 font-semibold">Sign Out</button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-orange-950 flex items-center justify-center px-4">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
+          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 ${emailConfirmed ? 'bg-orange-50' : 'bg-amber-50'}`}>
+            {emailConfirmed
+              ? <AlertCircle className="h-8 w-8 text-orange-500" />
+              : <Mail className="h-8 w-8 text-amber-500" />}
+          </div>
+
+          {!emailConfirmed ? (
+            <>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Confirm Your Email</h2>
+              <p className="text-gray-500 text-sm mb-2 leading-relaxed">
+                We sent a verification link to:
+              </p>
+              <p className="text-orange-500 font-semibold text-sm mb-4">{user?.email}</p>
+              <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-6 text-left">
+                <p className="text-sm text-amber-700 font-medium mb-1">Next steps:</p>
+                <ul className="text-sm text-amber-600 list-disc list-inside space-y-1">
+                  <li>Open your email inbox</li>
+                  <li>Click the verification link</li>
+                  <li>Come back here and refresh</li>
+                </ul>
+              </div>
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 rounded-xl font-semibold text-sm hover:from-orange-600 hover:to-red-600 transition-all disabled:opacity-60 mb-3"
+              >
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Checking...' : 'I have verified my email'}
+              </button>
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Registration Incomplete</h2>
+              <p className="text-gray-500 text-sm mb-4 leading-relaxed">
+                Your account exists but your rider profile was not saved. This can happen if the form was submitted twice or there was a network error.
+              </p>
+              <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 mb-6 text-left">
+                <p className="text-sm text-orange-700 font-medium mb-1">What to do:</p>
+                <ul className="text-sm text-orange-600 list-disc list-inside space-y-1">
+                  <li>Sign out and register again with the same email</li>
+                  <li>Or contact support if the issue persists</li>
+                </ul>
+              </div>
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 rounded-xl font-semibold text-sm hover:from-orange-600 hover:to-red-600 transition-all disabled:opacity-60 mb-3"
+              >
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Checking...' : 'Retry'}
+              </button>
+            </>
+          )}
+
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-gray-700 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+          >
+            <LogOut className="h-4 w-4" /> Sign Out
+          </button>
         </div>
       </div>
     );
