@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Truck, User, Mail, Phone, MapPin, Lock, Eye, EyeOff, ArrowRight, Building2 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
@@ -52,37 +51,25 @@ export default function IndividualRegisterPage() {
 
     setLoading(true);
     try {
-      const { data, error: authErr } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-      });
-      if (authErr) throw authErr;
-      if (!data.user) throw new Error('Registration failed. Please try again.');
-
-      const { error: profileErr } = await supabase.from('individual_profiles').insert({
-        id: data.user.id,
-        full_name: form.full_name,
-        email: form.email,
-        phone: form.phone,
-        address: form.address,
-        city: form.city,
-        state: form.state,
-      });
-      if (profileErr) throw profileErr;
-
-      // Send branded verification email via Resend
-      const origin = window.location.origin;
-      await fetch(`${SUPABASE_URL}/functions/v1/send-verification-email`, {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/register-user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
         body: JSON.stringify({
-          email: form.email,
-          name: form.full_name,
           portal: 'individual',
-          confirmationUrl: `${origin}/auth/callback`,
+          email: form.email,
+          password: form.password,
+          redirectTo: `${window.location.origin}/auth/callback`,
+          profile: {
+            full_name: form.full_name,
+            phone: form.phone,
+            address: form.address,
+            city: form.city,
+            state: form.state,
+          },
         }),
       });
+      const result = await res.json();
+      if (!res.ok || result.error) throw new Error(result.error || 'Registration failed.');
 
       setRegisteredEmail(form.email);
       setSuccess(true);

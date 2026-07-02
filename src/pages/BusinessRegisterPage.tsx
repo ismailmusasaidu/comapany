@@ -4,7 +4,6 @@ import {
   Truck, Building2, Mail, Phone, MapPin, CreditCard,
   Lock, Eye, EyeOff, ArrowRight, Briefcase, Users, Globe
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
@@ -81,42 +80,30 @@ export default function BusinessRegisterPage() {
 
     setLoading(true);
     try {
-      const { data, error: authErr } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-      });
-      if (authErr) throw authErr;
-      if (!data.user) throw new Error('Registration failed. Please try again.');
-
-      const { error: profileErr } = await supabase.from('business_profiles').insert({
-        id: data.user.id,
-        company_name: form.company_name,
-        contact_person: form.contact_person,
-        email: form.email,
-        phone: form.phone,
-        industry: form.industry,
-        company_size: form.company_size,
-        address: form.address,
-        city: form.city,
-        registration_number: form.registration_number,
-        tax_id: form.tax_id,
-        status: 'pending',
-      });
-      if (profileErr) throw profileErr;
-
-      // Send branded verification email via Resend
-      const origin = window.location.origin;
-      await fetch(`${SUPABASE_URL}/functions/v1/send-verification-email`, {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/register-user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
         body: JSON.stringify({
-          email: form.email,
-          name: form.contact_person,
           portal: 'business',
-          confirmationUrl: `${origin}/auth/callback`,
+          email: form.email,
+          password: form.password,
+          redirectTo: `${window.location.origin}/auth/callback`,
+          profile: {
+            company_name: form.company_name,
+            contact_person: form.contact_person,
+            phone: form.phone,
+            industry: form.industry,
+            company_size: form.company_size,
+            address: form.address,
+            city: form.city,
+            registration_number: form.registration_number,
+            tax_id: form.tax_id,
+            status: 'pending',
+          },
         }),
       });
+      const result = await res.json();
+      if (!res.ok || result.error) throw new Error(result.error || 'Registration failed.');
 
       setRegisteredEmail(form.email);
       setSuccess(true);

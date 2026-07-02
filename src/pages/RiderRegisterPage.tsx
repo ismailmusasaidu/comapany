@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bike, User, Mail, Phone, MapPin, CreditCard, Lock, Eye, EyeOff, ArrowRight, Car } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 interface FormData {
   full_name: string;
@@ -59,27 +60,28 @@ export default function RiderRegisterPage() {
 
     setLoading(true);
     try {
-      const { data, error: authErr } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/register-user`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
+        body: JSON.stringify({
+          portal: 'rider',
+          email: form.email,
+          password: form.password,
+          redirectTo: `${window.location.origin}/auth/callback`,
+          profile: {
+            full_name: form.full_name,
+            phone: form.phone,
+            address: form.address,
+            city: form.city,
+            vehicle_type: form.vehicle_type,
+            license_number: form.license_number,
+            nin: form.nin,
+            status: 'pending',
+          },
+        }),
       });
-      if (authErr) throw authErr;
-      if (!data.user) throw new Error('Registration failed. Please try again.');
-
-      const { error: profileErr } = await supabase.from('rider_profiles').insert({
-        id: data.user.id,
-        full_name: form.full_name,
-        email: form.email,
-        phone: form.phone,
-        address: form.address,
-        city: form.city,
-        vehicle_type: form.vehicle_type,
-        license_number: form.license_number,
-        nin: form.nin,
-        status: 'pending',
-      });
-      if (profileErr) throw profileErr;
+      const result = await res.json();
+      if (!res.ok || result.error) throw new Error(result.error || 'Registration failed.');
 
       setRegisteredEmail(form.email);
       setSuccess(true);
