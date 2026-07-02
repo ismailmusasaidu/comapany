@@ -98,7 +98,13 @@ export default function RiderRegisterPage() {
       setRegisteredEmail(form.email);
       setSuccess(true);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Registration failed.');
+      if (err instanceof Error) {
+        setError(err.message);
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        setError(String((err as { message: unknown }).message));
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
