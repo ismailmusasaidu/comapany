@@ -2,14 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft, Send, Plus, MessageSquare, User, Building2,
-  Search, ChevronRight, CheckCheck, Check, X
+  Search, ChevronRight, CheckCheck, Check, X, Bike
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
 interface Thread {
   id: string;
-  recipient_type: 'agent' | 'business';
+  recipient_type: 'agent' | 'business' | 'rider';
   recipient_id: string;
   subject: string;
   created_at: string;
@@ -22,7 +22,7 @@ interface Thread {
 interface Message {
   id: string;
   thread_id: string;
-  sender_role: 'admin' | 'agent' | 'business';
+  sender_role: 'admin' | 'agent' | 'business' | 'rider';
   sender_id: string;
   body: string;
   is_read: boolean;
@@ -32,7 +32,7 @@ interface Message {
 interface Recipient {
   id: string;
   name: string;
-  type: 'agent' | 'business';
+  type: 'agent' | 'business' | 'rider';
 }
 
 export default function AdminMessagingPage() {
@@ -74,16 +74,24 @@ export default function AdminMessagingPage() {
     if (!threadData) { setLoading(false); return; }
 
     const enriched = await Promise.all(threadData.map(async (t) => {
-      const table = t.recipient_type === 'agent' ? 'agent_profiles' : 'business_profiles';
-      const nameField = t.recipient_type === 'agent' ? 'full_name' : 'company_name';
-      const { data: profile } = await supabase.from(table).select(nameField).eq('id', t.recipient_id).maybeSingle();
+      let recipientName = 'Unknown';
+      if (t.recipient_type === 'agent') {
+        const { data: profile } = await supabase.from('agent_profiles').select('full_name').eq('id', t.recipient_id).maybeSingle();
+        recipientName = profile?.full_name || 'Unknown Agent';
+      } else if (t.recipient_type === 'business') {
+        const { data: profile } = await supabase.from('business_profiles').select('company_name').eq('id', t.recipient_id).maybeSingle();
+        recipientName = profile?.company_name || 'Unknown Business';
+      } else if (t.recipient_type === 'rider') {
+        const { data: profile } = await supabase.from('rider_profiles').select('full_name').eq('id', t.recipient_id).maybeSingle();
+        recipientName = profile?.full_name || 'Unknown Rider';
+      }
       const { count } = await supabase.from('messages').select('id', { count: 'exact', head: true })
         .eq('thread_id', t.id).eq('is_read', false).neq('sender_role', 'admin');
       const { data: last } = await supabase.from('messages').select('body').eq('thread_id', t.id)
         .order('created_at', { ascending: false }).limit(1).maybeSingle();
       return {
         ...t,
-        recipient_name: profile ? (profile as Record<string, string>)[nameField] : 'Unknown',
+        recipient_name: recipientName,
         unread_count: count || 0,
         last_message: last?.body || '',
       };
@@ -130,13 +138,15 @@ export default function AdminMessagingPage() {
   };
 
   const loadRecipients = async (search: string) => {
-    const [{ data: agents }, { data: businesses }] = await Promise.all([
+    const [{ data: agents }, { data: businesses }, { data: riders }] = await Promise.all([
       supabase.from('agent_profiles').select('id, full_name').ilike('full_name', `%${search}%`).limit(5),
       supabase.from('business_profiles').select('id, company_name').ilike('company_name', `%${search}%`).limit(5),
+      supabase.from('rider_profiles').select('id, full_name').ilike('full_name', `%${search}%`).limit(5),
     ]);
     const list: Recipient[] = [
       ...(agents || []).map(a => ({ id: a.id, name: a.full_name, type: 'agent' as const })),
       ...(businesses || []).map(b => ({ id: b.id, name: b.company_name, type: 'business' as const })),
+      ...(riders || []).map(r => ({ id: r.id, name: r.full_name, type: 'rider' as const })),
     ];
     setRecipients(list);
   };
@@ -216,9 +226,11 @@ export default function AdminMessagingPage() {
           <button key={t.id} onClick={() => openThread(t)}
             className={`w-full text-left px-4 py-3.5 hover:bg-gray-50 transition-colors ${activeThread?.id === t.id ? 'bg-orange-50 border-l-2 border-orange-500' : ''}`}>
             <div className="flex items-start gap-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${t.recipient_type === 'agent' ? 'bg-orange-100' : 'bg-blue-100'}`}>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${t.recipient_type === 'agent' ? 'bg-orange-100' : t.recipient_type === 'rider' ? 'bg-red-100' : 'bg-blue-100'}`}>
                 {t.recipient_type === 'agent'
                   ? <User className="h-4 w-4 text-orange-600" />
+                  : t.recipient_type === 'rider'
+                  ? <Bike className="h-4 w-4 text-red-600" />
                   : <Building2 className="h-4 w-4 text-blue-600" />}
               </div>
               <div className="flex-1 min-w-0">
@@ -255,9 +267,11 @@ export default function AdminMessagingPage() {
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${activeThread.recipient_type === 'agent' ? 'bg-orange-100' : 'bg-blue-100'}`}>
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${activeThread.recipient_type === 'agent' ? 'bg-orange-100' : activeThread.recipient_type === 'rider' ? 'bg-red-100' : 'bg-blue-100'}`}>
               {activeThread.recipient_type === 'agent'
                 ? <User className="h-4 w-4 text-orange-600" />
+                : activeThread.recipient_type === 'rider'
+                ? <Bike className="h-4 w-4 text-red-600" />
                 : <Building2 className="h-4 w-4 text-blue-600" />}
             </div>
             <div className="flex-1 min-w-0">
@@ -397,8 +411,8 @@ export default function AdminMessagingPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">To</label>
                 {selectedRecipient ? (
                   <div className="flex items-center gap-2 px-3 py-2.5 bg-orange-50 border border-orange-200 rounded-xl">
-                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${selectedRecipient.type === 'agent' ? 'bg-orange-100' : 'bg-blue-100'}`}>
-                      {selectedRecipient.type === 'agent' ? <User className="h-3 w-3 text-orange-600" /> : <Building2 className="h-3 w-3 text-blue-600" />}
+                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${selectedRecipient.type === 'agent' ? 'bg-orange-100' : selectedRecipient.type === 'rider' ? 'bg-red-100' : 'bg-blue-100'}`}>
+                      {selectedRecipient.type === 'agent' ? <User className="h-3 w-3 text-orange-600" /> : selectedRecipient.type === 'rider' ? <Bike className="h-3 w-3 text-red-600" /> : <Building2 className="h-3 w-3 text-blue-600" />}
                     </div>
                     <span className="text-sm font-medium text-gray-800 flex-1">{selectedRecipient.name}</span>
                     <span className="text-xs text-gray-500 capitalize">{selectedRecipient.type}</span>
@@ -420,8 +434,8 @@ export default function AdminMessagingPage() {
                         {recipients.map(r => (
                           <button key={r.id} onClick={() => { setSelectedRecipient(r); setRecipients([]); setRecipientSearch(''); }}
                             className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 text-left transition-colors">
-                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${r.type === 'agent' ? 'bg-orange-100' : 'bg-blue-100'}`}>
-                              {r.type === 'agent' ? <User className="h-3.5 w-3.5 text-orange-600" /> : <Building2 className="h-3.5 w-3.5 text-blue-600" />}
+                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${r.type === 'agent' ? 'bg-orange-100' : r.type === 'rider' ? 'bg-red-100' : 'bg-blue-100'}`}>
+                              {r.type === 'agent' ? <User className="h-3.5 w-3.5 text-orange-600" /> : r.type === 'rider' ? <Bike className="h-3.5 w-3.5 text-red-600" /> : <Building2 className="h-3.5 w-3.5 text-blue-600" />}
                             </div>
                             <div>
                               <p className="text-sm font-medium text-gray-800">{r.name}</p>

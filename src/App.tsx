@@ -56,6 +56,11 @@ const AdminLogisticsFeesPage = lazy(() => import('./pages/AdminLogisticsFeesPage
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const RiderRegisterPage = lazy(() => import('./pages/RiderRegisterPage'));
+const RiderLoginPage = lazy(() => import('./pages/RiderLoginPage'));
+const RiderDashboardPage = lazy(() => import('./pages/RiderDashboardPage'));
+const RiderMessagesPage = lazy(() => import('./pages/RiderMessagesPage'));
+const AdminRidersPage = lazy(() => import('./pages/AdminRidersPage'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -106,6 +111,7 @@ function App() {
           <Route path="/admin/invoice-generator" element={<ProtectedRoute element={<AdminInvoiceGeneratorPage />} />} />
           <Route path="/admin/individuals" element={<ProtectedRoute element={<AdminIndividualsPage />} />} />
           <Route path="/admin/logistics-fees" element={<ProtectedRoute element={<AdminLogisticsFeesPage />} />} />
+          <Route path="/admin/riders" element={<ProtectedRoute element={<AdminRidersPage />} />} />
 
           <Route path="/agent/messages" element={<AgentMessagesPage />} />
           <Route path="/business/messages" element={<BusinessMessagesPage />} />
@@ -134,6 +140,11 @@ function App() {
           <Route path="/individual/booking/new" element={<IndividualDeliveryBookingPage />} />
           <Route path="/individual/logistics/new" element={<IndividualLogisticsPage />} />
           <Route path="/individual/messages" element={<IndividualMessagesPage />} />
+
+          <Route path="/rider/register" element={<RiderRegisterPage />} />
+          <Route path="/rider/login" element={<RiderLoginPage />} />
+          <Route path="/rider/dashboard" element={<RiderDashboardPage />} />
+          <Route path="/rider/messages" element={<RiderMessagesPage />} />
 
           <Route
             path="/*"
