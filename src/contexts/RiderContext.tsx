@@ -10,11 +10,12 @@ interface RiderProfile {
   address: string;
   city: string;
   vehicle_type: string;
-  license_number: string;
+  vehicle_registration: string;
   nin: string;
+  guarantor_name: string;
+  guarantor_phone: string;
   status: 'pending' | 'approved' | 'rejected';
   rejection_reason: string;
-  admin_notes: string;
   created_at: string;
 }
 

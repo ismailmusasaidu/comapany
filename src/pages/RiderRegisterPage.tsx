@@ -11,8 +11,10 @@ interface FormData {
   address: string;
   city: string;
   vehicle_type: string;
-  license_number: string;
+  vehicle_registration: string;
   nin: string;
+  guarantor_name: string;
+  guarantor_phone: string;
   password: string;
   confirm_password: string;
 }
@@ -24,8 +26,10 @@ const INITIAL: FormData = {
   address: '',
   city: '',
   vehicle_type: 'motorcycle',
-  license_number: '',
+  vehicle_registration: '',
   nin: '',
+  guarantor_name: '',
+  guarantor_phone: '',
   password: '',
   confirm_password: '',
 };
@@ -74,8 +78,10 @@ export default function RiderRegisterPage() {
             address: form.address,
             city: form.city,
             vehicle_type: form.vehicle_type,
-            license_number: form.license_number,
+            vehicle_registration: form.vehicle_registration,
             nin: form.nin,
+            guarantor_name: form.guarantor_name,
+            guarantor_phone: form.guarantor_phone,
             status: 'pending',
           },
         }),
@@ -191,10 +197,10 @@ export default function RiderRegisterPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Driver's License Number</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Vehicle Registration No.</label>
                     <div className="relative">
                       <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <input type="text" required value={form.license_number} onChange={set('license_number')} placeholder="ABC-00000AA"
+                      <input type="text" required value={form.vehicle_registration} onChange={set('vehicle_registration')} placeholder="ABC-123XY"
                         className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all" />
                     </div>
                   </div>
@@ -205,6 +211,24 @@ export default function RiderRegisterPage() {
                     <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input type="text" required value={form.nin} onChange={set('nin')} placeholder="00000000000"
                       className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all" />
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Guarantor Full Name</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <input type="text" required value={form.guarantor_name} onChange={set('guarantor_name')} placeholder="Guarantor's name"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Guarantor Phone</label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <input type="tel" required value={form.guarantor_phone} onChange={set('guarantor_phone')} placeholder="+234 800 000 0000"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm transition-all" />
+                    </div>
                   </div>
                 </div>
               </div>

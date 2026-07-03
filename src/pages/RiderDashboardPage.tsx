@@ -295,7 +295,7 @@ export default function RiderDashboardPage() {
               <ProfileField icon={MapPin} label="City" value={profile.city} />
               <ProfileField icon={MapPin} label="Address" value={profile.address} />
               <ProfileField icon={Bike} label="Vehicle Type" value={VEHICLE_LABEL[profile.vehicle_type] || profile.vehicle_type} />
-              <ProfileField icon={CreditCard} label="License Number" value={profile.license_number} />
+              <ProfileField icon={CreditCard} label="Vehicle Reg." value={profile.vehicle_registration} />
               <ProfileField icon={CreditCard} label="NIN" value={profile.nin} />
             </div>
           </div>
