@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -17,6 +18,23 @@ export default function AdminLoginPage() {
 
     try {
       await signIn(email, password);
+
+      // Verify the signed-in user actually has admin access
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Authentication failed.');
+
+      const { data: adminRow } = await supabase
+        .from('admin_users')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!adminRow) {
+        // Not an admin — sign them back out immediately
+        await supabase.auth.signOut();
+        throw new Error('Access denied. This account does not have admin privileges.');
+      }
+
       navigate('/admin/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');

@@ -69,10 +69,11 @@ const PageLoader = () => (
 );
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, isAdmin, isLoading } = useAuth();
 
   if (isLoading) return <PageLoader />;
-  return user ? element : <Navigate to="/admin/login" />;
+  if (!user || !isAdmin) return <Navigate to="/admin/login" />;
+  return element;
 }
 
 function App() {
