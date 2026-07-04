@@ -33,13 +33,8 @@ Deno.serve(async (req: Request) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const siteUrl = Deno.env.get("SITE_URL");
 
-    // Use the configured SITE_URL secret so confirmation links always point
-    // to production instead of whatever origin the request came from.
-    const callbackUrl = siteUrl
-      ? `${siteUrl.replace(/\/$/, "")}/auth/callback`
-      : redirectTo;
+    const callbackUrl = "https://danhausalogistics.com/auth/callback";
 
     if (!resendApiKey) {
       return new Response(
