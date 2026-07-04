@@ -12,11 +12,12 @@ interface RiderProfile {
   address: string;
   city: string;
   vehicle_type: string;
-  license_number: string;
+  vehicle_registration: string;
   nin: string;
+  guarantor_name: string;
+  guarantor_phone: string;
   status: 'pending' | 'approved' | 'rejected';
   rejection_reason: string;
-  admin_notes: string;
   created_at: string;
 }
 
@@ -66,7 +67,6 @@ export default function AdminRidersPage() {
   const [selectedRider, setSelectedRider] = useState<RiderProfile | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
-  const [adminNotes, setAdminNotes] = useState('');
 
   // Messaging state
   const [msgThreads, setMsgThreads] = useState<MsgThread[]>([]);
@@ -161,16 +161,16 @@ export default function AdminRidersPage() {
 
   const updateStatus = async (riderId: string, status: 'approved' | 'rejected') => {
     setActionLoading(true);
-    await supabase.from('rider_profiles').update({
+    const { error } = await supabase.from('rider_profiles').update({
       status,
       rejection_reason: status === 'rejected' ? rejectionReason : '',
-      admin_notes: adminNotes,
       updated_at: new Date().toISOString(),
     }).eq('id', riderId);
-    await loadRiders();
-    setSelectedRider(null);
-    setRejectionReason('');
-    setAdminNotes('');
+    if (!error) {
+      await loadRiders();
+      setSelectedRider(null);
+      setRejectionReason('');
+    }
     setActionLoading(false);
   };
 
@@ -291,7 +291,7 @@ export default function AdminRidersPage() {
                           <p className="text-xs text-red-500 mt-1">Rejection reason: {rider.rejection_reason}</p>
                         )}
                       </div>
-                      <button onClick={() => { setSelectedRider(rider); setAdminNotes(rider.admin_notes || ''); setRejectionReason(''); }}
+                      <button onClick={() => { setSelectedRider(rider); setRejectionReason(''); }}
                         className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0">
                         Review
                       </button>
@@ -427,16 +427,11 @@ export default function AdminRidersPage() {
                 <InfoRow icon={Phone} label="Phone" value={selectedRider.phone} />
                 <InfoRow icon={MapPin} label="City" value={selectedRider.city} />
                 <InfoRow icon={Bike} label="Vehicle" value={VEHICLE_LABEL[selectedRider.vehicle_type] || selectedRider.vehicle_type} />
-                <InfoRow icon={CreditCard} label="License" value={selectedRider.license_number} />
+                <InfoRow icon={CreditCard} label="Vehicle Reg." value={selectedRider.vehicle_registration} />
                 <InfoRow icon={CreditCard} label="NIN" value={selectedRider.nin} />
                 <InfoRow icon={MapPin} label="Address" value={selectedRider.address} />
-                <InfoRow icon={User} label="Registered" value={new Date(selectedRider.created_at).toLocaleDateString()} />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Admin Notes (optional)</label>
-                <textarea value={adminNotes} onChange={e => setAdminNotes(e.target.value)} rows={2} placeholder="Internal notes about this rider..."
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none" />
+                <InfoRow icon={User} label="Guarantor" value={selectedRider.guarantor_name || '—'} />
+                <InfoRow icon={Phone} label="Guarantor Phone" value={selectedRider.guarantor_phone || '—'} />
               </div>
 
               {selectedRider.status !== 'rejected' && (
