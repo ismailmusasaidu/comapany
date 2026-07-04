@@ -12,12 +12,11 @@ interface RiderProfile {
   address: string;
   city: string;
   vehicle_type: string;
-  vehicle_registration: string;
+  license_number: string;
   nin: string;
-  guarantor_name: string;
-  guarantor_phone: string;
   status: 'pending' | 'approved' | 'rejected';
   rejection_reason: string;
+  admin_notes: string;
   created_at: string;
 }
 
@@ -428,11 +427,9 @@ export default function AdminRidersPage() {
                 <InfoRow icon={Phone} label="Phone" value={selectedRider.phone} />
                 <InfoRow icon={MapPin} label="City" value={selectedRider.city} />
                 <InfoRow icon={Bike} label="Vehicle" value={VEHICLE_LABEL[selectedRider.vehicle_type] || selectedRider.vehicle_type} />
-                <InfoRow icon={CreditCard} label="Vehicle Reg." value={selectedRider.vehicle_registration} />
+                <InfoRow icon={CreditCard} label="License" value={selectedRider.license_number} />
                 <InfoRow icon={CreditCard} label="NIN" value={selectedRider.nin} />
                 <InfoRow icon={MapPin} label="Address" value={selectedRider.address} />
-                <InfoRow icon={User} label="Guarantor" value={selectedRider.guarantor_name || '—'} />
-                <InfoRow icon={Phone} label="Guarantor Phone" value={selectedRider.guarantor_phone || '—'} />
                 <InfoRow icon={User} label="Registered" value={new Date(selectedRider.created_at).toLocaleDateString()} />
               </div>
 
