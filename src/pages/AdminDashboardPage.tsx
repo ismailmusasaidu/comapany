@@ -12,19 +12,23 @@ export default function AdminDashboardPage() {
   const [pendingAgents, setPendingAgents] = useState(0);
   const [pendingBusinesses, setPendingBusinesses] = useState(0);
   const [pendingRiders, setPendingRiders] = useState(0);
+  const [unassignedBookings, setUnassignedBookings] = useState(0);
 
   useEffect(() => {
     const fetchCounts = async () => {
-      const [{ count: unread }, { count: pending }, { count: pendingBiz }, { count: pendingRider }] = await Promise.all([
+      const [{ count: unread }, { count: pending }, { count: pendingBiz }, { count: pendingRider }, { count: unassignedDel }, { count: unassignedBiz }] = await Promise.all([
         supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('is_read', false),
         supabase.from('agent_profiles').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('business_profiles').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('rider_profiles').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('delivery_bookings').select('id', { count: 'exact', head: true }).eq('assignment_status', 'unassigned'),
+        supabase.from('business_delivery_bookings').select('id', { count: 'exact', head: true }).eq('assignment_status', 'unassigned'),
       ]);
       setUnreadCount(unread || 0);
       setPendingAgents(pending || 0);
       setPendingBusinesses(pendingBiz || 0);
       setPendingRiders(pendingRider || 0);
+      setUnassignedBookings((unassignedDel || 0) + (unassignedBiz || 0));
     };
     fetchCounts();
   }, []);
@@ -245,7 +249,25 @@ export default function AdminDashboardPage() {
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900">Rider Management</h3>
               </div>
-              <p className="text-gray-600 text-sm">Approve riders, manage their profiles & send messages</p>
+              <p className="text-gray-600 text-sm">Approve riders, manage their profiles &amp; send messages</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/bookings')}
+              className="relative bg-gradient-to-br from-green-50 to-teal-50 border border-green-200 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
+            >
+              {unassignedBookings > 0 && (
+                <span className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                  {unassignedBookings} unassigned
+                </span>
+              )}
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                  <Bike className="h-4 w-4 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900">Booking Assignments</h3>
+              </div>
+              <p className="text-gray-600 text-sm">Assign riders to deliveries, track acceptance &amp; rate performance</p>
             </button>
 
             <button
