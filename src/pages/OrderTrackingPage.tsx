@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Search, Package, MapPin, Clock, CheckCircle, Truck, AlertCircle,
   XCircle, RefreshCw, ChevronRight, Phone, Mail, User, Weight,
@@ -385,6 +385,32 @@ export default function OrderTrackingPage() {
       resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
   };
+
+  // Live update when the user is already viewing a tracked delivery/business booking
+  useEffect(() => {
+    if (!order || order.kind !== 'delivery') return;
+
+    const isBusinessRef = order.order_id.startsWith('BB-');
+    const table = isBusinessRef ? 'business_delivery_bookings' : 'delivery_bookings';
+
+    const channel = supabase
+      .channel(`tracking-rt-${order.id}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table, filter: `id=eq.${order.id}` },
+        (payload) => {
+          const updated = payload.new as { status: string; updated_at: string };
+          setOrder(prev => {
+            if (!prev) return prev;
+            return { ...prev, status: updated.status, updated_at: updated.updated_at };
+          });
+          setEvents(
+            synthesizeDeliveryHistory(updated.status, order.created_at, updated.updated_at, order.delivery_type)
+          );
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [order?.id, order?.kind]);
 
   const currentStatus = order ? STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending : null;
   const isLogistics = order?.kind === 'logistics';

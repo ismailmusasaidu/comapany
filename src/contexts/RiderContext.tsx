@@ -240,10 +240,9 @@ export function RiderProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateBookingStatus = async (bookingId: string, sourceTable: 'delivery' | 'business', newStatus: string) => {
-    // Optimistic update — change UI immediately so the button reflects the new state at once
     setAssignments(prev => prev.map(a => a.id === bookingId ? { ...a, status: newStatus } : a));
     const table = sourceTable === 'delivery' ? 'delivery_bookings' : 'business_delivery_bookings';
-    await supabase.from(table).update({ status: newStatus }).eq('id', bookingId);
+    await supabase.from(table).update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', bookingId);
   };
 
   const markNotificationRead = async (id: string) => {
