@@ -147,6 +147,8 @@ export function RiderProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    let initialized = false;
+
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
@@ -155,16 +157,22 @@ export function RiderProvider({ children }: { children: React.ReactNode }) {
         if (p?.status === 'approved') await loadAll(session.user.id);
       }
       setIsLoading(false);
+      initialized = true;
     };
     init();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Skip the initial SIGNED_IN that fires right after getSession — init() handles it
+      if (!initialized) return;
       (async () => {
-        setUser(session?.user ?? null);
         if (session?.user) {
+          setIsLoading(true);
+          setUser(session.user);
           const p = await fetchProfile(session.user.id);
           if (p?.status === 'approved') await loadAll(session.user.id);
+          setIsLoading(false);
         } else {
+          setUser(null);
           setProfile(null);
           setAssignments([]);
           setNotifications([]);
