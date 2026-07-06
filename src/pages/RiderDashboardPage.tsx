@@ -143,26 +143,32 @@ function AssignmentCard({ booking, onAccept, onReject, onStatusUpdate, accepting
                     <span className="font-semibold">Note: </span>{booking.special_instructions}
                   </div>
                 )}
-                {/* Status progression */}
-                {NEXT_STATUS[booking.status] && (
-                  <button onClick={() => onStatusUpdate(NEXT_STATUS[booking.status].next)} disabled={updatingStatus}
-                    className={`w-full flex items-center justify-center gap-2 text-white py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-60 ${NEXT_STATUS[booking.status].color}`}>
-                    {updatingStatus
-                      ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      : <Truck className="h-4 w-4" />}
-                    {NEXT_STATUS[booking.status].label}
-                  </button>
-                )}
-                {booking.status === 'delivered' && (
-                  <div className="flex items-center justify-center gap-2 py-2.5 bg-green-50 rounded-xl text-sm font-semibold text-green-700">
-                    <CheckCircle className="h-4 w-4" /> Delivery Completed
-                  </div>
-                )}
               </>
             )}
             {booking.assignment_note && booking.assignment_status === 'rejected' && (
               <p className="text-xs text-red-600 italic">Rejection reason: {booking.assignment_note}</p>
             )}
+          </div>
+        )}
+
+        {/* Status progression — always visible for accepted assignments */}
+        {booking.assignment_status === 'accepted' && NEXT_STATUS[booking.status] && (
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <button
+              onClick={() => onStatusUpdate(NEXT_STATUS[booking.status].next)}
+              disabled={updatingStatus}
+              className={`w-full flex items-center justify-center gap-2 text-white py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-60 ${NEXT_STATUS[booking.status].color}`}
+            >
+              {updatingStatus
+                ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                : <Truck className="h-4 w-4" />}
+              {NEXT_STATUS[booking.status].label}
+            </button>
+          </div>
+        )}
+        {booking.assignment_status === 'accepted' && booking.status === 'delivered' && (
+          <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-center gap-2 py-2.5 bg-green-50 rounded-xl text-sm font-semibold text-green-700">
+            <CheckCircle className="h-4 w-4" /> Delivery Completed
           </div>
         )}
 
