@@ -209,6 +209,32 @@ export default function AdminBookingsPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Realtime: reflect rider status changes instantly
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-bookings-rt')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'delivery_bookings' },
+        (payload) => {
+          setBookings(prev => prev.map(b =>
+            b.id === payload.new.id && b.source_table === 'delivery'
+              ? { ...b, status: payload.new.status, assignment_status: payload.new.assignment_status, assignment_note: payload.new.assignment_note, assigned_rider_id: payload.new.assigned_rider_id }
+              : b
+          ));
+        }
+      )
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'business_delivery_bookings' },
+        (payload) => {
+          setBookings(prev => prev.map(b =>
+            b.id === payload.new.id && b.source_table === 'business'
+              ? { ...b, status: payload.new.status, assignment_status: payload.new.assignment_status, assignment_note: payload.new.assignment_note, assigned_rider_id: payload.new.assigned_rider_id }
+              : b
+          ));
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
   // ── Derived data ─────────────────────────────────────────────────────────────
 
   const counts = {

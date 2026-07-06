@@ -89,6 +89,7 @@ interface RiderContextType {
   refreshProfile: () => Promise<void>;
   acceptAssignment: (bookingId: string, sourceTable: 'delivery' | 'business') => Promise<void>;
   rejectAssignment: (bookingId: string, sourceTable: 'delivery' | 'business', reason: string) => Promise<void>;
+  updateBookingStatus: (bookingId: string, sourceTable: 'delivery' | 'business', newStatus: string) => Promise<void>;
   markNotificationRead: (id: string) => Promise<void>;
   markAllNotificationsRead: () => Promise<void>;
   updateLocation: (latitude: number, longitude: number, accuracy?: number) => Promise<void>;
@@ -238,6 +239,13 @@ export function RiderProvider({ children }: { children: React.ReactNode }) {
     setAssignments(prev => prev.map(a => a.id === bookingId ? { ...a, assignment_status: 'rejected', assignment_note: reason } : a));
   };
 
+  const updateBookingStatus = async (bookingId: string, sourceTable: 'delivery' | 'business', newStatus: string) => {
+    const table = sourceTable === 'delivery' ? 'delivery_bookings' : 'business_delivery_bookings';
+    const { error } = await supabase.from(table).update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', bookingId);
+    if (error) throw error;
+    setAssignments(prev => prev.map(a => a.id === bookingId ? { ...a, status: newStatus } : a));
+  };
+
   const markNotificationRead = async (id: string) => {
     await supabase.from('rider_notifications').update({ is_read: true }).eq('id', id);
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
@@ -263,7 +271,7 @@ export function RiderProvider({ children }: { children: React.ReactNode }) {
     <RiderContext.Provider value={{
       user, profile, assignments, notifications, unreadNotifications, ratings, avgRating, location,
       isLoading, signIn, signOut, refreshProfile,
-      acceptAssignment, rejectAssignment, markNotificationRead, markAllNotificationsRead, updateLocation,
+      acceptAssignment, rejectAssignment, updateBookingStatus, markNotificationRead, markAllNotificationsRead, updateLocation,
     }}>
       {children}
     </RiderContext.Provider>

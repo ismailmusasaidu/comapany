@@ -23,14 +23,34 @@ function ago(d: string) {
   return new Date(d).toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
+// ── Status progression ────────────────────────────────────────────────────────
+
+const NEXT_STATUS: Record<string, { label: string; next: string; color: string }> = {
+  pending:    { label: 'Mark as Picked Up',  next: 'picked_up',  color: 'bg-orange-500 hover:bg-orange-600' },
+  confirmed:  { label: 'Mark as Picked Up',  next: 'picked_up',  color: 'bg-orange-500 hover:bg-orange-600' },
+  picked_up:  { label: 'Mark In Transit',    next: 'in_transit', color: 'bg-blue-500 hover:bg-blue-600' },
+  in_transit: { label: 'Mark as Delivered',  next: 'delivered',  color: 'bg-green-600 hover:bg-green-700' },
+};
+
+const STATUS_BADGE: Record<string, string> = {
+  pending:    'bg-yellow-50 text-yellow-700 border-yellow-200',
+  confirmed:  'bg-blue-50 text-blue-700 border-blue-200',
+  picked_up:  'bg-orange-50 text-orange-700 border-orange-200',
+  in_transit: 'bg-purple-50 text-purple-700 border-purple-200',
+  delivered:  'bg-green-50 text-green-700 border-green-200',
+  cancelled:  'bg-red-50 text-red-600 border-red-200',
+};
+
 // ── Assignment card ───────────────────────────────────────────────────────────
 
-function AssignmentCard({ booking, onAccept, onReject, accepting, rejecting }: {
+function AssignmentCard({ booking, onAccept, onReject, onStatusUpdate, accepting, rejecting, updatingStatus }: {
   booking: AssignedBooking;
   onAccept: () => void;
   onReject: (reason: string) => void;
+  onStatusUpdate: (newStatus: string) => void;
   accepting: boolean;
   rejecting: boolean;
+  updatingStatus: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
@@ -62,6 +82,11 @@ function AssignmentCard({ booking, onAccept, onReject, accepting, rejecting }: {
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusBadge.cls}`}>
                 {statusBadge.label}
               </span>
+              {booking.assignment_status === 'accepted' && (
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${STATUS_BADGE[booking.status] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                  {cap(booking.status)}
+                </span>
+              )}
               <span className="text-xs text-gray-400 ml-auto">{ago(booking.assigned_at)}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-700 mb-1">
@@ -118,6 +143,21 @@ function AssignmentCard({ booking, onAccept, onReject, accepting, rejecting }: {
                     <span className="font-semibold">Note: </span>{booking.special_instructions}
                   </div>
                 )}
+                {/* Status progression */}
+                {NEXT_STATUS[booking.status] && (
+                  <button onClick={() => onStatusUpdate(NEXT_STATUS[booking.status].next)} disabled={updatingStatus}
+                    className={`w-full flex items-center justify-center gap-2 text-white py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-60 ${NEXT_STATUS[booking.status].color}`}>
+                    {updatingStatus
+                      ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      : <Truck className="h-4 w-4" />}
+                    {NEXT_STATUS[booking.status].label}
+                  </button>
+                )}
+                {booking.status === 'delivered' && (
+                  <div className="flex items-center justify-center gap-2 py-2.5 bg-green-50 rounded-xl text-sm font-semibold text-green-700">
+                    <CheckCircle className="h-4 w-4" /> Delivery Completed
+                  </div>
+                )}
               </>
             )}
             {booking.assignment_note && booking.assignment_status === 'rejected' && (
@@ -171,7 +211,7 @@ function AssignmentCard({ booking, onAccept, onReject, accepting, rejecting }: {
 
 export default function RiderDashboardPage() {
   const { user, profile, assignments, notifications, unreadNotifications, ratings, avgRating, location, isLoading,
-    signOut, refreshProfile, acceptAssignment, rejectAssignment, markAllNotificationsRead, updateLocation } = useRider();
+    signOut, refreshProfile, acceptAssignment, rejectAssignment, updateBookingStatus, markAllNotificationsRead, updateLocation } = useRider();
   const navigate = useNavigate();
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -220,6 +260,13 @@ export default function RiderDashboardPage() {
   const handleReject = async (booking: AssignedBooking, reason: string) => {
     setActionLoading(`reject-${booking.id}`);
     try { await rejectAssignment(booking.id, booking.source_table, reason); }
+    catch { /* silently handled */ }
+    finally { setActionLoading(null); }
+  };
+
+  const handleStatusUpdate = async (booking: AssignedBooking, newStatus: string) => {
+    setActionLoading(`status-${booking.id}`);
+    try { await updateBookingStatus(booking.id, booking.source_table, newStatus); }
     catch { /* silently handled */ }
     finally { setActionLoading(null); }
   };
@@ -482,8 +529,10 @@ export default function RiderDashboardPage() {
                     <AssignmentCard key={booking.id} booking={booking}
                       onAccept={() => handleAccept(booking)}
                       onReject={(reason) => handleReject(booking, reason)}
+                      onStatusUpdate={(newStatus) => handleStatusUpdate(booking, newStatus)}
                       accepting={actionLoading === `accept-${booking.id}`}
                       rejecting={actionLoading === `reject-${booking.id}`}
+                      updatingStatus={actionLoading === `status-${booking.id}`}
                     />
                   ))
                 )}

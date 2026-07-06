@@ -122,6 +122,20 @@ export default function BusinessOrdersPage() {
 
   useEffect(() => { setPage(1); }, [tab, search, statusFilter, typeFilter, dateFrom, dateTo]);
 
+  // Realtime: reflect rider status updates live
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`biz-bookings-rt-${user.id}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'business_delivery_bookings', filter: `business_id=eq.${user.id}` },
+        (payload) => {
+          setBookings(prev => prev.map(b => b.id === payload.new.id ? { ...b, ...(payload.new as Booking) } : b));
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id]);
+
   const fetchAll = async () => {
     if (!user) return;
     setLoading(true);
