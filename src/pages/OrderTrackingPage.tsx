@@ -251,6 +251,7 @@ export default function OrderTrackingPage() {
     setEvents([]);
     setSearched(true);
 
+    try {
     const [
       { data: orderData },
       { data: bookingData },
@@ -384,6 +385,10 @@ export default function OrderTrackingPage() {
     setTimeout(() => {
       resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
+    } catch {
+      setError('Unable to fetch order. Please check your connection and try again.');
+      setLoading(false);
+    }
   };
 
   // Live update when the user is already viewing a tracked delivery/business booking

@@ -284,6 +284,7 @@ export default function AdminDashboardPage() {
             </button>
 
             <button
+              onClick={() => navigate('/admin/whatsapp')}
               className="relative bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-6 rounded-lg shadow hover:shadow-lg transition-all hover:scale-105 text-left"
             >
               <div className="flex items-center space-x-3 mb-2">

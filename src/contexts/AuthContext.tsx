@@ -28,6 +28,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    let initialized = false;
+
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
@@ -35,18 +37,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await checkAdmin(session.user.id);
       }
       setIsLoading(false);
+      initialized = true;
     };
 
     getSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!initialized) return;
       (async () => {
+        setIsLoading(true);
         setUser(session?.user ?? null);
         if (session?.user) {
           await checkAdmin(session.user.id);
         } else {
           setIsAdmin(false);
         }
+        setIsLoading(false);
       })();
     });
 

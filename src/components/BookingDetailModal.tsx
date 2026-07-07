@@ -84,9 +84,11 @@ export default function BookingDetailModal({ booking, onClose, isAdmin = false, 
 
   const handleStatusChange = async (newStatus: string) => {
     setSaving(true);
-    await supabase.from('delivery_bookings').update({ status: newStatus }).eq('id', booking.id);
-    setStatus(newStatus);
-    onStatusChange?.(booking.id, newStatus);
+    const { error } = await supabase.from('delivery_bookings').update({ status: newStatus }).eq('id', booking.id);
+    if (!error) {
+      setStatus(newStatus);
+      onStatusChange?.(booking.id, newStatus);
+    }
     setSaving(false);
   };
 
