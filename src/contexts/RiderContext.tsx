@@ -212,6 +212,7 @@ export function RiderProvider({ children }: { children: React.ReactNode }) {
     const { error, data } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     if (data.user) {
+      setUser(data.user);
       const p = await fetchProfile(data.user.id);
       if (p?.status === 'approved') await loadAll(data.user.id);
     }

@@ -70,7 +70,10 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     const { error, data } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    if (data.user) await fetchProfile(data.user.id);
+    if (data.user) {
+      setUser(data.user);
+      await fetchProfile(data.user.id);
+    }
   };
 
   const signOut = async () => {
