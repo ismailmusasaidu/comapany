@@ -7,6 +7,7 @@ import {
   Banknote, CreditCard, Building2, Wifi, LogOut
 } from 'lucide-react';
 import { useIndividual } from '../contexts/IndividualContext';
+import { usePersistentState } from '../hooks/usePersistentState';
 import { supabase } from '../lib/supabase';
 
 interface BookingForm {
@@ -182,8 +183,8 @@ export default function IndividualDeliveryBookingPage() {
   const { user, signOut } = useIndividual();
   const navigate = useNavigate();
   const handleLogout = async () => { await signOut(); navigate('/individual/login'); };
-  const [form, setForm] = useState<BookingForm>(EMPTY);
-  const [step, setStep] = useState(1);
+  const [form, setForm, clearForm] = usePersistentState<BookingForm>('individual_booking_form', EMPTY);
+  const [step, setStep, clearStep] = usePersistentState<number>('individual_booking_step', 1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -282,6 +283,7 @@ export default function IndividualDeliveryBookingPage() {
       });
       if (err) throw err;
       setCreatedRef(ref); setSuccess(true);
+      clearForm(); clearStep();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create booking.');
     } finally { setLoading(false); }
@@ -350,7 +352,7 @@ export default function IndividualDeliveryBookingPage() {
             <p className="text-xl font-bold text-orange-700">{createdRef}</p>
           </div>
           <div className="flex gap-3 justify-center">
-            <button onClick={() => { setSuccess(false); setForm(EMPTY); setStep(1); setFeeEstimate(null); }}
+            <button onClick={() => { setSuccess(false); setForm(EMPTY); setStep(1); setFeeEstimate(null); clearForm(); clearStep(); }}
               className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all">
               <Package className="h-4 w-4" /> New Booking
             </button>

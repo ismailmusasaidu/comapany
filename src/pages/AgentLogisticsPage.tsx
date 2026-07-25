@@ -5,6 +5,7 @@ import {
   Package, Warehouse, Zap, BarChart3, Globe, Navigation, Weight, Calendar, DollarSign, Home
 } from 'lucide-react';
 import { useAgent } from '../contexts/AgentContext';
+import { usePersistentState } from '../hooks/usePersistentState';
 import { supabase } from '../lib/supabase';
 import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
 
@@ -47,7 +48,7 @@ export default function AgentLogisticsPage() {
   const { user, profile, signOut } = useAgent();
   const navigate = useNavigate();
   const handleLogout = async () => { await signOut(); navigate('/agent/login'); };
-  const [form, setForm] = useState<RequestForm>(EMPTY);
+  const [form, setForm, clearForm] = usePersistentState<RequestForm>('agent_logistics_form', EMPTY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);

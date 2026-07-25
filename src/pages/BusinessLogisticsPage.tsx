@@ -5,6 +5,7 @@ import {
   CheckCircle, ArrowLeft, ArrowRight, Weight, LogOut
 } from 'lucide-react';
 import { useBusiness } from '../contexts/BusinessContext';
+import { usePersistentState } from '../hooks/usePersistentState';
 import { supabase } from '../lib/supabase';
 import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
 
@@ -50,7 +51,7 @@ export default function BusinessLogisticsPage() {
   const { user, profile, signOut } = useBusiness();
   const navigate = useNavigate();
   const handleLogout = async () => { await signOut(); navigate('/business/login'); };
-  const [form, setForm] = useState<RequestForm>(EMPTY);
+  const [form, setForm, clearForm] = usePersistentState<RequestForm>('business_logistics_form', EMPTY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -105,6 +106,7 @@ export default function BusinessLogisticsPage() {
       if (err) throw err;
       setCreatedRef(ref);
       setSuccess(true);
+      clearForm();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to submit request.');
     } finally {
@@ -126,7 +128,7 @@ export default function BusinessLogisticsPage() {
             <p className="text-xl font-bold text-orange-700">{createdRef}</p>
           </div>
           <div className="flex gap-3 justify-center">
-            <button onClick={() => { setSuccess(false); setForm(EMPTY); }}
+            <button onClick={() => { setSuccess(false); setForm(EMPTY); clearForm(); }}
               className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all">
               <Truck className="h-4 w-4" /> New Request
             </button>
