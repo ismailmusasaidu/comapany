@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAgent } from '../contexts/AgentContext';
 import { supabase } from '../lib/supabase';
+import { initializePaystackPayment } from '../lib/paystack';
 import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
 
 interface BookingForm {
@@ -195,6 +196,16 @@ export default function AgentDeliveryBookingPage() {
         status: 'pending',
       });
       if (err) throw err;
+
+      if (form.payment_method === 'paystack' && totalEstimate > 0 && user.email) {
+        const checkoutUrl = await initializePaystackPayment({
+          bookingRef: ref, tableName: 'delivery_bookings',
+          amountKobo: Math.round(totalEstimate * 100), customerEmail: user.email,
+        });
+        window.location.href = checkoutUrl;
+        return;
+      }
+
       setCreatedRef(ref); setSuccess(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create booking.');

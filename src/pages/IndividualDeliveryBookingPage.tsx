@@ -9,6 +9,7 @@ import {
 import { useIndividual } from '../contexts/IndividualContext';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { supabase } from '../lib/supabase';
+import { initializePaystackPayment } from '../lib/paystack';
 
 interface BookingForm {
   delivery_type: string;
@@ -282,6 +283,17 @@ export default function IndividualDeliveryBookingPage() {
         status: 'pending',
       });
       if (err) throw err;
+
+      if (form.payment_method === 'paystack' && totalEstimate > 0 && user.email) {
+        const checkoutUrl = await initializePaystackPayment({
+          bookingRef: ref, tableName: 'delivery_bookings',
+          amountKobo: Math.round(totalEstimate * 100), customerEmail: user.email,
+        });
+        clearForm(); clearStep();
+        window.location.href = checkoutUrl;
+        return;
+      }
+
       setCreatedRef(ref); setSuccess(true);
       clearForm(); clearStep();
     } catch (err: unknown) {

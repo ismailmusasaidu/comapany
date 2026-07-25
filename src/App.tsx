@@ -56,6 +56,7 @@ const AdminLogisticsFeesPage = lazy(() => import('./pages/AdminLogisticsFeesPage
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const PaymentCallbackPage = lazy(() => import('./pages/PaymentCallbackPage'));
 const RiderRegisterPage = lazy(() => import('./pages/RiderRegisterPage'));
 const RiderLoginPage = lazy(() => import('./pages/RiderLoginPage'));
 const RiderDashboardPage = lazy(() => import('./pages/RiderDashboardPage'));
@@ -123,6 +124,7 @@ function App() {
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/payment/callback" element={<PaymentCallbackPage />} />
           <Route path="/agent/login" element={<AgentLoginPage />} />
           <Route path="/agent/dashboard" element={<AgentDashboardPage />} />
           <Route path="/agent/orders" element={<AgentOrdersPage />} />
