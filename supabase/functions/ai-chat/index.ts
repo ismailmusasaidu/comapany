@@ -55,6 +55,22 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Anthropic requires the conversation to start with a user message.
+    // The chatbot seeds the UI with an assistant welcome message, so drop any
+    // leading assistant turns and any non-user/assistant roles before sending.
+    const conversation = messages
+      .filter((m: { role: string; content: string }) => m.role === "user" || m.role === "assistant")
+      .slice();
+    while (conversation.length > 0 && conversation[0].role !== "user") {
+      conversation.shift();
+    }
+    if (conversation.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "No user message to send" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
     if (!apiKey) {
       return new Response(
@@ -74,15 +90,25 @@ Deno.serve(async (req: Request) => {
         model: "claude-haiku-4-5",
         max_tokens: 512,
         system: SYSTEM_PROMPT,
-        messages: messages.slice(-10), // keep last 10 turns for context
+        messages: conversation.slice(-10), // keep last 10 turns for context
       }),
     });
 
     if (!response.ok) {
       const err = await response.text();
       console.error("Anthropic error:", err);
+      let friendly = "AI service error. Please try again.";
+      try {
+        const parsed = JSON.parse(err);
+        const msg: string = parsed?.error?.message ?? "";
+        if (msg.includes("credit balance is too low") || msg.includes("billing")) {
+          friendly = "Our AI assistant is temporarily unavailable. Please try again later.";
+        }
+      } catch {
+        // keep default friendly message
+      }
       return new Response(
-        JSON.stringify({ error: "AI service error. Please try again." }),
+        JSON.stringify({ error: friendly }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
