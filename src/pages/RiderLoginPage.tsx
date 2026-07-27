@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bike, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useRider } from '../contexts/RiderContext';
@@ -7,8 +7,12 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 export default function RiderLoginPage() {
-  const { signIn } = useRider();
+  const { signIn, user } = useRider();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) navigate('/rider/dashboard', { replace: true });
+  }, [user, navigate]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +29,6 @@ export default function RiderLoginPage() {
     setLoading(true);
     try {
       await signIn(email, password);
-      navigate('/rider/dashboard');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Invalid email or password.';
       if (msg.toLowerCase().includes('email not confirmed') || msg.toLowerCase().includes('email_not_confirmed')) {

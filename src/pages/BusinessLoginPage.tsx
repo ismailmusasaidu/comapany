@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Truck, Mail, Lock, Eye, EyeOff, Building2 } from 'lucide-react';
 import { useBusiness } from '../contexts/BusinessContext';
@@ -7,8 +7,12 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 export default function BusinessLoginPage() {
-  const { signIn } = useBusiness();
+  const { signIn, user } = useBusiness();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) navigate('/business/dashboard', { replace: true });
+  }, [user, navigate]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +29,6 @@ export default function BusinessLoginPage() {
     setLoading(true);
     try {
       await signIn(email, password);
-      navigate('/business/dashboard');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Login failed. Please check your credentials.';
       if (msg.toLowerCase().includes('email not confirmed') || msg.toLowerCase().includes('email_not_confirmed')) {

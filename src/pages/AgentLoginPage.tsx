@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Truck, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAgent } from '../contexts/AgentContext';
@@ -7,8 +7,12 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 export default function AgentLoginPage() {
-  const { signIn } = useAgent();
+  const { signIn, user } = useAgent();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) navigate('/agent/dashboard', { replace: true });
+  }, [user, navigate]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +29,6 @@ export default function AgentLoginPage() {
     setLoading(true);
     try {
       await signIn(email, password);
-      navigate('/agent/dashboard');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Invalid email or password.';
       if (msg.toLowerCase().includes('email not confirmed') || msg.toLowerCase().includes('email_not_confirmed')) {
