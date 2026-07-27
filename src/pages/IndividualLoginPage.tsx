@@ -7,12 +7,12 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 export default function IndividualLoginPage() {
-  const { signIn, user } = useIndividual();
+  const { signIn, user, profile, isLoading } = useIndividual();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) navigate('/individual/dashboard', { replace: true });
-  }, [user, navigate]);
+    if (!isLoading && user && profile) navigate('/individual/dashboard', { replace: true });
+  }, [user, profile, isLoading, navigate]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -56,6 +56,17 @@ export default function IndividualLoginPage() {
     setResendLoading(false);
     setResendDone(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center px-4">
