@@ -45,15 +45,19 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    let initialized = false;
+
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       if (session?.user) await fetchProfile(session.user.id);
       setIsLoading(false);
+      initialized = true;
     };
     init();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!initialized) return;
       (async () => {
         setUser(session?.user ?? null);
         if (session?.user) {
@@ -83,7 +87,15 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   };
 
   const refreshProfile = async () => {
-    if (user) await fetchProfile(user.id);
+    if (!user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        await fetchProfile(session.user.id);
+      }
+      return;
+    }
+    await fetchProfile(user.id);
   };
 
   return (

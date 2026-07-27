@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import {
   Truck, Package, BarChart3, Clock, CheckCircle, XCircle,
   LogOut, Plus, ChevronRight, User, MapPin, Phone, Mail,
@@ -182,7 +182,7 @@ function DonutChart({ segments }: { segments: { label: string; value: number; co
 }
 
 export default function IndividualDashboardPage() {
-  const { user, profile, signOut, refreshProfile } = useIndividual();
+  const { user, profile, signOut, refreshProfile, isLoading } = useIndividual();
   const navigate = useNavigate();
   const [analytics, setAnalytics] = useState<Analytics>(EMPTY_ANALYTICS);
   const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([]);
@@ -281,7 +281,7 @@ export default function IndividualDashboardPage() {
     navigate('/individual/login');
   };
 
-  if (!profile) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -290,6 +290,10 @@ export default function IndividualDashboardPage() {
         </div>
       </div>
     );
+  }
+
+  if (!profile) {
+    return <Navigate to="/individual/login" replace />;
   }
 
   const bTrend = trend(analytics.bookingsThisMonth, analytics.bookingsLastMonth);

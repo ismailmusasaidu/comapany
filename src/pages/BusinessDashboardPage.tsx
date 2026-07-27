@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import {
   Truck, Package, BarChart3, Clock, CheckCircle, XCircle,
   LogOut, Plus, ChevronRight, AlertTriangle, Building2,
@@ -178,7 +178,7 @@ function DonutChart({ segments }: { segments: { label: string; value: number; co
 }
 
 export default function BusinessDashboardPage() {
-  const { user, profile, signOut, refreshProfile } = useBusiness();
+  const { user, profile, signOut, refreshProfile, isLoading } = useBusiness();
   const navigate = useNavigate();
   const [analytics, setAnalytics] = useState<Analytics>(EMPTY_ANALYTICS);
   const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
@@ -265,7 +265,7 @@ export default function BusinessDashboardPage() {
     navigate('/business/login');
   };
 
-  if (!profile) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -274,6 +274,10 @@ export default function BusinessDashboardPage() {
         </div>
       </div>
     );
+  }
+
+  if (!profile) {
+    return <Navigate to="/business/login" replace />;
   }
 
   const bTrend = trend(analytics.bookingsThisMonth, analytics.bookingsLastMonth);
