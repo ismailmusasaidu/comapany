@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, RefreshCw, FileText, Package, Truck, Calendar,
   Download, Printer, Filter, Building2, Users, User, CheckCircle,
-  XCircle, Clock, ChevronDown, Search, X, Hash, MapPin, Weight,
+  XCircle, Clock, ChevronDown, Search, X, Hash, MapPin, Weight, DollarSign,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -31,7 +31,12 @@ interface DeliveryRow {
   delivery_type?: string | null;
   vehicle_type?: string | null;
   payment_method?: string | null;
+  payment_status?: string | null;
   special_instructions?: string;
+  total_amount?: number | null;
+  distance_fee?: number | null;
+  weight_fee?: number | null;
+  package_surcharge?: number | null;
   portal: 'individual' | 'agent' | 'business';
   owner_name: string;
   owner_email: string;
@@ -151,6 +156,7 @@ function buildInvoiceHTML(
   invoiceNumber: string,
 ): string {
   const totalDeclared = deliveries.reduce((s, d) => s + (d.declared_value ?? 0), 0);
+  const totalDeliveryFees = deliveries.reduce((s, d) => s + (d.total_amount ?? 0), 0);
   const deliveredCount = deliveries.filter(d => d.status === 'delivered').length;
   const completedCount = logistics.filter(r => r.status === 'completed').length;
   const cancelledCount = deliveries.filter(d => d.status === 'cancelled').length + logistics.filter(r => r.status === 'rejected').length;
@@ -177,6 +183,7 @@ function buildInvoiceHTML(
             <th style="padding:9px 10px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.05em">Route</th>
             <th style="padding:9px 10px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.05em">Package</th>
             <th style="padding:9px 10px;text-align:right;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.05em">Value</th>
+            <th style="padding:9px 10px;text-align:right;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.05em">Delivery Fee</th>
             <th style="padding:9px 10px;text-align:center;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.05em">Status</th>
           </tr>
         </thead>
@@ -201,6 +208,7 @@ function buildInvoiceHTML(
                   ${d.weight_kg ? `<div style="font-size:10px;color:#9ca3af">${d.weight_kg} kg</div>` : ''}
                 </td>
                 <td style="padding:9px 10px;text-align:right;font-weight:700;color:#111827">${naira(d.declared_value)}</td>
+                <td style="padding:9px 10px;text-align:right;font-weight:700;color:#ea580c">${naira(d.total_amount)}</td>
                 <td style="padding:9px 10px;text-align:center">
                   <span style="background:${sc.bg};color:${sc.text};border:1px solid ${sc.border};border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;white-space:nowrap">${cap(d.status)}</span>
                 </td>
@@ -211,7 +219,12 @@ function buildInvoiceHTML(
         <tfoot>
           <tr style="background:#fafafa;border-top:2px solid #e5e7eb">
             <td colspan="6" style="padding:10px 10px;text-align:right;font-weight:700;font-size:12px;color:#374151">Total Declared Value:</td>
-            <td style="padding:10px 10px;text-align:right;font-weight:800;font-size:14px;color:#ea580c">${naira(totalDeclared)}</td>
+            <td style="padding:10px 10px;text-align:right;font-weight:800;font-size:14px;color:#111827">${naira(totalDeclared)}</td>
+            <td></td>
+          </tr>
+          <tr style="background:#fff7ed;border-top:2px solid #fdba74">
+            <td colspan="6" style="padding:10px 10px;text-align:right;font-weight:700;font-size:12px;color:#374151">Total Delivery Fees:</td>
+            <td style="padding:10px 10px;text-align:right;font-weight:800;font-size:14px;color:#ea580c">${naira(totalDeliveryFees)}</td>
             <td></td>
           </tr>
         </tfoot>
@@ -407,11 +420,11 @@ export default function AdminInvoiceGeneratorPage() {
       supabase.from('individual_profiles').select('id, full_name, email, phone'),
       supabase.from('agent_profiles').select('id, full_name, email, phone, company_name'),
       supabase.from('business_profiles').select('id, company_name, contact_person, email, phone'),
-      supabase.from('delivery_bookings').select('id,booking_ref,created_at,status,sender_name,sender_phone,pickup_city,recipient_name,recipient_phone,delivery_city,package_type,package_description,weight_kg,declared_value,delivery_type,vehicle_type,payment_method,special_instructions,individual_id').not('individual_id','is',null).order('created_at',{ascending:false}),
+      supabase.from('delivery_bookings').select('id,booking_ref,created_at,status,sender_name,sender_phone,pickup_city,recipient_name,recipient_phone,delivery_city,package_type,package_description,weight_kg,declared_value,delivery_type,vehicle_type,payment_method,payment_status,special_instructions,total_amount,distance_fee,weight_fee,package_surcharge,individual_id').not('individual_id','is',null).order('created_at',{ascending:false}),
       supabase.from('logistics_requests').select('id,request_ref,created_at,status,title,service_type,description,origin,destination,quantity,weight_kg,preferred_date,budget_range,admin_notes,vehicle_type,individual_id').not('individual_id','is',null).order('created_at',{ascending:false}),
-      supabase.from('delivery_bookings').select('id,booking_ref,created_at,status,sender_name,sender_phone,pickup_city,recipient_name,recipient_phone,delivery_city,package_type,package_description,weight_kg,declared_value,delivery_type,vehicle_type,payment_method,special_instructions,agent_id').not('agent_id','is',null).order('created_at',{ascending:false}),
+      supabase.from('delivery_bookings').select('id,booking_ref,created_at,status,sender_name,sender_phone,pickup_city,recipient_name,recipient_phone,delivery_city,package_type,package_description,weight_kg,declared_value,delivery_type,vehicle_type,payment_method,payment_status,special_instructions,total_amount,distance_fee,weight_fee,package_surcharge,agent_id').not('agent_id','is',null).order('created_at',{ascending:false}),
       supabase.from('logistics_requests').select('id,request_ref,created_at,status,title,service_type,description,origin,destination,quantity,weight_kg,preferred_date,budget_range,admin_notes,vehicle_type,agent_id').not('agent_id','is',null).order('created_at',{ascending:false}),
-      supabase.from('business_delivery_bookings').select('id,booking_ref,created_at,status,sender_name,sender_phone,pickup_city,recipient_name,recipient_phone,delivery_city,package_type,package_description,weight_kg,declared_value,delivery_type,vehicle_type,payment_method,special_instructions,business_id').order('created_at',{ascending:false}),
+      supabase.from('business_delivery_bookings').select('id,booking_ref,created_at,status,sender_name,sender_phone,pickup_city,recipient_name,recipient_phone,delivery_city,package_type,package_description,weight_kg,declared_value,delivery_type,vehicle_type,payment_method,payment_status,special_instructions,total_amount,distance_fee,weight_fee,package_surcharge,business_id').order('created_at',{ascending:false}),
       supabase.from('business_logistics_requests').select('id,request_ref,created_at,status,title,service_type,description,origin,destination,quantity,weight,preferred_date,budget_range,admin_notes,vehicle_type,business_id').order('created_at',{ascending:false}),
       supabase.from('contact_info').select('email,phone,address').maybeSingle(),
     ]);
@@ -722,7 +735,7 @@ export default function AdminInvoiceGeneratorPage() {
                   <div className="grid sm:grid-cols-3 gap-0 divide-x divide-gray-100 border-b border-gray-100">
                     {[
                       { label: 'Total Declared Value', value: naira(totalDeclared), icon: Weight },
-                      { label: 'Completed Requests', value: String(completedCount), icon: CheckCircle },
+                      { label: 'Total Delivery Fees', value: naira(totalDeliveryFees), icon: DollarSign },
                       { label: 'Cancelled / Rejected', value: String(filtered.deliveries.filter(d => d.status === 'cancelled').length + filtered.logistics.filter(r => r.status === 'rejected').length), icon: XCircle },
                     ].map(k => (
                       <div key={k.label} className="flex items-center gap-3 px-5 py-4">
@@ -758,7 +771,7 @@ export default function AdminInvoiceGeneratorPage() {
                             <table className="w-full text-xs">
                               <thead>
                                 <tr className="bg-gray-800 text-white">
-                                  {['Ref', 'Date', 'Client', 'Route', 'Package', 'Value', 'Status'].map(h => (
+                                  {['Ref', 'Date', 'Client', 'Route', 'Package', 'Value', 'Fee', 'Status'].map(h => (
                                     <th key={h} className="px-3 py-2.5 text-left font-semibold text-xs uppercase tracking-wide first:rounded-tl-xl last:rounded-tr-xl">{h}</th>
                                   ))}
                                 </tr>
@@ -775,6 +788,7 @@ export default function AdminInvoiceGeneratorPage() {
                                     <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap">{d.pickup_city} → {d.delivery_city}</td>
                                     <td className="px-3 py-2.5 text-gray-600">{cap(d.package_type)}{d.weight_kg ? ` · ${d.weight_kg}kg` : ''}</td>
                                     <td className="px-3 py-2.5 font-bold text-gray-800 whitespace-nowrap">{naira(d.declared_value)}</td>
+                                    <td className="px-3 py-2.5 font-bold text-orange-600 whitespace-nowrap">{d.total_amount ? naira(d.total_amount) : '—'}</td>
                                     <td className="px-3 py-2.5"><span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${STATUS_PILL_CLASS[d.status] ?? 'bg-gray-100 text-gray-600'}`}>{cap(d.status)}</span></td>
                                   </tr>
                                 ))}
@@ -782,7 +796,8 @@ export default function AdminInvoiceGeneratorPage() {
                               <tfoot>
                                 <tr className="bg-gray-50 border-t-2 border-gray-200">
                                   <td colSpan={5} className="px-3 py-2.5 text-right text-xs font-bold text-gray-600">Total Declared Value:</td>
-                                  <td className="px-3 py-2.5 font-bold text-orange-600">{naira(totalDeclared)}</td>
+                                  <td className="px-3 py-2.5 font-bold text-gray-800">{naira(totalDeclared)}</td>
+                                  <td className="px-3 py-2.5 font-bold text-orange-600">{naira(totalDeliveryFees)}</td>
                                   <td />
                                 </tr>
                               </tfoot>
@@ -860,6 +875,10 @@ export default function AdminInvoiceGeneratorPage() {
                     <div>
                       <p className="text-slate-400 text-xs uppercase tracking-wide mb-1">Declared Value</p>
                       <p className="font-semibold text-orange-300">{naira(totalDeclared)}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 text-xs uppercase tracking-wide mb-1">Delivery Fees</p>
+                      <p className="font-semibold text-orange-300">{naira(totalDeliveryFees)}</p>
                     </div>
                   </div>
                   <button onClick={handlePrint} disabled={generating || loading || (filtered.deliveries.length + filtered.logistics.length === 0)}

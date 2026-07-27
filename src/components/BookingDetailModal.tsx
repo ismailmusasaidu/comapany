@@ -28,6 +28,12 @@ interface BookingDetail {
   status: string;
   created_at: string;
   updated_at: string;
+  distance_fee?: number | null;
+  weight_fee?: number | null;
+  package_surcharge?: number | null;
+  total_amount?: number | null;
+  payment_method?: string | null;
+  payment_status?: string | null;
   agent_profiles?: { full_name: string; company_name: string; phone: string; email: string } | null;
 }
 
@@ -252,6 +258,52 @@ export default function BookingDetailModal({ booking, onClose, isAdmin = false, 
               </div>
             )}
           </div>
+
+          {/* Payment & Charges Breakdown */}
+          {booking.total_amount !== null && booking.total_amount !== undefined && (
+            <div className="border border-gray-100 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <DollarSign className="h-3.5 w-3.5" /> Charges Breakdown
+                </p>
+                {booking.payment_method && (
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 capitalize">
+                    {booking.payment_method.replace(/_/g, ' ')}
+                  </span>
+                )}
+              </div>
+              <div className="space-y-2">
+                {(booking.distance_fee ?? 0) > 0 && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Distance Fee</span>
+                    <span className="font-medium text-gray-800">₦{Number(booking.distance_fee).toLocaleString()}</span>
+                  </div>
+                )}
+                {(booking.weight_fee ?? 0) > 0 && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Weight Fee</span>
+                    <span className="font-medium text-gray-800">₦{Number(booking.weight_fee).toLocaleString()}</span>
+                  </div>
+                )}
+                {(booking.package_surcharge ?? 0) > 0 && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Package Surcharge</span>
+                    <span className="font-medium text-gray-800">₦{Number(booking.package_surcharge).toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="border-t border-gray-200 pt-2 flex items-center justify-between">
+                  <span className="text-sm font-bold text-gray-700">Total Amount</span>
+                  <span className="text-lg font-bold text-orange-600">₦{Number(booking.total_amount).toLocaleString()}</span>
+                </div>
+                {booking.payment_status && booking.payment_status !== 'unpaid' && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-400">Payment Status</span>
+                    <span className={`font-semibold capitalize ${booking.payment_status === 'paid' ? 'text-green-600' : 'text-red-600'}`}>{booking.payment_status}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Agent info (admin only) */}
           {isAdmin && booking.agent_profiles && (

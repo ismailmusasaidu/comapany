@@ -194,6 +194,10 @@ export default function BusinessDeliveryBookingPage() {
         declared_value: form.declared_value ? parseFloat(form.declared_value) : null,
         special_instructions: form.special_instructions,
         payment_method: form.payment_method,
+        distance_fee: hasTotal ? distanceFee : null,
+        weight_fee: hasTotal ? weightFee : null,
+        package_surcharge: hasTotal ? pkgSurcharge : null,
+        total_amount: hasTotal ? totalEstimate : null,
         status: 'pending',
       });
       if (err) throw err;

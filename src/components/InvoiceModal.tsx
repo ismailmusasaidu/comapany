@@ -22,6 +22,12 @@ export interface BookingInvoiceData {
   weight_kg: number | null;
   declared_value: number | null;
   special_instructions: string;
+  distance_fee?: number | null;
+  weight_fee?: number | null;
+  package_surcharge?: number | null;
+  total_amount?: number | null;
+  payment_method?: string | null;
+  payment_status?: string | null;
   agent_name?: string;
   agent_company?: string;
   agent_phone?: string;
@@ -405,6 +411,45 @@ export default function InvoiceModal({ data, onClose }: Props) {
                     </div>
                   </div>
                 </>
+              )}
+
+              {/* Charges Breakdown & Total */}
+              {isBooking && (data as BookingInvoiceData).total_amount != null && (
+                <div style={{ marginBottom: '24px' }}>
+                  <p style={{ fontSize: '11px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Charges Breakdown</p>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                    <tbody>
+                      {((data as BookingInvoiceData).distance_fee ?? 0) > 0 && (
+                        <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
+                          <td style={{ padding: '10px 14px', color: '#6b7280' }}>Distance Fee</td>
+                          <td style={{ padding: '10px 14px', textAlign: 'right', fontWeight: '600', color: '#374151' }}>₦{Number((data as BookingInvoiceData).distance_fee).toLocaleString()}</td>
+                        </tr>
+                      )}
+                      {((data as BookingInvoiceData).weight_fee ?? 0) > 0 && (
+                        <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
+                          <td style={{ padding: '10px 14px', color: '#6b7280' }}>Weight Fee</td>
+                          <td style={{ padding: '10px 14px', textAlign: 'right', fontWeight: '600', color: '#374151' }}>₦{Number((data as BookingInvoiceData).weight_fee).toLocaleString()}</td>
+                        </tr>
+                      )}
+                      {((data as BookingInvoiceData).package_surcharge ?? 0) > 0 && (
+                        <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
+                          <td style={{ padding: '10px 14px', color: '#6b7280' }}>Package Surcharge</td>
+                          <td style={{ padding: '10px 14px', textAlign: 'right', fontWeight: '600', color: '#374151' }}>₦{Number((data as BookingInvoiceData).package_surcharge).toLocaleString()}</td>
+                        </tr>
+                      )}
+                      <tr style={{ borderTop: '2px solid #e5e7eb', background: '#fff7ed' }}>
+                        <td style={{ padding: '12px 14px', fontWeight: '800', fontSize: '14px', color: '#111827' }}>Total Amount Due</td>
+                        <td style={{ padding: '12px 14px', textAlign: 'right', fontWeight: '800', fontSize: '18px', color: '#ea580c' }}>₦{Number((data as BookingInvoiceData).total_amount).toLocaleString()}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '11px', color: '#6b7280' }}>
+                    <span>Payment Method: <strong style={{ color: '#374151' }}>{(data as BookingInvoiceData).payment_method ? cap((data as BookingInvoiceData).payment_method!) : '—'}</strong></span>
+                    {(data as BookingInvoiceData).payment_status && (data as BookingInvoiceData).payment_status !== 'unpaid' && (
+                      <span>Payment Status: <strong style={{ color: (data as BookingInvoiceData).payment_status === 'paid' ? '#15803d' : '#b91c1c' }}>{cap((data as BookingInvoiceData).payment_status!)}</strong></span>
+                    )}
+                  </div>
+                </div>
               )}
 
               {/* Description / Notes */}
