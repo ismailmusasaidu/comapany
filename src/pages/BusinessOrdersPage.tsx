@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useBusiness } from '../contexts/BusinessContext';
 import { supabase } from '../lib/supabase';
+import BookingDetailModal from '../components/BookingDetailModal';
 import InvoiceModal, { type InvoiceData } from '../components/InvoiceModal';
 
 interface Booking {
@@ -31,6 +32,12 @@ interface Booking {
   status: string;
   created_at: string;
   updated_at: string;
+  distance_fee?: number | null;
+  weight_fee?: number | null;
+  package_surcharge?: number | null;
+  total_amount?: number | null;
+  payment_method?: string | null;
+  payment_status?: string | null;
 }
 
 interface LogisticsRequest {
@@ -703,38 +710,11 @@ export default function BusinessOrdersPage() {
       </div>
 
       {selectedBooking && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedBooking(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-gray-900">{selectedBooking.booking_ref}</h2>
-              <button onClick={() => setSelectedBooking(null)} className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="space-y-3 text-sm">
-              {[
-                { label: 'Status', value: cap(selectedBooking.status) },
-                ...(selectedBooking.delivery_type ? [{ label: 'Delivery Type', value: cap(selectedBooking.delivery_type) }] : []),
-                ...(selectedBooking.vehicle_type ? [{ label: 'Vehicle Type', value: cap(selectedBooking.vehicle_type) }] : []),
-                { label: 'Sender', value: `${selectedBooking.sender_name} — ${selectedBooking.sender_phone}` },
-                { label: 'Sender Address', value: `${selectedBooking.sender_address}, ${selectedBooking.pickup_city}` },
-                { label: 'Recipient', value: `${selectedBooking.recipient_name} — ${selectedBooking.recipient_phone}` },
-                { label: 'Recipient Address', value: `${selectedBooking.recipient_address}, ${selectedBooking.delivery_city}` },
-                { label: 'Package Type', value: cap(selectedBooking.package_type) },
-                { label: 'Description', value: selectedBooking.package_description || '—' },
-                { label: 'Weight', value: selectedBooking.weight_kg ? `${selectedBooking.weight_kg} kg` : '—' },
-                { label: 'Declared Value', value: selectedBooking.declared_value ? `₦${selectedBooking.declared_value.toLocaleString()}` : '—' },
-                { label: 'Instructions', value: selectedBooking.special_instructions || '—' },
-                { label: 'Created', value: new Date(selectedBooking.created_at).toLocaleString() },
-              ].map(row => (
-                <div key={row.label} className="flex gap-3">
-                  <span className="text-gray-400 w-36 flex-shrink-0 font-medium">{row.label}</span>
-                  <span className="text-gray-800">{row.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <BookingDetailModal
+          booking={selectedBooking}
+          isAdmin={false}
+          onClose={() => setSelectedBooking(null)}
+        />
       )}
 
       {invoiceData && <InvoiceModal data={invoiceData} onClose={() => setInvoiceData(null)} />}

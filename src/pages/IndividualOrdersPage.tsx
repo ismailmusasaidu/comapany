@@ -32,6 +32,12 @@ interface Booking {
   status: string;
   created_at: string;
   updated_at: string;
+  distance_fee?: number | null;
+  weight_fee?: number | null;
+  package_surcharge?: number | null;
+  total_amount?: number | null;
+  payment_method?: string | null;
+  payment_status?: string | null;
 }
 
 interface LogisticsRequest {
