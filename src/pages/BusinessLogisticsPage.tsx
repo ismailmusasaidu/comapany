@@ -10,8 +10,10 @@ import { supabase } from '../lib/supabase';
 import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
 import FreightForwardingWizard from '../components/FreightForwardingWizard';
 import CustomsClearanceWizard from '../components/CustomsClearanceWizard';
+import RelocationWizard from '../components/RelocationWizard';
 import { type FreightFormData, SHIPPING_MODES, SERVICE_LEVELS, PACKAGING_OPTIONS } from '../lib/freightData';
 import { type CustomsFormData, TRANSPORT_MODES as CUSTOMS_MODES, SHIPMENT_STATUSES, PACKAGING_OPTIONS as CUSTOMS_PACKAGING, CUSTOMS_SERVICES } from '../lib/customsData';
+import { type RelocationFormData, RELOCATION_TYPES, MOVE_SCOPES, SERVICES_REQUIRED as RELO_SERVICES, ADDITIONAL_MOVING_SERVICES, VEHICLE_OPTIONS } from '../lib/relocationData';
 
 interface RequestForm {
   title: string;
@@ -216,6 +218,61 @@ export default function BusinessLogisticsPage() {
     }
   };
 
+  const handleRelocationSubmit = async (reloData: RelocationFormData) => {
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const ref = generateRef();
+      const typeLabel = RELOCATION_TYPES.find(r => r.value === reloData.relocationType)?.label || '';
+      const scopeLabel = MOVE_SCOPES.find(m => m.value === reloData.moveScope)?.label || '';
+      const serviceLabel = RELO_SERVICES.find(s => s.value === reloData.serviceRequired)?.label || '';
+      const isIntl = reloData.moveScope === 'international';
+      const pickupStr = [reloData.pickup.city, isIntl ? reloData.pickup.country : reloData.pickup.state].filter(Boolean).join(', ');
+      const deliveryStr = [reloData.delivery.city, isIntl ? reloData.delivery.country : reloData.delivery.state].filter(Boolean).join(', ');
+      const totalWeight = reloData.items.reduce((s, it) => s + (parseFloat(it.weightKg) || 0), 0);
+      const totalQty = reloData.items.reduce((s, it) => s + (parseInt(it.quantity) || 0), 0);
+      const { error: err } = await supabase.from('business_logistics_requests').insert({
+        request_ref: ref,
+        business_id: user.id,
+        service_type: 'relocation',
+        title: `${typeLabel}: ${pickupStr} → ${deliveryStr}`,
+        description: [
+          `Relocation Type: ${typeLabel}`,
+          `Move Scope: ${scopeLabel}`,
+          `Service: ${serviceLabel}`,
+          reloData.preferredDate ? `Moving Date: ${new Date(reloData.preferredDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}` : '',
+          `Flexible Date: ${reloData.flexibleDate ? 'Yes' : 'No'}`,
+          `Pickup: ${pickupStr} — ${reloData.pickup.address}`,
+          `Delivery: ${deliveryStr} — ${reloData.delivery.address}`,
+          `Items: ${reloData.items.length} category(s), ${totalQty} items, ${totalWeight.toFixed(1)} kg`,
+          ...reloData.items.map((it, i) => `  Item ${i + 1}: ${it.category} — ${it.description}, Qty: ${it.quantity}${it.weightKg ? ', ' + it.weightKg + ' kg' : ''}${it.fragile ? ' [Fragile]' : ''}${it.highValue ? ' [High Value]' : ''}${it.specialHandling ? ' [Special Handling]' : ''}`),
+          reloData.additionalServices.length > 0 ? `Additional Services: ${reloData.additionalServices.map(s => ADDITIONAL_MOVING_SERVICES.find(a => a.value === s)?.label || s).join(', ')}` : '',
+          `Vehicle: ${VEHICLE_OPTIONS.find(v => v.value === reloData.vehicleType)?.label || ''}`,
+          `Contact: ${reloData.contactName} (${reloData.contactPhone}, ${reloData.contactEmail})`,
+          reloData.contactCompany ? `Company: ${reloData.contactCompany}` : '',
+          reloData.documents.length > 0 ? `Documents: ${reloData.documents.map(d => d.name).join(', ')}` : '',
+          reloData.additionalNotes ? `Notes: ${reloData.additionalNotes}` : '',
+        ].filter(Boolean).join('\n'),
+        origin: pickupStr,
+        destination: deliveryStr,
+        quantity: String(totalQty),
+        weight: `${totalWeight.toFixed(1)} kg`,
+        preferred_date: reloData.preferredDate || null,
+        budget_range: '',
+        freight_details: reloData,
+        status: 'pending',
+      });
+      if (err) throw err;
+      setCreatedRef(ref);
+      setSuccess(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit request.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
@@ -265,8 +322,8 @@ export default function BusinessLogisticsPage() {
         </div>
       </header>
 
-      <div className={`mx-auto px-4 py-8 ${(form.service_type === 'freight' || form.service_type === 'customs') ? 'max-w-4xl' : 'max-w-3xl'}`}>
-        {error && (form.service_type === 'freight' || form.service_type === 'customs') && (
+      <div className={`mx-auto px-4 py-8 ${(form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation') ? 'max-w-4xl' : 'max-w-3xl'}`}>
+        {error && (form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation') && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6">
             {error}
           </div>
@@ -300,6 +357,13 @@ export default function BusinessLogisticsPage() {
         ) : form.service_type === 'customs' ? (
           <CustomsClearanceWizard
             onSubmit={handleCustomsSubmit}
+            loading={loading}
+            accentColor="orange"
+            onCancel={() => navigate('/business/dashboard')}
+          />
+        ) : form.service_type === 'relocation' ? (
+          <RelocationWizard
+            onSubmit={handleRelocationSubmit}
             loading={loading}
             accentColor="orange"
             onCancel={() => navigate('/business/dashboard')}
