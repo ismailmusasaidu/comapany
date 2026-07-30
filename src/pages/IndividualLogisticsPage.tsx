@@ -11,9 +11,11 @@ import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBooking
 import FreightForwardingWizard from '../components/FreightForwardingWizard';
 import CustomsClearanceWizard from '../components/CustomsClearanceWizard';
 import RelocationWizard from '../components/RelocationWizard';
+import WarehouseWizard from '../components/WarehouseWizard';
 import { type FreightFormData, SHIPPING_MODES, SERVICE_LEVELS, PACKAGING_OPTIONS } from '../lib/freightData';
 import { type CustomsFormData, TRANSPORT_MODES as CUSTOMS_MODES, SHIPMENT_STATUSES, PACKAGING_OPTIONS as CUSTOMS_PACKAGING, CUSTOMS_SERVICES } from '../lib/customsData';
 import { type RelocationFormData, RELOCATION_TYPES, MOVE_SCOPES, SERVICES_REQUIRED as RELO_SERVICES, ADDITIONAL_MOVING_SERVICES, VEHICLE_OPTIONS } from '../lib/relocationData';
+import { type WarehouseFormData, STORAGE_TYPES, CUSTOMER_TYPES, STORAGE_DURATIONS, GOODS_CATEGORIES, STORAGE_REQUIREMENTS, WAREHOUSE_ADDITIONAL_SERVICES } from '../lib/warehouseData';
 
 interface RequestForm {
   service_type: string;
@@ -252,6 +254,59 @@ export default function IndividualLogisticsPage() {
     }
   };
 
+  const handleWarehouseSubmit = async (whData: WarehouseFormData) => {
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const ref = generateRef();
+      const typeLabel = STORAGE_TYPES.find(s => s.value === whData.storageType)?.label || '';
+      const custLabel = CUSTOMER_TYPES.find(c => c.value === whData.customerType)?.label || '';
+      const durLabel = STORAGE_DURATIONS.find(d => d.value === whData.storageDuration)?.label || '';
+      const totalWeight = whData.goods.reduce((s, g) => s + (parseFloat(g.weightKg) || 0), 0);
+      const totalQty = whData.goods.reduce((s, g) => s + (parseInt(g.quantity) || 0), 0);
+      const pickupStr = whData.requirePickup ? `${whData.pickupCity}, ${whData.pickupState}` : 'Not required';
+      const deliveryStr = whData.requireDelivery ? whData.deliveryAddress : 'Not required';
+      const { error: err } = await supabase.from('logistics_requests').insert({
+        request_ref: ref,
+        individual_id: user.id,
+        service_type: 'warehousing',
+        title: `${typeLabel} — ${custLabel} (${durLabel})`,
+        description: [
+          `Storage Type: ${typeLabel}`,
+          `Customer Type: ${custLabel}`,
+          `Duration: ${durLabel}`,
+          whData.preferredStartDate ? `Start Date: ${new Date(whData.preferredStartDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}` : '',
+          whData.estimatedEndDate ? `End Date: ${new Date(whData.estimatedEndDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}` : '',
+          `Pickup: ${pickupStr}${whData.requirePickup && whData.pickupAddress ? ' — ' + whData.pickupAddress : ''}`,
+          `Delivery: ${deliveryStr}`,
+          `Goods: ${whData.goods.length} item(s), ${totalQty} units, ${totalWeight.toFixed(1)} kg`,
+          ...whData.goods.map((g, i) => `  Item ${i + 1}: ${g.itemName} — ${GOODS_CATEGORIES.find(c => c.value === g.category)?.label || g.category}, Qty: ${g.quantity}${g.weightKg ? ', ' + g.weightKg + ' kg' : ''}`),
+          whData.storageRequirements.length > 0 ? `Storage Requirements: ${whData.storageRequirements.map(r => STORAGE_REQUIREMENTS.find(s => s.value === r)?.label || r).join(', ')}` : '',
+          whData.additionalServices.length > 0 ? `Additional Services: ${whData.additionalServices.map(s => WAREHOUSE_ADDITIONAL_SERVICES.find(a => a.value === s)?.label || s).join(', ')}` : '',
+          `Contact: ${whData.contactName} (${whData.contactPhone}, ${whData.contactEmail})`,
+          whData.documents.length > 0 ? `Documents: ${whData.documents.map(d => d.name).join(', ')}` : '',
+          whData.additionalNotes ? `Notes: ${whData.additionalNotes}` : '',
+        ].filter(Boolean).join('\n'),
+        origin: pickupStr,
+        destination: deliveryStr,
+        quantity: totalQty || null,
+        weight_kg: totalWeight || null,
+        preferred_date: whData.preferredStartDate || null,
+        budget_range: '',
+        freight_details: whData,
+        status: 'pending',
+      });
+      if (err) throw err;
+      setCreatedRef(ref);
+      setSuccess(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit request.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
@@ -307,8 +362,8 @@ export default function IndividualLogisticsPage() {
         </div>
       </header>
 
-      <div className={`mx-auto px-4 py-8 ${(form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation') ? 'max-w-4xl' : 'max-w-3xl'}`}>
-        {error && (form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation') && (
+      <div className={`mx-auto px-4 py-8 ${(form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation' || form.service_type === 'warehousing') ? 'max-w-4xl' : 'max-w-3xl'}`}>
+        {error && (form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation' || form.service_type === 'warehousing') && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6">
             {error}
           </div>
@@ -359,6 +414,13 @@ export default function IndividualLogisticsPage() {
         ) : form.service_type === 'relocation' ? (
           <RelocationWizard
             onSubmit={handleRelocationSubmit}
+            loading={loading}
+            accentColor="orange"
+            onCancel={() => navigate('/individual/dashboard')}
+          />
+        ) : form.service_type === 'warehousing' ? (
+          <WarehouseWizard
+            onSubmit={handleWarehouseSubmit}
             loading={loading}
             accentColor="orange"
             onCancel={() => navigate('/individual/dashboard')}
