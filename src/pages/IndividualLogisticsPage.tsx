@@ -8,6 +8,8 @@ import { useIndividual } from '../contexts/IndividualContext';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { supabase } from '../lib/supabase';
 import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
+import FreightForwardingWizard from '../components/FreightForwardingWizard';
+import { type FreightFormData, SHIPPING_MODES, SERVICE_LEVELS, PACKAGING_OPTIONS } from '../lib/freightData';
 
 interface RequestForm {
   service_type: string;
@@ -96,6 +98,52 @@ export default function IndividualLogisticsPage() {
     }
   };
 
+  const handleFreightSubmit = async (freightData: FreightFormData) => {
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const ref = generateRef();
+      const { error: err } = await supabase.from('logistics_requests').insert({
+        request_ref: ref,
+        individual_id: user.id,
+        service_type: 'freight',
+        title: `Freight — ${freightData.shipmentScope === 'international' ? 'International' : 'Domestic'} ${SHIPPING_MODES.find(m => m.value === freightData.shippingMode)?.label || ''}: ${[freightData.originCity, freightData.shipmentScope === 'international' ? freightData.originCountry : freightData.originState].filter(Boolean).join(', ')} → ${[freightData.destCity, freightData.shipmentScope === 'international' ? freightData.destCountry : freightData.destState].filter(Boolean).join(', ')}`,
+        description: [
+          `Scope: ${freightData.shipmentScope === 'international' ? 'International' : 'Domestic'}`,
+          `Mode: ${SHIPPING_MODES.find(m => m.value === freightData.shippingMode)?.label || ''}`,
+          `Service: ${SERVICE_LEVELS.find(s => s.value === freightData.serviceLevel)?.label || ''}`,
+          `Cargo: ${freightData.cargoItems.length} item(s), ${freightData.cargoItems.reduce((s, c) => s + (parseInt(c.quantity) || 0), 0)} units, ${freightData.cargoItems.reduce((s, c) => s + (parseFloat(c.weight_kg) || 0), 0).toFixed(1)} kg`,
+          ...freightData.cargoItems.map((c, i) => `  Item ${i + 1}: ${c.commodity} — ${PACKAGING_OPTIONS.find(p => p.value === c.packaging)?.label || c.packaging}, Qty: ${c.quantity}, ${c.weight_kg ? c.weight_kg + ' kg' : 'weight n/a'}`),
+          freightData.incoterm ? `Incoterms: ${freightData.incoterm}` : '',
+          freightData.hazardous ? 'Hazardous: Yes' : '',
+          freightData.insuranceRequired ? 'Insurance: Required' : '',
+          freightData.temperatureControlled ? 'Temperature Controlled: Yes' : '',
+          freightData.cargoValue ? `Cargo Value: ₦${parseFloat(freightData.cargoValue).toLocaleString()}` : '',
+          freightData.containerLoad ? `Container: ${freightData.containerLoad}${freightData.containerSize ? ' ' + freightData.containerSize : ''}${freightData.containerCount ? ' x' + freightData.containerCount : ''}` : '',
+          freightData.additionalServices.length > 0 ? `Services: ${freightData.additionalServices.join(', ')}` : '',
+          `Contact: ${freightData.contactName} (${freightData.contactPhone}, ${freightData.contactEmail})`,
+          freightData.shipmentNotes ? `Notes: ${freightData.shipmentNotes}` : '',
+        ].filter(Boolean).join('\n'),
+        origin: [freightData.originCity, freightData.shipmentScope === 'international' ? freightData.originCountry : freightData.originState].filter(Boolean).join(', '),
+        destination: [freightData.destCity, freightData.shipmentScope === 'international' ? freightData.destCountry : freightData.destState].filter(Boolean).join(', '),
+        quantity: freightData.cargoItems.reduce((s, c) => s + (parseInt(c.quantity) || 0), 0) || null,
+        weight_kg: freightData.cargoItems.reduce((s, c) => s + (parseFloat(c.weight_kg) || 0), 0) || null,
+        preferred_date: freightData.preferredPickupDate || null,
+        budget_range: freightData.cargoValue ? `₦${parseFloat(freightData.cargoValue).toLocaleString()}` : '',
+        freight_details: freightData,
+        status: 'pending',
+      });
+      if (err) throw err;
+      setCreatedRef(ref);
+      setSuccess(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit request.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
@@ -151,41 +199,55 @@ export default function IndividualLogisticsPage() {
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className={`mx-auto px-4 py-8 ${form.service_type === 'freight' ? 'max-w-4xl' : 'max-w-3xl'}`}>
+        {error && form.service_type === 'freight' && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6">
+            {error}
+          </div>
+        )}
+
+        {/* Service Type */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+          <h2 className="font-bold text-gray-900 mb-1">Select Service Type</h2>
+          <p className="text-gray-500 text-sm mb-5">Choose the logistics service you need</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {SERVICES.map(svc => {
+              const Icon = svc.icon;
+              const active = form.service_type === svc.value;
+              return (
+                <button
+                  key={svc.value}
+                  type="button"
+                  onClick={() => { setForm(p => ({ ...p, service_type: svc.value })); setError(''); }}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    active ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
+                >
+                  <div className={`w-9 h-9 ${active ? 'bg-orange-100' : svc.bg} rounded-lg flex items-center justify-center mb-2`}>
+                    <Icon className={`h-5 w-5 ${active ? 'text-orange-600' : svc.color}`} />
+                  </div>
+                  <p className={`font-semibold text-sm ${active ? 'text-orange-700' : 'text-gray-800'}`}>{svc.label}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{svc.desc}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {form.service_type === 'freight' ? (
+          <FreightForwardingWizard
+            onSubmit={handleFreightSubmit}
+            loading={loading}
+            accentColor="orange"
+            onCancel={() => navigate('/individual/dashboard')}
+          />
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
               {error}
             </div>
           )}
-
-          {/* Service Type */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-bold text-gray-900 mb-1">Select Service Type</h2>
-            <p className="text-gray-500 text-sm mb-5">Choose the logistics service you need</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {SERVICES.map(svc => {
-                const Icon = svc.icon;
-                const active = form.service_type === svc.value;
-                return (
-                  <button
-                    key={svc.value}
-                    type="button"
-                    onClick={() => setForm(p => ({ ...p, service_type: svc.value }))}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${
-                      active ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300 bg-white'
-                    }`}
-                  >
-                    <div className={`w-9 h-9 ${active ? 'bg-orange-100' : svc.bg} rounded-lg flex items-center justify-center mb-2`}>
-                      <Icon className={`h-5 w-5 ${active ? 'text-orange-600' : svc.color}`} />
-                    </div>
-                    <p className={`font-semibold text-sm ${active ? 'text-orange-700' : 'text-gray-800'}`}>{svc.label}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{svc.desc}</p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
           {/* Vehicle Selection */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
@@ -365,6 +427,7 @@ export default function IndividualLogisticsPage() {
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

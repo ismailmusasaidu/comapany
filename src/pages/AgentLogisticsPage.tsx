@@ -8,6 +8,42 @@ import { useAgent } from '../contexts/AgentContext';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { supabase } from '../lib/supabase';
 import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
+import FreightForwardingWizard from '../components/FreightForwardingWizard';
+import { type FreightFormData, SHIPPING_MODES, SERVICE_LEVELS, PACKAGING_OPTIONS } from '../lib/freightData';
+
+function buildFreightPayload(data: FreightFormData) {
+  const isIntl = data.shipmentScope === 'international';
+  const modeLabel = SHIPPING_MODES.find(m => m.value === data.shippingMode)?.label || data.shippingMode;
+  const scopeLabel = isIntl ? 'International' : 'Domestic';
+  const dirLabel = isIntl ? (data.shipmentDirection === 'import' ? 'Import' : 'Export') : 'Within Nigeria';
+  const serviceLabel = SERVICE_LEVELS.find(s => s.value === data.serviceLevel)?.label || '';
+  const originStr = [data.originCity, isIntl ? data.originCountry : data.originState].filter(Boolean).join(', ');
+  const destStr = [data.destCity, isIntl ? data.destCountry : data.destState].filter(Boolean).join(', ');
+  const totalWeight = data.cargoItems.reduce((sum, c) => sum + (parseFloat(c.weight_kg) || 0), 0);
+  const totalQty = data.cargoItems.reduce((sum, c) => sum + (parseInt(c.quantity) || 0), 0);
+  const title = `Freight — ${scopeLabel} ${modeLabel}: ${originStr} → ${destStr}`;
+  const descParts = [
+    `Scope: ${scopeLabel} ${dirLabel}`,
+    `Mode: ${modeLabel}`,
+    `Service: ${serviceLabel}`,
+    `Origin: ${originStr}${data.originPort ? ` (${data.originPort})` : ''}`,
+    `Destination: ${destStr}${data.destPort ? ` (${data.destPort})` : ''}`,
+    `Cargo: ${data.cargoItems.length} item(s), ${totalQty} units, ${totalWeight.toFixed(1)} kg`,
+    ...data.cargoItems.map((c, i) => `  Item ${i + 1}: ${c.commodity} — ${PACKAGING_OPTIONS.find(p => p.value === c.packaging)?.label || c.packaging}, Qty: ${c.quantity}, ${c.weight_kg ? c.weight_kg + ' kg' : 'weight n/a'}`),
+    isIntl && data.incoterm ? `Incoterms: ${data.incoterm}` : '',
+    data.hazardous ? 'Hazardous: Yes' : '',
+    data.insuranceRequired ? 'Insurance: Required' : '',
+    data.temperatureControlled ? 'Temperature Controlled: Yes' : '',
+    data.cargoValue ? `Cargo Value: ₦${parseFloat(data.cargoValue).toLocaleString()}` : '',
+    data.containerLoad ? `Container: ${data.containerLoad}${data.containerSize ? ' ' + data.containerSize : ''}${data.containerCount ? ' x' + data.containerCount : ''}` : '',
+    data.additionalServices.length > 0 ? `Services: ${data.additionalServices.join(', ')}` : '',
+    `Contact: ${data.contactName} (${data.contactPhone}, ${data.contactEmail})`,
+    data.contactCompany ? `Company: ${data.contactCompany}` : '',
+    data.shipmentNotes ? `Notes: ${data.shipmentNotes}` : '',
+    data.documentNames.length > 0 ? `Documents: ${data.documentNames.join(', ')}` : '',
+  ].filter(Boolean);
+  return { title, description: descParts.join('\n'), freight_details: data };
+}
 
 interface RequestForm {
   service_type: string;
@@ -110,6 +146,38 @@ export default function AgentLogisticsPage() {
     }
   };
 
+  const handleFreightSubmit = async (freightData: FreightFormData) => {
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const ref = generateRef();
+      const payload = buildFreightPayload(freightData);
+      const { error: err } = await supabase.from('logistics_requests').insert({
+        request_ref: ref,
+        agent_id: user.id,
+        service_type: 'freight',
+        title: payload.title,
+        description: payload.description,
+        origin: [freightData.originCity, freightData.shipmentScope === 'international' ? freightData.originCountry : freightData.originState].filter(Boolean).join(', '),
+        destination: [freightData.destCity, freightData.shipmentScope === 'international' ? freightData.destCountry : freightData.destState].filter(Boolean).join(', '),
+        quantity: freightData.cargoItems.reduce((s, c) => s + (parseInt(c.quantity) || 0), 0) || null,
+        weight_kg: freightData.cargoItems.reduce((s, c) => s + (parseFloat(c.weight_kg) || 0), 0) || null,
+        preferred_date: freightData.preferredPickupDate || null,
+        budget_range: freightData.cargoValue ? `₦${parseFloat(freightData.cargoValue).toLocaleString()}` : '',
+        freight_details: freightData,
+        status: 'pending',
+      });
+      if (err) throw err;
+      setCreatedRef(ref);
+      setSuccess(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit request.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
@@ -166,41 +234,56 @@ export default function AgentLogisticsPage() {
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className={`mx-auto px-4 py-8 ${form.service_type === 'freight' ? 'max-w-4xl' : 'max-w-3xl'}`}>
+        {error && form.service_type === 'freight' && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6">
+            {error}
+          </div>
+        )}
+
+        {/* Service Type — always visible */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+          <h2 className="font-bold text-gray-900 mb-1">Select Service Type</h2>
+          <p className="text-gray-500 text-sm mb-5">Choose the logistics service you need</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {SERVICES.map(svc => {
+              const Icon = svc.icon;
+              const active = form.service_type === svc.value;
+              return (
+                <button
+                  key={svc.value}
+                  type="button"
+                  onClick={() => { setForm(p => ({ ...p, service_type: svc.value })); setError(''); }}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    active ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
+                >
+                  <div className={`w-9 h-9 ${active ? 'bg-orange-100' : svc.bg} rounded-lg flex items-center justify-center mb-2`}>
+                    <Icon className={`h-5 w-5 ${active ? 'text-orange-600' : svc.color}`} />
+                  </div>
+                  <p className={`font-semibold text-sm ${active ? 'text-orange-700' : 'text-gray-800'}`}>{svc.label}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{svc.desc}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Freight Forwarding Wizard */}
+        {form.service_type === 'freight' ? (
+          <FreightForwardingWizard
+            onSubmit={handleFreightSubmit}
+            loading={loading}
+            accentColor="orange"
+            onCancel={() => navigate('/agent/dashboard')}
+          />
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
               {error}
             </div>
           )}
-
-          {/* Service Type */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-bold text-gray-900 mb-1">Select Service Type</h2>
-            <p className="text-gray-500 text-sm mb-5">Choose the logistics service you need</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {SERVICES.map(svc => {
-                const Icon = svc.icon;
-                const active = form.service_type === svc.value;
-                return (
-                  <button
-                    key={svc.value}
-                    type="button"
-                    onClick={() => setForm(p => ({ ...p, service_type: svc.value }))}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${
-                      active ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300 bg-white'
-                    }`}
-                  >
-                    <div className={`w-9 h-9 ${active ? 'bg-orange-100' : svc.bg} rounded-lg flex items-center justify-center mb-2`}>
-                      <Icon className={`h-5 w-5 ${active ? 'text-orange-600' : svc.color}`} />
-                    </div>
-                    <p className={`font-semibold text-sm ${active ? 'text-orange-700' : 'text-gray-800'}`}>{svc.label}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{svc.desc}</p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
           {/* Vehicle Selection */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
@@ -380,6 +463,7 @@ export default function AgentLogisticsPage() {
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

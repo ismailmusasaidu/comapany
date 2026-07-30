@@ -8,6 +8,8 @@ import { useBusiness } from '../contexts/BusinessContext';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { supabase } from '../lib/supabase';
 import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
+import FreightForwardingWizard from '../components/FreightForwardingWizard';
+import { type FreightFormData, SHIPPING_MODES, SERVICE_LEVELS, PACKAGING_OPTIONS } from '../lib/freightData';
 
 interface RequestForm {
   title: string;
@@ -114,6 +116,52 @@ export default function BusinessLogisticsPage() {
     }
   };
 
+  const handleFreightSubmit = async (freightData: FreightFormData) => {
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const ref = generateRef();
+      const { error: err } = await supabase.from('business_logistics_requests').insert({
+        request_ref: ref,
+        business_id: user.id,
+        service_type: 'freight',
+        title: `Freight — ${freightData.shipmentScope === 'international' ? 'International' : 'Domestic'} ${SHIPPING_MODES.find(m => m.value === freightData.shippingMode)?.label || ''}: ${[freightData.originCity, freightData.shipmentScope === 'international' ? freightData.originCountry : freightData.originState].filter(Boolean).join(', ')} → ${[freightData.destCity, freightData.shipmentScope === 'international' ? freightData.destCountry : freightData.destState].filter(Boolean).join(', ')}`,
+        description: [
+          `Scope: ${freightData.shipmentScope === 'international' ? 'International' : 'Domestic'}`,
+          `Mode: ${SHIPPING_MODES.find(m => m.value === freightData.shippingMode)?.label || ''}`,
+          `Service: ${SERVICE_LEVELS.find(s => s.value === freightData.serviceLevel)?.label || ''}`,
+          `Cargo: ${freightData.cargoItems.length} item(s), ${freightData.cargoItems.reduce((s, c) => s + (parseInt(c.quantity) || 0), 0)} units, ${freightData.cargoItems.reduce((s, c) => s + (parseFloat(c.weight_kg) || 0), 0).toFixed(1)} kg`,
+          ...freightData.cargoItems.map((c, i) => `  Item ${i + 1}: ${c.commodity} — ${PACKAGING_OPTIONS.find(p => p.value === c.packaging)?.label || c.packaging}, Qty: ${c.quantity}, ${c.weight_kg ? c.weight_kg + ' kg' : 'weight n/a'}`),
+          freightData.incoterm ? `Incoterms: ${freightData.incoterm}` : '',
+          freightData.hazardous ? 'Hazardous: Yes' : '',
+          freightData.insuranceRequired ? 'Insurance: Required' : '',
+          freightData.temperatureControlled ? 'Temperature Controlled: Yes' : '',
+          freightData.cargoValue ? `Cargo Value: ₦${parseFloat(freightData.cargoValue).toLocaleString()}` : '',
+          freightData.containerLoad ? `Container: ${freightData.containerLoad}${freightData.containerSize ? ' ' + freightData.containerSize : ''}${freightData.containerCount ? ' x' + freightData.containerCount : ''}` : '',
+          freightData.additionalServices.length > 0 ? `Services: ${freightData.additionalServices.join(', ')}` : '',
+          `Contact: ${freightData.contactName} (${freightData.contactPhone}, ${freightData.contactEmail})`,
+          freightData.shipmentNotes ? `Notes: ${freightData.shipmentNotes}` : '',
+        ].filter(Boolean).join('\n'),
+        origin: [freightData.originCity, freightData.shipmentScope === 'international' ? freightData.originCountry : freightData.originState].filter(Boolean).join(', '),
+        destination: [freightData.destCity, freightData.shipmentScope === 'international' ? freightData.destCountry : freightData.destState].filter(Boolean).join(', '),
+        quantity: String(freightData.cargoItems.reduce((s, c) => s + (parseInt(c.quantity) || 0), 0)),
+        weight: `${freightData.cargoItems.reduce((s, c) => s + (parseFloat(c.weight_kg) || 0), 0).toFixed(1)} kg`,
+        preferred_date: freightData.preferredPickupDate || null,
+        budget_range: freightData.cargoValue ? `₦${parseFloat(freightData.cargoValue).toLocaleString()}` : '',
+        freight_details: freightData,
+        status: 'pending',
+      });
+      if (err) throw err;
+      setCreatedRef(ref);
+      setSuccess(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit request.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
@@ -163,31 +211,45 @@ export default function BusinessLogisticsPage() {
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        {error && (
+      <div className={`mx-auto px-4 py-8 ${form.service_type === 'freight' ? 'max-w-4xl' : 'max-w-3xl'}`}>
+        {error && form.service_type === 'freight' && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Service Type */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-bold text-gray-900 mb-1">Service Type</h2>
-            <p className="text-gray-400 text-sm mb-5">Select the logistics service you need</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {SERVICE_TYPES.map(st => (
-                <button key={st.value} type="button" onClick={() => setForm(p => ({ ...p, service_type: st.value }))}
-                  className={`p-4 rounded-xl border-2 text-left transition-all ${
-                    form.service_type === st.value ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300 bg-white'
-                  }`}>
-                  <p className="text-xl mb-1.5">{st.icon}</p>
-                  <p className={`font-semibold text-sm ${form.service_type === st.value ? 'text-orange-700' : 'text-gray-800'}`}>{st.label}</p>
-                  <p className="text-xs text-gray-400 mt-0.5 leading-tight">{st.desc}</p>
-                </button>
-              ))}
-            </div>
+        {/* Service Type */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+          <h2 className="font-bold text-gray-900 mb-1">Service Type</h2>
+          <p className="text-gray-400 text-sm mb-5">Select the logistics service you need</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {SERVICE_TYPES.map(st => (
+              <button key={st.value} type="button" onClick={() => { setForm(p => ({ ...p, service_type: st.value })); setError(''); }}
+                className={`p-4 rounded-xl border-2 text-left transition-all ${
+                  form.service_type === st.value ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300 bg-white'
+                }`}>
+                <p className="text-xl mb-1.5">{st.icon}</p>
+                <p className={`font-semibold text-sm ${form.service_type === st.value ? 'text-orange-700' : 'text-gray-800'}`}>{st.label}</p>
+                <p className="text-xs text-gray-400 mt-0.5 leading-tight">{st.desc}</p>
+              </button>
+            ))}
           </div>
+        </div>
+
+        {form.service_type === 'freight' ? (
+          <FreightForwardingWizard
+            onSubmit={handleFreightSubmit}
+            loading={loading}
+            accentColor="orange"
+            onCancel={() => navigate('/business/dashboard')}
+          />
+        ) : (
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6">
+              {error}
+            </div>
+          )}
 
           {/* Vehicle Selection */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
@@ -322,6 +384,7 @@ export default function BusinessLogisticsPage() {
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );
