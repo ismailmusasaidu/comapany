@@ -9,7 +9,9 @@ import { usePersistentState } from '../hooks/usePersistentState';
 import { supabase } from '../lib/supabase';
 import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
 import FreightForwardingWizard from '../components/FreightForwardingWizard';
+import CustomsClearanceWizard from '../components/CustomsClearanceWizard';
 import { type FreightFormData, SHIPPING_MODES, SERVICE_LEVELS, PACKAGING_OPTIONS } from '../lib/freightData';
+import { type CustomsFormData, TRANSPORT_MODES as CUSTOMS_MODES, SHIPMENT_STATUSES, PACKAGING_OPTIONS as CUSTOMS_PACKAGING, CUSTOMS_SERVICES } from '../lib/customsData';
 
 interface RequestForm {
   service_type: string;
@@ -144,6 +146,55 @@ export default function IndividualLogisticsPage() {
     }
   };
 
+  const handleCustomsSubmit = async (customsData: CustomsFormData) => {
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const ref = generateRef();
+      const typeLabel = customsData.clearanceType === 'import' ? 'Import' : 'Export';
+      const modeLabel = CUSTOMS_MODES.find(m => m.value === customsData.transportMode)?.label || '';
+      const { error: err } = await supabase.from('logistics_requests').insert({
+        request_ref: ref,
+        individual_id: user.id,
+        service_type: 'customs',
+        title: `Customs ${typeLabel} Clearance — ${modeLabel}: ${customsData.countryOrigin} → ${customsData.countryDestination}`,
+        description: [
+          `Clearance Type: ${typeLabel} Clearance`,
+          `Transport Mode: ${modeLabel}`,
+          `Shipment Status: ${SHIPMENT_STATUSES.find(s => s.value === customsData.shipmentStatus)?.label || ''}`,
+          `Port: ${customsData.portOfEntry}`,
+          `Origin: ${customsData.countryOrigin}`,
+          `Destination: ${customsData.countryDestination}`,
+          `Supplier/Consignee: ${customsData.supplierConsignee}`,
+          `Cargo: ${customsData.cargoItems.length} item(s), ${customsData.cargoItems.reduce((s, c) => s + (parseInt(c.quantity) || 0), 0)} units, ${customsData.cargoItems.reduce((s, c) => s + (parseFloat(c.weightKg) || 0), 0).toFixed(1)} kg`,
+          ...customsData.cargoItems.map((c, i) => `  Item ${i + 1}: ${c.commodity} — ${CUSTOMS_PACKAGING.find(p => p.value === c.packaging)?.label || c.packaging}, Qty: ${c.quantity}, ${c.weightKg ? c.weightKg + ' kg' : 'weight n/a'}, Value: ${c.cargoValue ? c.cargoValue + ' ' + c.currency : 'n/a'}`),
+          customsData.containerLoad ? `Container: ${customsData.containerLoad}${customsData.containerSize ? ' ' + customsData.containerSize : ''}${customsData.containerCount ? ' x' + customsData.containerCount : ''}` : '',
+          customsData.requiredServices.length > 0 ? `Services: ${customsData.requiredServices.map(s => CUSTOMS_SERVICES.find(c => c.value === s)?.label || s).join(', ')}` : '',
+          `Contact: ${customsData.fullName} (${customsData.phone}, ${customsData.email})`,
+          customsData.additionalNotes ? `Notes: ${customsData.additionalNotes}` : '',
+        ].filter(Boolean).join('\n'),
+        origin: customsData.countryOrigin || '',
+        destination: customsData.countryDestination || '',
+        quantity: customsData.cargoItems.reduce((s, c) => s + (parseInt(c.quantity) || 0), 0) || null,
+        weight_kg: customsData.cargoItems.reduce((s, c) => s + (parseFloat(c.weightKg) || 0), 0) || null,
+        preferred_date: customsData.expectedDate || null,
+        budget_range: customsData.cargoItems.reduce((s, c) => s + (parseFloat(c.cargoValue) || 0), 0) > 0
+          ? `${customsData.cargoItems.reduce((s, c) => s + (parseFloat(c.cargoValue) || 0), 0).toLocaleString()} ${customsData.cargoItems[0]?.currency || 'USD'}`
+          : '',
+        freight_details: customsData,
+        status: 'pending',
+      });
+      if (err) throw err;
+      setCreatedRef(ref);
+      setSuccess(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit request.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
@@ -199,8 +250,8 @@ export default function IndividualLogisticsPage() {
         </div>
       </header>
 
-      <div className={`mx-auto px-4 py-8 ${form.service_type === 'freight' ? 'max-w-4xl' : 'max-w-3xl'}`}>
-        {error && form.service_type === 'freight' && (
+      <div className={`mx-auto px-4 py-8 ${(form.service_type === 'freight' || form.service_type === 'customs') ? 'max-w-4xl' : 'max-w-3xl'}`}>
+        {error && (form.service_type === 'freight' || form.service_type === 'customs') && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6">
             {error}
           </div>
@@ -237,6 +288,13 @@ export default function IndividualLogisticsPage() {
         {form.service_type === 'freight' ? (
           <FreightForwardingWizard
             onSubmit={handleFreightSubmit}
+            loading={loading}
+            accentColor="orange"
+            onCancel={() => navigate('/individual/dashboard')}
+          />
+        ) : form.service_type === 'customs' ? (
+          <CustomsClearanceWizard
+            onSubmit={handleCustomsSubmit}
             loading={loading}
             accentColor="orange"
             onCancel={() => navigate('/individual/dashboard')}

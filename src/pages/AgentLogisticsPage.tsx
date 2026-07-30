@@ -9,7 +9,42 @@ import { usePersistentState } from '../hooks/usePersistentState';
 import { supabase } from '../lib/supabase';
 import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
 import FreightForwardingWizard from '../components/FreightForwardingWizard';
+import CustomsClearanceWizard from '../components/CustomsClearanceWizard';
 import { type FreightFormData, SHIPPING_MODES, SERVICE_LEVELS, PACKAGING_OPTIONS } from '../lib/freightData';
+import { type CustomsFormData, TRANSPORT_MODES as CUSTOMS_MODES, SHIPMENT_STATUSES, PACKAGING_OPTIONS as CUSTOMS_PACKAGING, CUSTOMS_SERVICES } from '../lib/customsData';
+
+function buildCustomsPayload(data: CustomsFormData) {
+  const typeLabel = data.clearanceType === 'import' ? 'Import' : 'Export';
+  const modeLabel = CUSTOMS_MODES.find(m => m.value === data.transportMode)?.label || data.transportMode;
+  const originStr = data.countryOrigin || '';
+  const destStr = data.countryDestination || '';
+  const totalWeight = data.cargoItems.reduce((s, c) => s + (parseFloat(c.weightKg) || 0), 0);
+  const totalQty = data.cargoItems.reduce((s, c) => s + (parseInt(c.quantity) || 0), 0);
+  const totalValue = data.cargoItems.reduce((s, c) => s + (parseFloat(c.cargoValue) || 0), 0);
+  const primaryCurrency = data.cargoItems[0]?.currency || 'USD';
+  const title = `Customs ${typeLabel} Clearance — ${modeLabel}: ${originStr} → ${destStr}`;
+  const descParts = [
+    `Clearance Type: ${typeLabel} Clearance`,
+    `Transport Mode: ${modeLabel}`,
+    `Shipment Status: ${SHIPMENT_STATUSES.find(s => s.value === data.shipmentStatus)?.label || ''}`,
+    `Port: ${data.portOfEntry}`,
+    `Origin: ${originStr}`,
+    `Destination: ${destStr}`,
+    `Supplier/Consignee: ${data.supplierConsignee}`,
+    `Cargo: ${data.cargoItems.length} item(s), ${totalQty} units, ${totalWeight.toFixed(1)} kg, ${totalValue.toLocaleString()} ${primaryCurrency}`,
+    ...data.cargoItems.map((c, i) => `  Item ${i + 1}: ${c.commodity} — ${CUSTOMS_PACKAGING.find(p => p.value === c.packaging)?.label || c.packaging}, Qty: ${c.quantity}, ${c.weightKg ? c.weightKg + ' kg' : 'weight n/a'}, Value: ${c.cargoValue ? c.cargoValue + ' ' + c.currency : 'n/a'}${c.hsCode ? ', HS: ' + c.hsCode : ''}${c.hazardous ? ' [Hazardous]' : ''}${c.perishable ? ' [Perishable]' : ''}${c.temperatureControlled ? ' [Temp Controlled]' : ''}`),
+    data.containerLoad ? `Container: ${data.containerLoad}${data.containerSize ? ' ' + data.containerSize : ''}${data.containerCount ? ' x' + data.containerCount : ''}${data.containerNumber ? ' (' + data.containerNumber + ')' : ''}${data.sealNumber ? ' Seal: ' + data.sealNumber : ''}` : '',
+    data.requiredServices.length > 0 ? `Services: ${data.requiredServices.map(s => CUSTOMS_SERVICES.find(c => c.value === s)?.label || s).join(', ')}` : '',
+    `Contact: ${data.fullName} (${data.phone}, ${data.email})`,
+    data.companyName ? `Company: ${data.companyName}` : '',
+    data.rcNumber ? `RC: ${data.rcNumber}` : '',
+    data.tin ? `TIN: ${data.tin}` : '',
+    data.invoiceNumber ? `Invoice No: ${data.invoiceNumber}` : '',
+    data.documents.length > 0 ? `Documents: ${data.documents.map(d => d.name).join(', ')}` : '',
+    data.additionalNotes ? `Notes: ${data.additionalNotes}` : '',
+  ].filter(Boolean);
+  return { title, description: descParts.join('\n') };
+}
 
 function buildFreightPayload(data: FreightFormData) {
   const isIntl = data.shipmentScope === 'international';
@@ -178,6 +213,40 @@ export default function AgentLogisticsPage() {
     }
   };
 
+  const handleCustomsSubmit = async (customsData: CustomsFormData) => {
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const ref = generateRef();
+      const payload = buildCustomsPayload(customsData);
+      const { error: err } = await supabase.from('logistics_requests').insert({
+        request_ref: ref,
+        agent_id: user.id,
+        service_type: 'customs',
+        title: payload.title,
+        description: payload.description,
+        origin: customsData.countryOrigin || '',
+        destination: customsData.countryDestination || '',
+        quantity: customsData.cargoItems.reduce((s, c) => s + (parseInt(c.quantity) || 0), 0) || null,
+        weight_kg: customsData.cargoItems.reduce((s, c) => s + (parseFloat(c.weightKg) || 0), 0) || null,
+        preferred_date: customsData.expectedDate || null,
+        budget_range: customsData.cargoItems.reduce((s, c) => s + (parseFloat(c.cargoValue) || 0), 0) > 0
+          ? `${customsData.cargoItems.reduce((s, c) => s + (parseFloat(c.cargoValue) || 0), 0).toLocaleString()} ${customsData.cargoItems[0]?.currency || 'USD'}`
+          : '',
+        freight_details: customsData,
+        status: 'pending',
+      });
+      if (err) throw err;
+      setCreatedRef(ref);
+      setSuccess(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit request.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
@@ -234,8 +303,8 @@ export default function AgentLogisticsPage() {
         </div>
       </header>
 
-      <div className={`mx-auto px-4 py-8 ${form.service_type === 'freight' ? 'max-w-4xl' : 'max-w-3xl'}`}>
-        {error && form.service_type === 'freight' && (
+      <div className={`mx-auto px-4 py-8 ${(form.service_type === 'freight' || form.service_type === 'customs') ? 'max-w-4xl' : 'max-w-3xl'}`}>
+        {error && (form.service_type === 'freight' || form.service_type === 'customs') && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6">
             {error}
           </div>
@@ -273,6 +342,13 @@ export default function AgentLogisticsPage() {
         {form.service_type === 'freight' ? (
           <FreightForwardingWizard
             onSubmit={handleFreightSubmit}
+            loading={loading}
+            accentColor="orange"
+            onCancel={() => navigate('/agent/dashboard')}
+          />
+        ) : form.service_type === 'customs' ? (
+          <CustomsClearanceWizard
+            onSubmit={handleCustomsSubmit}
             loading={loading}
             accentColor="orange"
             onCancel={() => navigate('/agent/dashboard')}
