@@ -50,46 +50,48 @@ export function IndividualProvider({ children }: { children: React.ReactNode }) 
     };
     init();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!initialized) return;
-      (async () => {
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setProfile(null);
+        return;
+      }
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         setUser(session?.user ?? null);
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          fetchProfile(session.user.id);
         } else {
           setProfile(null);
         }
-      })();
+      }
     });
 
     return () => subscription?.unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    if (data.user) {
-      setUser(data.user);
-      await fetchProfile(data.user.id);
-    }
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    setUser(null);
     setProfile(null);
   };
 
   const refreshProfile = async () => {
-    if (!user) {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        await fetchProfile(session.user.id);
-      }
+    if (user) {
+      await fetchProfile(user.id);
       return;
     }
-    await fetchProfile(user.id);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      setUser(session.user);
+      await fetchProfile(session.user.id);
+    }
   };
 
   return (

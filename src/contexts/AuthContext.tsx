@@ -44,16 +44,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!initialized) return;
-      (async () => {
-        setIsLoading(true);
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setIsAdmin(false);
+        return;
+      }
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         setUser(session?.user ?? null);
         if (session?.user) {
-          await checkAdmin(session.user.id);
+          checkAdmin(session.user.id);
         } else {
           setIsAdmin(false);
         }
-        setIsLoading(false);
-      })();
+      }
     });
 
     return () => subscription?.unsubscribe();
@@ -65,17 +68,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    if (data.user) {
-      setUser(data.user);
-      await checkAdmin(data.user.id);
-    }
+    // onAuthStateChange will handle setUser + checkAdmin
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    setUser(null);
+    setIsAdmin(false);
   };
 
   return (

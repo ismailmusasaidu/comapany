@@ -8,7 +8,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, user, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,24 +21,20 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      await signIn(email, password);
-
-      // Verify the signed-in user actually has admin access
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Authentication failed.');
+      const { data, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInErr) throw signInErr;
 
       const { data: adminRow } = await supabase
         .from('admin_users')
         .select('user_id')
-        .eq('user_id', user.id)
+        .eq('user_id', data.user.id)
         .maybeSingle();
 
       if (!adminRow) {
-        // Not an admin — sign them back out immediately
         await supabase.auth.signOut();
         throw new Error('Access denied. This account does not have admin privileges.');
       }
-
+      // AuthContext's onAuthStateChange will set isAdmin and the useEffect redirect handles navigation.
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

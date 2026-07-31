@@ -26,16 +26,7 @@ export default function AuthCallbackPage() {
 
       // Password recovery flow — redirect to reset page, the SDK handles the session
       if (tokenHash && type === 'recovery') {
-        const { error: verifyErr } = await supabase.auth.verifyOtp({
-          token_hash: tokenHash,
-          type: 'recovery',
-        });
-        if (verifyErr) {
-          setErrorMsg(verifyErr.message);
-          setStatus('error');
-          return;
-        }
-        navigate('/auth/reset-password', { replace: true });
+        navigate('/auth/reset-password?token_hash=' + encodeURIComponent(tokenHash) + '&type=recovery', { replace: true });
         return;
       }
 

@@ -35,28 +35,15 @@ export default function ResetPasswordPage() {
     }
 
     // Implicit flow: Supabase fires PASSWORD_RECOVERY after processing hash fragment
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
         setPageState('ready');
       }
     });
 
-    // Also check immediately in case the session is already set
+    // Also check immediately in case the session is already set (hash already processed)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setPageState('ready');
-      } else {
-        setTimeout(() => {
-          supabase.auth.getSession().then(({ data: { session: s } }) => {
-            if (s) {
-              setPageState('ready');
-            } else {
-              setErrorMsg('This reset link is invalid or has expired. Please request a new one.');
-              setPageState('error');
-            }
-          });
-        }, 3000);
-      }
+      if (session) setPageState('ready');
     });
 
     return () => subscription.unsubscribe();

@@ -161,25 +161,29 @@ export function RiderProvider({ children }: { children: React.ReactNode }) {
     };
     init();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       // Skip the initial SIGNED_IN that fires right after getSession — init() handles it
       if (!initialized) return;
-      (async () => {
-        if (session?.user) {
-          setIsLoading(true);
-          setUser(session.user);
-          const p = await fetchProfile(session.user.id);
-          if (p?.status === 'approved') await loadAll(session.user.id);
-          setIsLoading(false);
-        } else {
-          setUser(null);
-          setProfile(null);
-          setAssignments([]);
-          setNotifications([]);
-          setRatings([]);
-          setLocation(null);
-        }
-      })();
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setProfile(null);
+        setAssignments([]);
+        setNotifications([]);
+        setRatings([]);
+        setLocation(null);
+        return;
+      }
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        (async () => {
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            const p = await fetchProfile(session.user.id);
+            if (p?.status === 'approved') await loadAll(session.user.id);
+          } else {
+            setProfile(null);
+          }
+        })();
+      }
     });
 
     return () => subscription?.unsubscribe();
@@ -209,13 +213,9 @@ export function RiderProvider({ children }: { children: React.ReactNode }) {
   // ── Actions ───────────────────────────────────────────────────────────────────
 
   const signIn = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    if (data.user) {
-      setUser(data.user);
-      const p = await fetchProfile(data.user.id);
-      if (p?.status === 'approved') await loadAll(data.user.id);
-    }
+    // onAuthStateChange will handle setUser + fetchProfile + loadAll
   };
 
   const signOut = async () => {
