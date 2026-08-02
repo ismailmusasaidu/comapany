@@ -104,18 +104,25 @@ export default function AgentDeliveryBookingPage() {
   const [pkgCharges, setPkgCharges]   = useState<Record<string, PkgCharge>>({});
   const [weightRates, setWeightRates] = useState<Record<string, number>>({});
 
+  const [feeRates, setFeeRates] = useState<Record<string, { fee_per_km: number; minimum_fee: number }>>({});
+
   useEffect(() => {
     const load = async () => {
-      const [{ data: pkgs }, { data: wRates }] = await Promise.all([
+      const [{ data: pkgs }, { data: feeRows }] = await Promise.all([
         supabase.from('package_type_charges').select('package_type, label, surcharge'),
-        supabase.from('delivery_fee_settings').select('delivery_type, weight_fee_per_kg'),
+        supabase.from('delivery_fee_settings').select('delivery_type, fee_per_km, minimum_fee, weight_fee_per_kg'),
       ]);
       const pm: Record<string, PkgCharge> = {};
       for (const p of pkgs ?? []) pm[p.package_type] = p;
       setPkgCharges(pm);
       const wm: Record<string, number> = {};
-      for (const w of wRates ?? []) wm[w.delivery_type] = w.weight_fee_per_kg ?? 0;
+      const fm: Record<string, { fee_per_km: number; minimum_fee: number }> = {};
+      for (const row of feeRows ?? []) {
+        wm[row.delivery_type] = row.weight_fee_per_kg ?? 0;
+        fm[row.delivery_type] = { fee_per_km: Number(row.fee_per_km) || 0, minimum_fee: Number(row.minimum_fee) || 0 };
+      }
       setWeightRates(wm);
+      setFeeRates(fm);
     };
     load();
   }, []);
@@ -162,8 +169,13 @@ export default function AgentDeliveryBookingPage() {
         body: JSON.stringify({ pickup_city: pickupCity, delivery_city: deliveryCity, delivery_type: 'same_state' }),
       });
       const data = await res.json();
-      if (!res.ok) setFeeError(data.error ?? 'Could not calculate fee.');
-      else setFeeEstimate(data);
+      if (!res.ok) { setFeeError(data.error ?? 'Could not calculate fee.'); return; }
+      const distanceKm = Number(data.distance_km) || 0;
+      const rate = feeRates['same_state'] ?? { fee_per_km: 0, minimum_fee: 0 };
+      const feePerKm = Number(data.fee_per_km) || rate.fee_per_km;
+      const minimumFee = Number(data.minimum_fee) || rate.minimum_fee;
+      const estimatedFee = Number(data.estimated_fee) || Math.max(Math.round(distanceKm * feePerKm), minimumFee);
+      setFeeEstimate({ distance_km: distanceKm, fee_per_km: feePerKm, minimum_fee: minimumFee, estimated_fee: estimatedFee });
     } catch { setFeeError('Network error while calculating fee.'); }
     finally { setFeeLoading(false); }
   };
