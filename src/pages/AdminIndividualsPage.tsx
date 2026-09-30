@@ -4,7 +4,7 @@ import {
   ArrowLeft, Users, Package, Truck, Search, Eye, RefreshCw,
   ChevronDown, MapPin, Phone, Mail, User, Send, MessageSquare,
   Check, CheckCheck, Plus, X, FileDown, Activity, Clock,
-  CheckCircle, XCircle, TrendingUp, Filter,
+  CheckCircle, TrendingUp, Filter,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';

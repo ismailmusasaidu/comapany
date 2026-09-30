@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, RefreshCw, FileText, Package, Truck, Calendar,
-  Download, Printer, Filter, Building2, Users, User, CheckCircle,
-  XCircle, Clock, ChevronDown, Search, X, Hash, MapPin, Weight, DollarSign,
+  Printer, Filter, Building2, Users, User, CheckCircle,
+  XCircle, Hash, Weight, DollarSign,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -509,8 +509,8 @@ export default function AdminInvoiceGeneratorPage() {
   }, []);
 
   const totalDeclared = filtered.deliveries.reduce((s, d) => s + (d.declared_value ?? 0), 0);
+  const totalDeliveryFees = filtered.deliveries.reduce((s, d) => s + (d.total_amount ?? 0), 0);
   const deliveredCount = filtered.deliveries.filter(d => d.status === 'delivered').length;
-  const completedCount = filtered.logistics.filter(r => r.status === 'completed').length;
 
   const allStatuses = useMemo(() => {
     const s = new Set<string>();

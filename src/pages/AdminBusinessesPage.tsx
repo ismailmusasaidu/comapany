@@ -367,10 +367,10 @@ export default function AdminBusinessesPage() {
 
         <div className="max-w-7xl mx-auto px-6 flex border-t border-gray-100">
           {([
-            { key: 'overview', label: 'Overview', icon: BarChart3 },
+            { key: 'overview', label: 'Overview', icon: BarChart3, badge: undefined },
             { key: 'businesses', label: 'Businesses', icon: Building2, badge: pendingBiz },
-            { key: 'bookings', label: 'Bookings', icon: Package },
-            { key: 'requests', label: 'Requests', icon: Truck },
+            { key: 'bookings', label: 'Bookings', icon: Package, badge: undefined },
+            { key: 'requests', label: 'Requests', icon: Truck, badge: undefined },
             { key: 'messages', label: 'Messages', icon: MessageSquare, badge: totalUnread || undefined },
           ] as const).map(t => (
             <button key={t.key} onClick={() => setTab(t.key as Tab)}
@@ -890,7 +890,7 @@ export default function AdminBusinessesPage() {
                               className={`text-xs font-medium px-2.5 py-1.5 rounded-xl border cursor-pointer focus:outline-none ${STATUS_BADGE[r.status] ?? ''}`}>
                               {REQUEST_STATUS_OPTIONS.map(s => <option key={s} value={s}>{cap(s)}</option>)}
                             </select>
-                            <button onClick={() => setInvoiceData({ type: 'request', ...r, business_name: r.business_profiles?.company_name, business_contact: r.business_profiles?.contact_person, vehicle_type: r.vehicle_type ?? undefined })}
+                            <button onClick={() => setInvoiceData({ type: 'request', ...r, description: (r as Request & { description?: string }).description ?? '', budget_range: (r as Request & { budget_range?: string }).budget_range ?? '', business_name: r.business_profiles?.company_name, business_contact: r.business_profiles?.contact_person, vehicle_type: r.vehicle_type ?? undefined })}
                               title="Generate Invoice"
                               className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors border border-gray-200">
                               <FileDown className="h-3.5 w-3.5" />

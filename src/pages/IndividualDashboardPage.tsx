@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import {
-  Truck, Package, BarChart3, Clock, CheckCircle, XCircle,
+  Truck, Package, BarChart3,
   LogOut, Plus, ChevronRight, User, MapPin, Phone, Mail,
-  TrendingUp, Activity, FileText, Target, ArrowUpRight, ArrowDownRight,
+  Activity, FileText, Target, ArrowUpRight, ArrowDownRight,
   Minus, Award, Zap, MessageSquare, FileDown, SlidersHorizontal,
   Menu, X
 } from 'lucide-react';

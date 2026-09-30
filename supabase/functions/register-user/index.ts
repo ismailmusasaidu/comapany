@@ -20,7 +20,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { portal, email, password, redirectTo, profile } = await req.json();
+    const { portal, email, password, profile } = await req.json();
 
     const meta = PORTAL_META[portal];
     if (!meta) {

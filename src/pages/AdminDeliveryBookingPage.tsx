@@ -126,7 +126,6 @@ const PKG_META: Record<string, { icon: React.ComponentType<{ className?: string 
 const PKG_ORDER = ['document', 'parcel', 'fragile', 'heavy'];
 
 interface PkgCharge  { package_type: string; label: string; surcharge: number; }
-interface WeightRate { delivery_type: string; weight_fee_per_kg: number; }
 interface FeeEstimate { distance_km: number; fee_per_km: number; minimum_fee: number; estimated_fee: number; }
 
 const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL as string;

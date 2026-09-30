@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Bike, Check, CheckCheck, Clock, Search, Send, MessageSquare, XCircle, CheckCircle, ChevronDown, User, Phone, Mail, MapPin, CreditCard, X } from 'lucide-react';
+import { ArrowLeft, Bike, Check, CheckCheck, Search, Send, MessageSquare, XCircle, CheckCircle, ChevronDown, User, Phone, Mail, MapPin, CreditCard, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Truck, MapPin, FileText, CheckCircle, ArrowLeft, ArrowRight, LogOut,
-  Package, Warehouse, Zap, BarChart3, Globe, Navigation, Weight, Calendar, DollarSign, Home
+  Package, Warehouse, Zap, BarChart3, Globe, Navigation, Weight, Calendar, Home
 } from 'lucide-react';
 import { useAgent } from '../contexts/AgentContext';
 import { usePersistentState } from '../hooks/usePersistentState';
@@ -123,7 +123,7 @@ export default function AgentLogisticsPage() {
   const { user, profile, signOut } = useAgent();
   const navigate = useNavigate();
   const handleLogout = async () => { await signOut(); navigate('/agent/login'); };
-  const [form, setForm, clearForm] = usePersistentState<RequestForm>('agent_logistics_form', EMPTY);
+  const [form, setForm] = usePersistentState<RequestForm>('agent_logistics_form', EMPTY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);

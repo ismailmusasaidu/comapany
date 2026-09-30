@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import {
-  Truck, Package, BarChart3, Clock, CheckCircle, XCircle,
+  Truck, Package, BarChart3, Clock, XCircle,
   LogOut, Plus, ChevronRight, AlertTriangle, User, Building2,
-  MapPin, Phone, Mail, TrendingUp, Activity, FileText,
+  MapPin, Phone, Mail, Activity, FileText,
   Target, ArrowUpRight, ArrowDownRight, Minus, Award, Zap, MessageSquare, FileDown, SlidersHorizontal,
   Menu, X
 } from 'lucide-react';
@@ -201,10 +201,10 @@ export default function AgentDashboardPage() {
   const [recentRequests, setRecentRequests] = useState<RecentRequest[]>([]);
   const [selectedBooking, setSelectedBooking] = useState<RecentBooking | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [dataLoading, setDataLoading] = useState(true);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [, setDataLoading] = useState(true);
 
   useEffect(() => { refreshProfile(); }, []);
   useEffect(() => {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, RefreshCw, Package, Truck, Users, Building2, User,
   Calendar, CheckCircle, XCircle, Clock, Zap, Activity,
-  ChevronRight, Search, Filter, BarChart3,
+  ChevronRight, Search, BarChart3,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -173,7 +173,6 @@ function UserDetailPanel({
   const filteredR = filterByRange(requests, timeRange);
 
   const deliveredB = filteredB.filter(b => b.status === 'delivered').length;
-  const cancelledB = filteredB.filter(b => b.status === 'cancelled').length;
   const activeB = filteredB.filter(b => !['delivered', 'cancelled'].includes(b.status)).length;
   const completedR = filteredR.filter(r => r.status === 'completed').length;
 

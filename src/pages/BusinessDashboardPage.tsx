@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import {
-  Truck, Package, BarChart3, Clock, CheckCircle, XCircle,
+  Truck, Package, BarChart3, Clock, XCircle,
   LogOut, Plus, ChevronRight, AlertTriangle, Building2,
   MapPin, Phone, Mail, TrendingUp, Activity, FileText,
   Target, ArrowUpRight, ArrowDownRight, Minus, Award, Zap,
@@ -184,10 +184,10 @@ export default function BusinessDashboardPage() {
   const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
   const [recentRequests, setRecentRequests] = useState<Request[]>([]);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [dataLoading, setDataLoading] = useState(true);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [, setDataLoading] = useState(true);
 
   useEffect(() => { refreshProfile(); }, []);
   useEffect(() => {

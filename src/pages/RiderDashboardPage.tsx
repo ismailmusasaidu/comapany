@@ -231,9 +231,11 @@ export default function RiderDashboardPage() {
   useEffect(() => {
     if (!user) return;
     const fetchUnread = async () => {
+      const { data: threads } = await supabase.from('message_threads').select('id').eq('recipient_id', user.id).eq('recipient_type', 'rider');
+      if (!threads?.length) { setUnreadMessages(0); return; }
       const { count } = await supabase.from('messages').select('id', { count: 'exact', head: true })
-        .eq('is_read', false).eq('sender_role', 'admin')
-        .in('thread_id', supabase.from('message_threads').select('id').eq('recipient_id', user.id).eq('recipient_type', 'rider'));
+        .in('thread_id', threads.map(t => t.id))
+        .eq('is_read', false).eq('sender_role', 'admin');
       setUnreadMessages(count || 0);
     };
     fetchUnread();
