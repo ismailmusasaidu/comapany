@@ -4,8 +4,8 @@ import {
   ArrowLeft, Users, Package, Truck, CheckCircle, XCircle, Clock,
   Search, Filter, Eye, Building2, MapPin, Phone, Mail, RefreshCw,
   ChevronDown, AlertCircle, TrendingUp, Target, Activity, Award,
-  ArrowUpRight, ArrowDownRight, Minus, UserCheck, UserX, BarChart3, Zap,
-  MessageSquare, Send, Plus, X, ChevronRight, Check, CheckCheck, FileDown
+  ArrowUpRight, ArrowDownRight, Minus, UserCheck, BarChart3, Zap,
+  MessageSquare, Send, Plus, X, Check, CheckCheck, FileDown
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -105,7 +105,7 @@ const STATUS_BADGE: Record<string, string> = {
 function cap(s: string) { return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 function fmtDate(d: string) { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
 function pct(n: number, d: number) { return d === 0 ? 0 : Math.round((n / d) * 100); }
-function trend(curr: number, prev: number) {
+function trend(curr: number, prev: number): { dir: 'up' | 'down' | 'flat'; pct: number } {
   if (prev === 0) return { dir: curr > 0 ? 'up' : 'flat' as const, pct: 0 };
   const p = Math.round(((curr - prev) / prev) * 100);
   return { dir: (p > 0 ? 'up' : p < 0 ? 'down' : 'flat') as 'up' | 'down' | 'flat', pct: Math.abs(p) };
@@ -890,7 +890,7 @@ export default function AdminAgentsPage() {
                               <input type="text" placeholder="Add notes..." defaultValue={r.admin_notes}
                                 onBlur={e => updateRequestStatus(r.id, r.status, e.target.value)}
                                 className="text-xs px-2.5 py-1.5 border border-gray-200 rounded-lg w-28 focus:outline-none focus:ring-1 focus:ring-orange-400" />
-                              <button onClick={() => setInvoiceData({ type: 'request', ...r, budget_range: (r as Request & { budget_range?: string }).budget_range ?? '', agent_name: r.agent_profiles?.full_name, agent_company: r.agent_profiles?.company_name, vehicle_type: r.vehicle_type ?? undefined })}
+                              <button onClick={() => setInvoiceData({ type: 'request', ...r, description: (r as Request & { description?: string }).description ?? '', budget_range: (r as Request & { budget_range?: string }).budget_range ?? '', agent_name: r.agent_profiles?.full_name, agent_company: r.agent_profiles?.company_name, vehicle_type: r.vehicle_type ?? undefined })}
                                 title="Generate Invoice"
                                 className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors border border-gray-200 flex-shrink-0">
                                 <FileDown className="h-3.5 w-3.5" />

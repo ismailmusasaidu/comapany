@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { X, Printer, Download, Truck, Package } from 'lucide-react';
+import { X, Printer, Truck, Package } from 'lucide-react';
 
 // ─── Booking invoice data ────────────────────────────────────────────────────
 export interface BookingInvoiceData {

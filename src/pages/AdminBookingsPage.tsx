@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowLeft, Bike, MapPin, Package, Star, User, Phone,
-  CheckCircle, XCircle, Clock, RefreshCw, Zap, Navigation,
+  ArrowLeft, Bike, MapPin, Package, Star,
+  CheckCircle, XCircle, RefreshCw, Zap, Navigation,
   ChevronDown, ChevronUp, Search, AlertCircle
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
