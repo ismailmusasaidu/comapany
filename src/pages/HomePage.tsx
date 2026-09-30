@@ -1,4 +1,4 @@
-import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, Users, TrendingUp, ArrowRight, Star, Zap, CheckCircle, ChevronLeft, ChevronRight, Bike, Store, FileText, CreditCard, BadgeCheck, Upload, X, MessageCircle, Quote, ChevronDown, ChevronUp } from 'lucide-react';
+import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, Users, TrendingUp, ArrowRight, Star, Zap, CheckCircle, ChevronLeft, ChevronRight, Bike, Store, FileText, FileCheck, CreditCard, BadgeCheck, Upload, X, MessageCircle, Quote, ChevronDown, ChevronUp, Warehouse, Home, Snowflake, HeartPulse, Plane } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
@@ -64,6 +64,14 @@ const iconMap: Record<string, React.ReactNode> = {
   package: <Package className="h-7 w-7 text-white" />,
   clock: <Clock className="h-7 w-7 text-white" />,
   users: <Users className="h-7 w-7 text-white" />,
+  zap: <Zap className="h-7 w-7 text-white" />,
+  warehouse: <Warehouse className="h-7 w-7 text-white" />,
+  'file-check': <FileCheck className="h-7 w-7 text-white" />,
+  'map-pin': <MapPin className="h-7 w-7 text-white" />,
+  home: <Home className="h-7 w-7 text-white" />,
+  snowflake: <Snowflake className="h-7 w-7 text-white" />,
+  'heart-pulse': <HeartPulse className="h-7 w-7 text-white" />,
+  plane: <Plane className="h-7 w-7 text-white" />,
 };
 
 export default function HomePage() {
