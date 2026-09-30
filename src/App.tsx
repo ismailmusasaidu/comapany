@@ -54,6 +54,7 @@ const AdminInvoiceGeneratorPage = lazy(() => import('./pages/AdminInvoiceGenerat
 const AdminIndividualsPage = lazy(() => import('./pages/AdminIndividualsPage'));
 const AdminLogisticsFeesPage = lazy(() => import('./pages/AdminLogisticsFeesPage'));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const PaymentCallbackPage = lazy(() => import('./pages/PaymentCallbackPage'));
@@ -122,6 +123,7 @@ function App() {
 
           <Route path="/agent/register" element={<AgentRegisterPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
           <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
           <Route path="/payment/callback" element={<PaymentCallbackPage />} />

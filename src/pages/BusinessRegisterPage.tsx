@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Truck, Building2, Mail, Phone, MapPin, CreditCard,
   Lock, Eye, EyeOff, ArrowRight, Briefcase, Users, Globe
@@ -52,13 +52,12 @@ const COMPANY_SIZES = [
 ];
 
 export default function BusinessRegisterPage() {
+  const navigate = useNavigate();
   const [form, setForm] = useState<FormData>(INITIAL);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState('');
 
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [key]: e.target.value }));
@@ -87,7 +86,6 @@ export default function BusinessRegisterPage() {
           portal: 'business',
           email: form.email,
           password: form.password,
-          redirectTo: `${window.location.origin}/auth/callback`,
           profile: {
             company_name: form.company_name,
             contact_person: form.contact_person,
@@ -105,45 +103,13 @@ export default function BusinessRegisterPage() {
       const result = await res.json();
       if (!res.ok || result.error) throw new Error(result.error || 'Registration failed.');
 
-      setRegisteredEmail(form.email);
-      setSuccess(true);
+      navigate(`/auth/verify-email?portal=business&email=${encodeURIComponent(form.email)}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Registration failed.');
     } finally {
       setLoading(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center px-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-blue-50 border-2 border-blue-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Mail className="h-10 w-10 text-blue-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Check Your Email</h2>
-          <p className="text-gray-500 mb-2 leading-relaxed">We sent a verification link to:</p>
-          <p className="text-orange-500 font-semibold mb-6 text-sm">{registeredEmail}</p>
-          <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-8 text-left">
-            <p className="text-sm text-orange-700 font-medium">What happens next?</p>
-            <ul className="mt-2 space-y-1 text-sm text-orange-600 list-disc list-inside">
-              <li>Open the email and click "Verify My Email Address"</li>
-              <li>Admin reviews your business profile</li>
-              <li>You receive approval notification</li>
-              <li>Log in to access your business dashboard</li>
-            </ul>
-          </div>
-          <p className="text-xs text-gray-400 mb-4">Didn't receive it? Check your spam folder or try registering again.</p>
-          <Link
-            to="/business/login"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all hover:scale-105"
-          >
-            Go to Login <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-12 px-4">

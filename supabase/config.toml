@@ -1,0 +1,45 @@
+# Supabase Edge Functions config
+# Each deployed function needs a [functions.<slug>] table with verify_jwt.
+# verify_jwt: false for public functions (webhooks, registration, email confirmation).
+
+[functions.confirm-email]
+verify_jwt = false
+
+[functions.register-user]
+verify_jwt = false
+
+[functions.send-verification-email]
+verify_jwt = false
+
+[functions.send-notification]
+verify_jwt = false
+
+[functions.notify-status-change]
+verify_jwt = false
+
+[functions.calculate-delivery-fee]
+verify_jwt = false
+
+[functions.ai-chat]
+verify_jwt = false
+
+[functions.paystack-initialize]
+verify_jwt = true
+
+[functions.paystack-verify]
+verify_jwt = false
+
+[functions.paystack-webhook]
+verify_jwt = false
+
+[functions.rider-dispatch]
+verify_jwt = false
+
+[functions.create-admin-user]
+verify_jwt = false
+
+[functions.generate-delivery-otp]
+verify_jwt = true
+
+[functions.verify-delivery-otp]
+verify_jwt = true
