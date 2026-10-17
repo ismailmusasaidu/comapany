@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, RefreshCw, Search, Truck, User, Building2, Users,
-  Filter, X, MapPin, Package, Calendar, StickyNote, CheckCircle,
+  Filter, X, MapPin, Package, Calendar, StickyNote, CheckCircle, DollarSign,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -23,6 +23,8 @@ interface UnifiedRequest {
   vehicle_type: string | null;
   status: string;
   admin_notes: string;
+  fee_amount: number | null;
+  payment_status: string;
   created_at: string;
   requester_name: string;
   requester_phone: string;
@@ -45,6 +47,10 @@ const SOURCE_META = {
   agent: { label: 'Agent', icon: Users, chip: 'bg-orange-50 text-orange-700 border-orange-200' },
   business: { label: 'Business', icon: Building2, chip: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
 } as const;
+
+const FEE_EDITABLE_STATUSES = ['approved', 'in_progress', 'completed'];
+
+function naira(n: number | null | undefined) { return n != null ? `₦${Number(n).toLocaleString('en-NG')}` : '—'; }
 
 function cap(s: string) { return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 function fmtDate(d: string) { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
@@ -93,6 +99,8 @@ export default function AdminLogisticsRequestsPage() {
   const [selected, setSelected] = useState<UnifiedRequest | null>(null);
   const [editStatus, setEditStatus] = useState('pending');
   const [editNotes, setEditNotes] = useState('');
+  const [editFee, setEditFee] = useState('');
+  const [editPaymentStatus, setEditPaymentStatus] = useState('unpaid');
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState('');
 
@@ -118,6 +126,8 @@ export default function AdminLogisticsRequestsPage() {
         budget_range: (r.budget_range as string) ?? '',
         vehicle_type: r.vehicle_type as string | null,
         status: r.status as string, admin_notes: (r.admin_notes as string) ?? '',
+        fee_amount: (r.fee_amount as number | null) ?? null,
+        payment_status: (r.payment_status as string) ?? 'unpaid',
         created_at: r.created_at as string,
         requester_name: p.full_name ?? 'Unknown', requester_phone: p.phone ?? '',
         requester_email: p.email ?? '',
@@ -136,6 +146,8 @@ export default function AdminLogisticsRequestsPage() {
         budget_range: (r.budget_range as string) ?? '',
         vehicle_type: r.vehicle_type as string | null,
         status: r.status as string, admin_notes: (r.admin_notes as string) ?? '',
+        fee_amount: (r.fee_amount as number | null) ?? null,
+        payment_status: (r.payment_status as string) ?? 'unpaid',
         created_at: r.created_at as string,
         requester_name: p.full_name ?? p.company_name ?? 'Unknown', requester_phone: '',
         requester_email: '',
@@ -153,6 +165,8 @@ export default function AdminLogisticsRequestsPage() {
         budget_range: (r.budget_range as string) ?? '',
         vehicle_type: r.vehicle_type as string | null,
         status: r.status as string, admin_notes: (r.admin_notes as string) ?? '',
+        fee_amount: (r.fee_amount as number | null) ?? null,
+        payment_status: (r.payment_status as string) ?? 'unpaid',
         created_at: r.created_at as string,
         requester_name: p.company_name ?? p.contact_person ?? 'Unknown',
         requester_phone: p.phone ?? '', requester_email: p.email ?? '',
@@ -188,16 +202,34 @@ export default function AdminLogisticsRequestsPage() {
     setSelected(r);
     setEditStatus(r.status);
     setEditNotes(r.admin_notes);
+    setEditFee(r.fee_amount != null ? String(r.fee_amount) : '');
+    setEditPaymentStatus(r.payment_status || 'unpaid');
     setActionError('');
   };
+
+  const feeEditable = FEE_EDITABLE_STATUSES.includes(editStatus);
 
   const saveChanges = async () => {
     if (!selected) return;
     setSaving(true);
     setActionError('');
+
+    const canSetFee = FEE_EDITABLE_STATUSES.includes(editStatus);
+    const parsedFee = editFee.trim() === '' ? null : Number(editFee);
+    if (editFee.trim() !== '' && (Number.isNaN(parsedFee) || parsedFee! < 0)) {
+      setActionError('Fee amount must be a positive number.');
+      setSaving(false);
+      return;
+    }
+
     const { error } = await supabase.from(selected.table).update({
       status: editStatus,
       admin_notes: editNotes,
+      ...(canSetFee ? {
+        fee_amount: parsedFee,
+        // Clearing the fee forces the request back to unpaid
+        payment_status: parsedFee == null ? 'unpaid' : editPaymentStatus,
+      } : {}),
       updated_at: new Date().toISOString(),
     }).eq('id', selected.id);
     if (error) {
@@ -205,8 +237,10 @@ export default function AdminLogisticsRequestsPage() {
       setSaving(false);
       return;
     }
-    setRequests(prev => prev.map(r => r.id === selected.id ? { ...r, status: editStatus, admin_notes: editNotes } : r));
-    setSelected(prev => prev ? { ...prev, status: editStatus, admin_notes: editNotes } : prev);
+    const feeAmount = canSetFee ? parsedFee : selected.fee_amount;
+    const paymentStatus = canSetFee ? (parsedFee == null ? 'unpaid' : editPaymentStatus) : selected.payment_status;
+    setRequests(prev => prev.map(r => r.id === selected.id ? { ...r, status: editStatus, admin_notes: editNotes, fee_amount: feeAmount, payment_status: paymentStatus } : r));
+    setSelected(prev => prev ? { ...prev, status: editStatus, admin_notes: editNotes, fee_amount: feeAmount, payment_status: paymentStatus } : prev);
     setSaving(false);
   };
 
@@ -298,6 +332,11 @@ export default function AdminLogisticsRequestsPage() {
                             <p className="font-semibold text-gray-900 truncate">{r.title}</p>
                             <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${meta.chip}`}>{meta.label}</span>
                             <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_BADGE[r.status] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>{cap(r.status)}</span>
+                            {r.fee_amount != null && (
+                              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${r.payment_status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-600 border-red-200'}`}>
+                                {naira(r.fee_amount)} · {cap(r.payment_status)}
+                              </span>
+                            )}
                           </div>
                           <p className="text-xs text-gray-400 mt-0.5">{r.request_ref} · {r.requester_name} · {fmtDate(r.created_at)}</p>
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-gray-500">
@@ -406,6 +445,35 @@ export default function AdminLogisticsRequestsPage() {
                   {STATUS_OPTIONS.map(s => <option key={s} value={s}>{cap(s)}</option>)}
                 </select>
               </div>
+
+              {feeEditable && (
+                <div className="rounded-2xl border border-orange-100 bg-orange-50/50 p-4 space-y-3">
+                  <p className="flex items-center gap-1.5 text-xs font-semibold text-orange-700 uppercase tracking-wide">
+                    <DollarSign className="h-3.5 w-3.5" /> Service Fee
+                  </p>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-gray-500 font-medium mb-1.5 block">Fee cost (₦)</label>
+                      <input type="number" min="0" step="0.01" value={editFee} onChange={e => setEditFee(e.target.value)}
+                        placeholder="e.g. 15000"
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500 font-medium mb-1.5 block">Payment status</label>
+                      <select value={editPaymentStatus} onChange={e => setEditPaymentStatus(e.target.value)} disabled={editFee.trim() === ''}
+                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100 disabled:text-gray-400">
+                        <option value="unpaid">Unpaid</option>
+                        <option value="paid">Paid</option>
+                      </select>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    {editFee.trim() === ''
+                      ? 'Leave the fee empty while the cost is not yet fixed — the request stays unpaid.'
+                      : `The requester will see a fee of ₦${Number(editFee || 0).toLocaleString('en-NG')} for this request.`}
+                  </p>
+                </div>
+              )}
 
               <div>
                 <label className="text-xs text-gray-400 font-medium mb-1.5 flex items-center gap-1.5">
