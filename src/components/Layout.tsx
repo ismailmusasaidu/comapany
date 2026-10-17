@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 import AIChatbot from './AIChatbot';
 
 interface LayoutProps {
@@ -98,6 +99,8 @@ export default function Layout({ children }: LayoutProps) {
     document.addEventListener('mousedown', onClick);
     return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('mousedown', onClick); };
   }, []);
+
+  useScrollReveal();
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 

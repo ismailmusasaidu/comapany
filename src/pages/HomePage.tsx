@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { SERVICE_IMAGES } from '../lib/serviceImages';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 interface HeroData {
   title: string;
@@ -256,6 +257,7 @@ export default function HomePage() {
   }, [lightboxIndex, displayGallery.length]);
 
   const [heroIndex, setHeroIndex] = useState(0);
+  useScrollReveal();
   const heroAutoRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const heroSlides = [
@@ -330,7 +332,7 @@ export default function HomePage() {
             key={i}
             className={`absolute inset-0 transition-opacity duration-[1200ms] ease-out ${i === heroIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
           >
-            <img src={slide.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src={slide.image} alt="" className={`absolute inset-0 w-full h-full object-cover ${i === heroIndex ? 'animate-kenburns' : ''}`} />
             <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/35 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/25" />
 
@@ -435,7 +437,7 @@ export default function HomePage() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid lg:grid-cols-[1fr_auto] gap-8 items-end mb-14">
+          <div className="grid lg:grid-cols-[1fr_auto] gap-8 items-end mb-14" data-reveal>
             <div>
               <span className="section-badge bg-orange-100 text-orange-600">Logistics Solutions</span>
               <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-0">
@@ -448,7 +450,7 @@ export default function HomePage() {
           </div>
 
           {displayServices.length === 4 ? (
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-6 lg:grid-cols-3" data-reveal="zoom">
               <div className="group relative overflow-hidden rounded-3xl min-h-[400px] lg:min-h-[540px] lg:col-span-2 lg:row-span-2">
                 <img
                   src={SERVICE_IMAGES[0]}
@@ -509,7 +511,7 @@ export default function HomePage() {
               </div>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" data-reveal="zoom">
               {displayServices.map((service) => (
                 <ServiceCard key={service.id} service={service} />
               ))}
@@ -522,7 +524,7 @@ export default function HomePage() {
       <section id="marketplace" className="py-20 lg:py-28 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <div className="animate-slideInLeft">
+            <div className="animate-slideInLeft" data-reveal="left">
               <span className="section-badge bg-blue-100 text-blue-800">Marketplace</span>
               <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-6 leading-tight">
                 Your One-Stop <span className="text-gradient">Shopping</span> Destination
@@ -554,7 +556,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="relative animate-slideInRight">
+            <div className="relative animate-slideInRight" data-reveal="right">
               <div className="absolute -inset-8 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-3xl blur-3xl"></div>
               <div className="relative bg-gradient-to-br from-slate-900 to-blue-900 rounded-3xl p-8 shadow-2xl">
                 <div className="grid grid-cols-2 gap-4">
@@ -581,7 +583,7 @@ export default function HomePage() {
       <section id="about" className="py-20 lg:py-28 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '50px 50px'}}></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-reveal>
             <div className="flex justify-center mb-4">
               <span className="section-badge bg-white/10 text-orange-300 border border-orange-500/20">About Us</span>
             </div>
@@ -589,7 +591,7 @@ export default function HomePage() {
             <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">{aboutData.description}</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 items-stretch">
+          <div className="grid md:grid-cols-3 gap-8 items-stretch" data-reveal="zoom">
             {[
               { icon: <Shield className="h-8 w-8 text-white" />, title: 'Our Mission', text: aboutData.mission },
               { icon: <TrendingUp className="h-8 w-8 text-white" />, title: 'Our Vision', text: aboutData.vision },
@@ -613,7 +615,7 @@ export default function HomePage() {
       {/* ── GALLERY ── */}
       <section id="gallery" className="py-20 lg:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-reveal>
             <div className="flex justify-center">
               <span className="section-badge bg-orange-100 text-orange-600">Our Operations</span>
             </div>
@@ -764,7 +766,7 @@ export default function HomePage() {
       {/* ── PARTNERS ── */}
       <section id="partners" className="py-20 lg:py-28 bg-gray-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
+          <div className="text-center mb-14" data-reveal>
             <div className="flex justify-center">
               <span className="section-badge bg-blue-100 text-blue-800">Trusted By Industry Leaders</span>
             </div>
@@ -824,7 +826,7 @@ export default function HomePage() {
         <div className="absolute top-0 left-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-50 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-reveal>
             <div className="flex justify-center">
               <span className="section-badge bg-orange-100 text-orange-600">Our Team</span>
             </div>
@@ -838,7 +840,7 @@ export default function HomePage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {displayTeam.map((member, i) => (
-              <div key={member.id} className="animate-slideUp h-full" style={{ animationDelay: `${i * 100}ms` }}>
+              <div key={member.id} className="animate-slideUp h-full" style={{ animationDelay: `${i * 150}ms` }} data-reveal>
                 <div className="group relative bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 h-full">
                   <div className="relative h-60 bg-gradient-to-br from-slate-800 to-blue-900 flex items-center justify-center overflow-hidden">
                     <div className="absolute -top-10 -right-10 w-36 h-36 bg-orange-500/20 rounded-full blur-2xl"></div>
@@ -875,7 +877,7 @@ export default function HomePage() {
         <div className="absolute top-0 right-0 w-80 h-80 bg-orange-50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-14">
+          <div className="text-center mb-14" data-reveal>
             <div className="flex justify-center mb-4">
               <span className="section-badge bg-orange-100 text-orange-700">Join Our Network</span>
             </div>
@@ -1145,7 +1147,7 @@ export default function HomePage() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2 pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-reveal>
             <div className="flex justify-center">
               <span className="section-badge bg-orange-100 text-orange-600">What Clients Say</span>
             </div>
@@ -1261,7 +1263,7 @@ export default function HomePage() {
       <section id="coverage" className="py-20 lg:py-28 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-reveal>
             <div className="flex justify-center mb-4">
               <span className="section-badge bg-white/10 text-orange-300 border border-orange-500/20">Coverage</span>
             </div>
@@ -1336,7 +1338,7 @@ export default function HomePage() {
       <section id="faq" className="py-20 lg:py-28 bg-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-14">
+          <div className="text-center mb-14" data-reveal>
             <div className="flex justify-center">
               <span className="section-badge bg-blue-100 text-blue-800">FAQ</span>
             </div>
@@ -1423,7 +1425,7 @@ export default function HomePage() {
         <div className="absolute top-0 left-0 w-96 h-96 bg-orange-50 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
-            <div className="animate-slideInLeft">
+            <div className="animate-slideInLeft" data-reveal="left">
               <span className="section-badge bg-orange-100 text-orange-600">Get In Touch</span>
               <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
                 Let's <span className="text-gradient">Talk</span>
@@ -1459,7 +1461,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="animate-slideInRight">
+            <div className="animate-slideInRight" data-reveal="right">
               <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 lg:p-10">
                 <h3 className="text-2xl font-bold text-slate-900 mb-6">Send us a Message</h3>
                 {contactSuccess ? (
