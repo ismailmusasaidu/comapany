@@ -59,7 +59,14 @@ export interface FreightFormData {
   contactWhatsApp: string;
 
   shipmentNotes: string;
-  documentNames: string[];
+  documents: FreightDocument[];
+}
+
+export interface FreightDocument {
+  name: string;
+  type: string;
+  file?: File;
+  path?: string;
 }
 
 export const EMPTY_FREIGHT: FreightFormData = {
@@ -94,7 +101,7 @@ export const EMPTY_FREIGHT: FreightFormData = {
   contactPhone: '',
   contactWhatsApp: '',
   shipmentNotes: '',
-  documentNames: [],
+  documents: [],
 };
 
 export const NIGERIAN_STATES = [

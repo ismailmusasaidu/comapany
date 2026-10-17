@@ -22,6 +22,8 @@ export interface CustomsCargoItem {
 export interface CustomsDocument {
   name: string;
   type: string;
+  file?: File;
+  path?: string;
 }
 
 export interface CustomsFormData {

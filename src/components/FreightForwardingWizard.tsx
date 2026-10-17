@@ -597,10 +597,11 @@ export default function FreightForwardingWizard({ onSubmit, loading, accentColor
                 <Upload className={`h-8 w-8 ${accent.text} mx-auto mb-3`} />
                 <p className="text-sm font-medium text-gray-700 mb-1">Click to upload or drag files here</p>
                 <p className="text-xs text-gray-400 mb-4">Invoice, Packing List, Bill of Lading, Air Waybill, or other documents</p>
-                <input type="file" multiple onChange={e => {
+                <input type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onChange={e => {
                   if (e.target.files) {
-                    const names = Array.from(e.target.files).map(f => f.name);
-                    update({ documentNames: [...data.documentNames, ...names] });
+                    const newDocs = Array.from(e.target.files).map(f => ({ name: f.name, type: 'other', file: f }));
+                    if (newDocs.length > 0) update({ documents: [...data.documents, ...newDocs] });
+                    e.target.value = '';
                   }
                 }}
                   className="hidden" id="file-upload" />
@@ -609,14 +610,14 @@ export default function FreightForwardingWizard({ onSubmit, loading, accentColor
                 </label>
               </div>
 
-              {data.documentNames.length > 0 && (
+              {data.documents.length > 0 && (
                 <div className="mt-3 space-y-2">
-                  {data.documentNames.map((name, i) => (
+                  {data.documents.map((d, i) => (
                     <div key={i} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
                       <span className="text-sm text-gray-700 flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-gray-400" /> {name}
+                        <FileText className="h-4 w-4 text-gray-400" /> {d.name}
                       </span>
-                      <button type="button" onClick={() => update({ documentNames: data.documentNames.filter((_, idx) => idx !== i) })}
+                      <button type="button" onClick={() => update({ documents: data.documents.filter((_, idx) => idx !== i) })}
                         className="p-1 text-gray-400 hover:text-red-500 transition-colors">
                         <X className="h-4 w-4" />
                       </button>
@@ -624,7 +625,7 @@ export default function FreightForwardingWizard({ onSubmit, loading, accentColor
                   ))}
                 </div>
               )}
-              <p className="text-xs text-gray-400 mt-2">File names are recorded with your request. Our team will request the actual files when following up.</p>
+              <p className="text-xs text-gray-400 mt-2">Files are uploaded securely with your request and reviewed by our team.</p>
             </div>
           </div>
         )}
@@ -735,9 +736,9 @@ export default function FreightForwardingWizard({ onSubmit, loading, accentColor
                 </ReviewSection>
               )}
 
-              {data.documentNames.length > 0 && (
+              {data.documents.length > 0 && (
                 <ReviewSection title="Documents" accent={accent}>
-                  {data.documentNames.map((n, i) => <ReviewRow key={i} label={`File ${i + 1}`} value={n} />)}
+                  {data.documents.map((d, i) => <ReviewRow key={i} label={`File ${i + 1}`} value={d.name} />)}
                 </ReviewSection>
               )}
             </div>

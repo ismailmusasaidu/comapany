@@ -434,12 +434,12 @@ export default function CustomsClearanceWizard({ onSubmit, loading, accentColor,
             </div>
             <FileUpload accent={accent} documentTypes={CUSTOMS_DOCUMENT_TYPES}
               files={data.documents}
-              onAddFiles={(names, type) => {
-                const newDocs = names.map(name => ({ name, type }));
+              onAddFiles={(picked, type) => {
+                const newDocs = picked.map(p => ({ name: p.name, type, file: p.file }));
                 setData(prev => ({ ...prev, documents: [...prev.documents, ...newDocs] }));
               }}
               onRemoveFile={idx => setData(prev => ({ ...prev, documents: prev.documents.filter((_, i) => i !== idx) }))} />
-            <p className="text-xs text-gray-400">File names are recorded with your request. Our team will request the actual files when following up.</p>
+            <p className="text-xs text-gray-400">Files are uploaded securely with your request and reviewed by our team.</p>
           </div>
         )}
 

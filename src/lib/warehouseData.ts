@@ -21,6 +21,8 @@ export interface WarehouseGoodsItem {
 export interface WarehouseDocument {
   name: string;
   type: string;
+  file?: File;
+  path?: string;
 }
 
 export interface WarehouseFormData {

@@ -7,6 +7,7 @@ import {
 import { useBusiness } from '../contexts/BusinessContext';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { supabase } from '../lib/supabase';
+import { uploadRequestDocuments } from '../lib/logisticsDocuments';
 import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
 import FreightForwardingWizard from '../components/FreightForwardingWizard';
 import CustomsClearanceWizard from '../components/CustomsClearanceWizard';
@@ -131,6 +132,7 @@ export default function BusinessLogisticsPage() {
     setError('');
     try {
       const ref = generateRef();
+      const documents = await uploadRequestDocuments(user.id, ref, freightData.documents);
       const { error: err } = await supabase.from('business_logistics_requests').insert({
         request_ref: ref,
         business_id: user.id,
@@ -159,6 +161,7 @@ export default function BusinessLogisticsPage() {
         preferred_date: freightData.preferredPickupDate || null,
         budget_range: freightData.cargoValue ? `₦${parseFloat(freightData.cargoValue).toLocaleString()}` : '',
         freight_details: freightData,
+        documents,
         status: 'pending',
       });
       if (err) throw err;
@@ -179,6 +182,7 @@ export default function BusinessLogisticsPage() {
       const ref = generateRef();
       const typeLabel = customsData.clearanceType === 'import' ? 'Import' : 'Export';
       const modeLabel = CUSTOMS_MODES.find(m => m.value === customsData.transportMode)?.label || '';
+      const documents = await uploadRequestDocuments(user.id, ref, customsData.documents);
       const { error: err } = await supabase.from('business_logistics_requests').insert({
         request_ref: ref,
         business_id: user.id,
@@ -211,6 +215,7 @@ export default function BusinessLogisticsPage() {
           ? `${customsData.cargoItems.reduce((s, c) => s + (parseFloat(c.cargoValue) || 0), 0).toLocaleString()} ${customsData.cargoItems[0]?.currency || 'USD'}`
           : '',
         freight_details: customsData,
+        documents,
         status: 'pending',
       });
       if (err) throw err;
@@ -230,6 +235,7 @@ export default function BusinessLogisticsPage() {
     try {
       const ref = generateRef();
       const typeLabel = RELOCATION_TYPES.find(r => r.value === reloData.relocationType)?.label || '';
+      const documents = await uploadRequestDocuments(user.id, ref, reloData.documents);
       const scopeLabel = MOVE_SCOPES.find(m => m.value === reloData.moveScope)?.label || '';
       const serviceLabel = RELO_SERVICES.find(s => s.value === reloData.serviceRequired)?.label || '';
       const isIntl = reloData.moveScope === 'international';
@@ -266,6 +272,7 @@ export default function BusinessLogisticsPage() {
         preferred_date: reloData.preferredDate || null,
         budget_range: '',
         freight_details: reloData,
+        documents,
         status: 'pending',
       });
       if (err) throw err;
@@ -316,6 +323,7 @@ export default function BusinessLogisticsPage() {
     try {
       const ref = generateRef();
       const typeLabel = STORAGE_TYPES.find(s => s.value === whData.storageType)?.label || '';
+      const documents = await uploadRequestDocuments(user.id, ref, whData.documents);
       const custLabel = CUSTOMER_TYPES.find(c => c.value === whData.customerType)?.label || '';
       const durLabel = STORAGE_DURATIONS.find(d => d.value === whData.storageDuration)?.label || '';
       const totalWeight = whData.goods.reduce((s, g) => s + (parseFloat(g.weightKg) || 0), 0);
@@ -351,6 +359,7 @@ export default function BusinessLogisticsPage() {
         preferred_date: whData.preferredStartDate || null,
         budget_range: '',
         freight_details: whData,
+        documents,
         status: 'pending',
       });
       if (err) throw err;

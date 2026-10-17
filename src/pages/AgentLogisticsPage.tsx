@@ -7,6 +7,7 @@ import {
 import { useAgent } from '../contexts/AgentContext';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { supabase } from '../lib/supabase';
+import { uploadRequestDocuments } from '../lib/logisticsDocuments';
 import { VehicleSelectionStep, VEHICLES_LIST } from './IndividualDeliveryBookingPage';
 import FreightForwardingWizard from '../components/FreightForwardingWizard';
 import CustomsClearanceWizard from '../components/CustomsClearanceWizard';
@@ -81,7 +82,7 @@ function buildFreightPayload(data: FreightFormData) {
     `Contact: ${data.contactName} (${data.contactPhone}, ${data.contactEmail})`,
     data.contactCompany ? `Company: ${data.contactCompany}` : '',
     data.shipmentNotes ? `Notes: ${data.shipmentNotes}` : '',
-    data.documentNames.length > 0 ? `Documents: ${data.documentNames.join(', ')}` : '',
+    data.documents.length > 0 ? `Documents: ${data.documents.map(d => d.name).join(', ')}` : '',
   ].filter(Boolean);
   return { title, description: descParts.join('\n'), freight_details: data };
 }
@@ -195,6 +196,7 @@ export default function AgentLogisticsPage() {
     try {
       const ref = generateRef();
       const payload = buildFreightPayload(freightData);
+      const documents = await uploadRequestDocuments(user.id, ref, freightData.documents);
       const { error: err } = await supabase.from('logistics_requests').insert({
         request_ref: ref,
         agent_id: user.id,
@@ -208,6 +210,7 @@ export default function AgentLogisticsPage() {
         preferred_date: freightData.preferredPickupDate || null,
         budget_range: freightData.cargoValue ? `₦${parseFloat(freightData.cargoValue).toLocaleString()}` : '',
         freight_details: freightData,
+        documents,
         status: 'pending',
       });
       if (err) throw err;
@@ -227,6 +230,7 @@ export default function AgentLogisticsPage() {
     try {
       const ref = generateRef();
       const payload = buildCustomsPayload(customsData);
+      const documents = await uploadRequestDocuments(user.id, ref, customsData.documents);
       const { error: err } = await supabase.from('logistics_requests').insert({
         request_ref: ref,
         agent_id: user.id,
@@ -242,6 +246,7 @@ export default function AgentLogisticsPage() {
           ? `${customsData.cargoItems.reduce((s, c) => s + (parseFloat(c.cargoValue) || 0), 0).toLocaleString()} ${customsData.cargoItems[0]?.currency || 'USD'}`
           : '',
         freight_details: customsData,
+        documents,
         status: 'pending',
       });
       if (err) throw err;
@@ -261,6 +266,7 @@ export default function AgentLogisticsPage() {
     try {
       const ref = generateRef();
       const typeLabel = RELOCATION_TYPES.find(r => r.value === reloData.relocationType)?.label || '';
+      const documents = await uploadRequestDocuments(user.id, ref, reloData.documents);
       const scopeLabel = MOVE_SCOPES.find(m => m.value === reloData.moveScope)?.label || '';
       const serviceLabel = RELO_SERVICES.find(s => s.value === reloData.serviceRequired)?.label || '';
       const isIntl = reloData.moveScope === 'international';
@@ -297,6 +303,7 @@ export default function AgentLogisticsPage() {
         preferred_date: reloData.preferredDate || null,
         budget_range: '',
         freight_details: reloData,
+        documents,
         status: 'pending',
       });
       if (err) throw err;
@@ -347,6 +354,7 @@ export default function AgentLogisticsPage() {
     try {
       const ref = generateRef();
       const typeLabel = STORAGE_TYPES.find(s => s.value === whData.storageType)?.label || '';
+      const documents = await uploadRequestDocuments(user.id, ref, whData.documents);
       const custLabel = CUSTOMER_TYPES.find(c => c.value === whData.customerType)?.label || '';
       const durLabel = STORAGE_DURATIONS.find(d => d.value === whData.storageDuration)?.label || '';
       const totalWeight = whData.goods.reduce((s, g) => s + (parseFloat(g.weightKg) || 0), 0);
@@ -382,6 +390,7 @@ export default function AgentLogisticsPage() {
         preferred_date: whData.preferredStartDate || null,
         budget_range: '',
         freight_details: whData,
+        documents,
         status: 'pending',
       });
       if (err) throw err;

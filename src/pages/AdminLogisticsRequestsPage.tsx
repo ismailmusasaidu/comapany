@@ -2,10 +2,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, RefreshCw, Search, Truck, User, Building2, Users,
-  Filter, X, MapPin, Package, Calendar, StickyNote, CheckCircle, DollarSign,
+  Filter, X, MapPin, Package, Calendar, StickyNote, CheckCircle, DollarSign, FileText,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { logAdminAction } from '../lib/auditLog';
+import { getDocumentViewUrl, StoredDocument } from '../lib/logisticsDocuments';
 
 interface UnifiedRequest {
   id: string;
@@ -30,6 +31,7 @@ interface UnifiedRequest {
   requester_name: string;
   requester_phone: string;
   requester_email: string;
+  documents: StoredDocument[];
 }
 
 const STATUS_OPTIONS = ['pending', 'reviewing', 'approved', 'in_progress', 'completed', 'rejected'];
@@ -55,6 +57,44 @@ function naira(n: number | null | undefined) { return n != null ? `₦${Number(n
 
 function cap(s: string) { return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 function fmtDate(d: string) { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+
+function AdminDocumentRow({ doc }: { doc: StoredDocument }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const open = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const url = await getDocumentViewUrl(doc.path);
+      if (url) window.open(url, '_blank', 'noopener,noreferrer');
+      else setError('Could not open document');
+    } catch {
+      setError('Could not open document');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between px-4 py-2.5 gap-3">
+      <div className="flex items-center gap-2.5 min-w-0">
+        <FileText className="w-4 h-4 text-gray-400 shrink-0" />
+        <span className="text-sm text-gray-700 truncate">{doc.name}</span>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        {error && <span className="text-xs text-red-500">{error}</span>}
+        <button
+          onClick={open}
+          disabled={loading}
+          className="text-xs font-medium text-amber-600 hover:text-amber-700 disabled:opacity-50"
+        >
+          {loading ? 'Opening…' : 'View'}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function DescriptionBlock({ text }: { text: string }) {
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
@@ -132,6 +172,7 @@ export default function AdminLogisticsRequestsPage() {
         created_at: r.created_at as string,
         requester_name: p.full_name ?? 'Unknown', requester_phone: p.phone ?? '',
         requester_email: p.email ?? '',
+        documents: (r.documents as StoredDocument[] | null) ?? [],
       });
     });
     (agentRes.data ?? []).forEach((r: Record<string, unknown>) => {
@@ -152,6 +193,7 @@ export default function AdminLogisticsRequestsPage() {
         created_at: r.created_at as string,
         requester_name: p.full_name ?? p.company_name ?? 'Unknown', requester_phone: '',
         requester_email: '',
+        documents: (r.documents as StoredDocument[] | null) ?? [],
       });
     });
     (bizRes.data ?? []).forEach((r: Record<string, unknown>) => {
@@ -171,6 +213,7 @@ export default function AdminLogisticsRequestsPage() {
         created_at: r.created_at as string,
         requester_name: p.company_name ?? p.contact_person ?? 'Unknown',
         requester_phone: p.phone ?? '', requester_email: p.email ?? '',
+        documents: (r.documents as StoredDocument[] | null) ?? [],
       });
     });
 
@@ -464,6 +507,17 @@ export default function AdminLogisticsRequestsPage() {
               </div>
 
               {selected.description && <DescriptionBlock text={selected.description} />}
+
+              {selected.documents.length > 0 && (
+                <div className="rounded-2xl border border-gray-100 overflow-hidden">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 pt-3 pb-1">Attached Documents</p>
+                  <div className="divide-y divide-gray-50">
+                    {selected.documents.map((doc, i) => (
+                      <AdminDocumentRow key={doc.path || i} doc={doc} />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="text-xs text-gray-400 font-medium mb-1.5 block">Status</label>

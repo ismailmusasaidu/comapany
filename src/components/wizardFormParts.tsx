@@ -199,7 +199,7 @@ export function FileUpload({ accent, documentTypes, files, onAddFiles, onRemoveF
   accent: AccentTheme;
   documentTypes: { value: string; label: string }[];
   files: { name: string; type: string }[];
-  onAddFiles: (names: string[], type: string) => void;
+  onAddFiles: (docs: { file?: File; name: string; type: string }[], type: string) => void;
   onRemoveFile: (idx: number) => void;
 }) {
   const [selectedType, setSelectedType] = useState('');
@@ -226,8 +226,8 @@ export function FileUpload({ accent, documentTypes, files, onAddFiles, onRemoveF
             className="hidden" id={inputId}
             onChange={e => {
               if (e.target.files) {
-                const names = Array.from(e.target.files).map(f => f.name);
-                onAddFiles(names, selectedType || 'other');
+                const picked = Array.from(e.target.files).map(f => ({ file: f, name: f.name, type: selectedType || 'other' }));
+                if (picked.length > 0) onAddFiles(picked, selectedType || 'other');
                 e.target.value = '';
               }
             }} />

@@ -30,6 +30,8 @@ export interface MoveLocation {
 export interface RelocationDocument {
   name: string;
   type: string;
+  file?: File;
+  path?: string;
 }
 
 export interface RelocationFormData {
