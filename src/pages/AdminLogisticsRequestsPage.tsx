@@ -49,6 +49,40 @@ const SOURCE_META = {
 function cap(s: string) { return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 function fmtDate(d: string) { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
 
+function DescriptionBlock({ text }: { text: string }) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+  // Lines like "Label: value" become paired rows; anything else stays free text
+  const pairs: { label: string; value: string }[] = [];
+  const freeText: string[] = [];
+  for (const line of lines) {
+    const m = line.match(/^([A-Za-z][A-Za-z0-9 /&'-]{0,40}?):\s*(.+)$/);
+    if (m) pairs.push({ label: m[1].trim(), value: m[2].trim() });
+    else freeText.push(line);
+  }
+
+  return (
+    <div className="rounded-2xl border border-gray-100 overflow-hidden">
+      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 pt-3 pb-1">Description</p>
+      {pairs.length > 0 && (
+        <div className="divide-y divide-gray-50">
+          {pairs.map((p, i) => (
+            <div key={i} className="flex gap-3 px-4 py-2.5 text-sm odd:bg-gray-50/60">
+              <span className="w-36 flex-shrink-0 text-xs font-semibold text-gray-500 pt-0.5">{p.label}</span>
+              <span className="text-gray-800 leading-relaxed">{p.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {freeText.length > 0 && (
+        <div className="px-4 py-3 text-sm text-gray-700 leading-relaxed space-y-1.5">
+          {freeText.map((t, i) => <p key={i}>{t}</p>)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminLogisticsRequestsPage() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState<UnifiedRequest[]>([]);
@@ -363,12 +397,7 @@ export default function AdminLogisticsRequestsPage() {
                 )}
               </div>
 
-              {selected.description && (
-                <div>
-                  <p className="text-xs text-gray-400 font-medium mb-1">Description</p>
-                  <p className="text-sm text-gray-700 bg-gray-50 rounded-xl p-4 leading-relaxed">{selected.description}</p>
-                </div>
-              )}
+              {selected.description && <DescriptionBlock text={selected.description} />}
 
               <div>
                 <label className="text-xs text-gray-400 font-medium mb-1.5 block">Status</label>
