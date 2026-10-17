@@ -23,12 +23,12 @@ const MAIN_LINKS = [
 ];
 
 const SERVICE_MENU: { href: string; label: string; desc: string; icon: typeof Zap; accent: string }[] = [
-  { href: '/logistics', label: 'Express Delivery', desc: 'Same-day & next-day parcels', icon: Zap, accent: 'text-amber-400 bg-amber-500/10' },
-  { href: '/logistics', label: 'Freight Forwarding', desc: 'Air, sea & land cargo', icon: Ship, accent: 'text-sky-400 bg-sky-500/10' },
-  { href: '/logistics', label: 'Customs Clearance', desc: 'Fast, compliant clearing', icon: FileCheck, accent: 'text-emerald-400 bg-emerald-500/10' },
-  { href: '/logistics', label: 'Cold Chain', desc: 'Temperature-controlled transport', icon: Snowflake, accent: 'text-cyan-400 bg-cyan-500/10' },
-  { href: '/logistics', label: 'Warehousing', desc: 'Secure storage & fulfilment', icon: WarehouseIcon, accent: 'text-orange-400 bg-orange-500/10' },
-  { href: '/logistics', label: 'Relocation', desc: 'Home & office moving', icon: Boxes, accent: 'text-rose-400 bg-rose-500/10' },
+  { href: '/logistics/zap', label: 'Express Delivery', desc: 'Same-day & next-day parcels', icon: Zap, accent: 'text-amber-400 bg-amber-500/10' },
+  { href: '/logistics/plane', label: 'Import & Export', desc: 'Air, sea & land freight', icon: Ship, accent: 'text-sky-400 bg-sky-500/10' },
+  { href: '/logistics/file-check', label: 'Customs Clearance', desc: 'Fast, compliant clearing', icon: FileCheck, accent: 'text-emerald-400 bg-emerald-500/10' },
+  { href: '/logistics/snowflake', label: 'Cold Chain', desc: 'Temperature-controlled transport', icon: Snowflake, accent: 'text-cyan-400 bg-cyan-500/10' },
+  { href: '/logistics/warehouse', label: 'Warehousing', desc: 'Secure storage & fulfilment', icon: WarehouseIcon, accent: 'text-orange-400 bg-orange-500/10' },
+  { href: '/logistics/home', label: 'Relocation', desc: 'Home & office moving', icon: Boxes, accent: 'text-rose-400 bg-rose-500/10' },
 ];
 
 const QUICK_TOOLS: { href: string; label: string; desc: string; icon: typeof Zap }[] = [
