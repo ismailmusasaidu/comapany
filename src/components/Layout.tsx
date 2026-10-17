@@ -129,7 +129,7 @@ export default function Layout({ children }: LayoutProps) {
         openMenu === menu ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
       }`}
     >
-      <div className="bg-slate-900/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
+      <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
         <div className="h-1 bg-gradient-to-r from-orange-500 via-red-400 to-orange-500" />
         {children}
       </div>
