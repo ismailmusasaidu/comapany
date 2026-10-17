@@ -36,6 +36,7 @@ const AgentDashboardPage = lazy(() => import('./pages/AgentDashboardPage'));
 const AgentDeliveryBookingPage = lazy(() => import('./pages/AgentDeliveryBookingPage'));
 const AgentLogisticsPage = lazy(() => import('./pages/AgentLogisticsPage'));
 const AdminAgentsPage = lazy(() => import('./pages/AdminAgentsPage'));
+const AdminLogisticsRequestsPage = lazy(() => import('./pages/AdminLogisticsRequestsPage'));
 const BusinessRegisterPage = lazy(() => import('./pages/BusinessRegisterPage'));
 const BusinessLoginPage = lazy(() => import('./pages/BusinessLoginPage'));
 const BusinessDashboardPage = lazy(() => import('./pages/BusinessDashboardPage'));
@@ -116,6 +117,7 @@ function App() {
           <Route path="/admin/marketplace-partners" element={<ProtectedRoute element={<AdminMarketplacePartnersPage />} />} />
           <Route path="/admin/messages" element={<ProtectedRoute element={<AdminContactMessagesPage />} />} />
           <Route path="/admin/agents" element={<ProtectedRoute element={<AdminAgentsPage />} />} />
+          <Route path="/admin/logistics-requests" element={<ProtectedRoute element={<AdminLogisticsRequestsPage />} />} />
           <Route path="/admin/businesses" element={<ProtectedRoute element={<AdminBusinessesPage />} />} />
           <Route path="/admin/booking/new" element={<ProtectedRoute element={<AdminDeliveryBookingPage />} />} />
           <Route path="/admin/delivery-request/new" element={<ProtectedRoute element={<AdminDeliveryRequestPage />} />} />

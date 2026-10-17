@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Users, Package, Truck, CheckCircle, XCircle, Clock,
   Search, Filter, Eye, Building2, MapPin, Phone, Mail, RefreshCw,
@@ -187,11 +187,8 @@ interface MsgMessage {
 
 export default function AdminAgentsPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { user: adminUser } = useAuth();
-  const VALID_TABS: Tab[] = ['overview', 'agents', 'bookings', 'requests', 'messages'];
-  const initialTab = searchParams.get('tab') as Tab | null;
-  const [tab, setTab] = useState<Tab>(initialTab && VALID_TABS.includes(initialTab) ? initialTab : 'overview');
+  const [tab, setTab] = useState<Tab>('overview');
   const [agents, setAgents] = useState<Agent[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [requests, setRequests] = useState<Request[]>([]);
