@@ -1,7 +1,8 @@
-import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, Users, TrendingUp, ArrowRight, Star, Zap, CheckCircle, ChevronLeft, ChevronRight, Bike, Store, FileText, FileCheck, CreditCard, BadgeCheck, Upload, X, MessageCircle, Quote, ChevronDown, ChevronUp, Warehouse, Home, Snowflake, HeartPulse, Plane } from 'lucide-react';
+import { Truck, Package, ShoppingCart, Globe, Clock, Shield, Phone, Mail, MapPin, Users, TrendingUp, ArrowRight, Star, Zap, CheckCircle, ChevronLeft, ChevronRight, Bike, Store, FileText, FileCheck, CreditCard, BadgeCheck, Upload, X, MessageCircle, Quote, ChevronDown, ChevronUp, Warehouse, Home, Snowflake, HeartPulse, Plane, Linkedin, Twitter, Facebook, type LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { SERVICE_IMAGES } from '../lib/serviceImages';
 
 interface HeroData {
   title: string;
@@ -59,20 +60,54 @@ interface WhatsAppSettings {
   is_enabled: boolean;
 }
 
-const iconMap: Record<string, React.ReactNode> = {
-  truck: <Truck className="h-7 w-7 text-white" />,
-  package: <Package className="h-7 w-7 text-white" />,
-  clock: <Clock className="h-7 w-7 text-white" />,
-  users: <Users className="h-7 w-7 text-white" />,
-  zap: <Zap className="h-7 w-7 text-white" />,
-  warehouse: <Warehouse className="h-7 w-7 text-white" />,
-  'file-check': <FileCheck className="h-7 w-7 text-white" />,
-  'map-pin': <MapPin className="h-7 w-7 text-white" />,
-  home: <Home className="h-7 w-7 text-white" />,
-  snowflake: <Snowflake className="h-7 w-7 text-white" />,
-  'heart-pulse': <HeartPulse className="h-7 w-7 text-white" />,
-  plane: <Plane className="h-7 w-7 text-white" />,
+const iconComponents: Record<string, LucideIcon> = {
+  truck: Truck,
+  package: Package,
+  clock: Clock,
+  users: Users,
+  zap: Zap,
+  warehouse: Warehouse,
+  'file-check': FileCheck,
+  'map-pin': MapPin,
+  home: Home,
+  snowflake: Snowflake,
+  'heart-pulse': HeartPulse,
+  plane: Plane,
 };
+
+const getServiceIcon = (icon: string, cls = 'h-7 w-7 text-white') => {
+  const Icon = iconComponents[icon] ?? Truck;
+  return <Icon className={cls} />;
+};
+
+function ServiceCard({ service }: { service: Service }) {
+  const image = SERVICE_IMAGES[service.icon] ?? SERVICE_IMAGES.truck;
+  return (
+    <div className="group h-full bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col">
+      <div className="relative h-44 overflow-hidden">
+        <img
+          src={image}
+          alt={service.title}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
+        <div className="absolute -bottom-6 left-6 w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/30 ring-4 ring-white group-hover:scale-110 transition-transform duration-300">
+          {getServiceIcon(service.icon, 'h-6 w-6 text-white')}
+        </div>
+      </div>
+      <div className="p-6 pt-10 flex-1 flex flex-col">
+        <h3 className="text-lg font-bold text-slate-900 mb-2">{service.title}</h3>
+        <p className="text-sm text-gray-500 leading-relaxed flex-1">{service.description}</p>
+        <Link
+          to={`/logistics/${service.icon}`}
+          className="mt-5 inline-flex items-center gap-1.5 text-orange-600 text-sm font-semibold group-hover:gap-3 transition-all"
+        >
+          Learn more <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 export default function HomePage() {
   const [heroData, setHeroData] = useState<HeroData>({
@@ -168,30 +203,6 @@ export default function HomePage() {
 
   const displayTeam = teamMembers.length > 0 ? teamMembers : defaultTeam;
 
-  const [partnerIndex, setPartnerIndex] = useState(0);
-  const partnerAutoRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const partnerVisibleCount = 5;
-  const partnerMaxIndex = Math.max(0, displayPartners.length - partnerVisibleCount);
-
-  const stopPartnerAuto = useCallback(() => {
-    if (partnerAutoRef.current) clearInterval(partnerAutoRef.current);
-  }, []);
-
-  const startPartnerAuto = useCallback(() => {
-    stopPartnerAuto();
-    partnerAutoRef.current = setInterval(() => {
-      setPartnerIndex(prev => (prev >= partnerMaxIndex ? 0 : prev + 1));
-    }, 2800);
-  }, [partnerMaxIndex, stopPartnerAuto]);
-
-  useEffect(() => {
-    startPartnerAuto();
-    return stopPartnerAuto;
-  }, [startPartnerAuto, stopPartnerAuto]);
-
-  const partnerPrev = () => { setPartnerIndex(prev => Math.max(0, prev - 1)); startPartnerAuto(); };
-  const partnerNext = () => { setPartnerIndex(prev => (prev >= partnerMaxIndex ? 0 : prev + 1)); startPartnerAuto(); };
-
   const [onboardingTab, setOnboardingTab] = useState<'rider' | 'vendor'>('rider');
 
   const [contactForm, setContactForm] = useState({ name: '', email: '', service_interest: 'Logistics Services', message: '' });
@@ -244,169 +255,266 @@ export default function HomePage() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [lightboxIndex, displayGallery.length]);
 
-  const [teamIndex, setTeamIndex] = useState(0);
-  const teamSlideRef = useRef<HTMLDivElement>(null);
-  const teamAutoRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [teamVisibleCount, setTeamVisibleCount] = useState(4);
+  const [heroIndex, setHeroIndex] = useState(0);
+  const heroAutoRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const heroSlides = [
+    {
+      badge: 'Your Trusted Partner',
+      titleA: 'Seamless Logistics',
+      titleB: '& Marketplace Solutions',
+      subtitle: heroData.subtitle,
+      image: 'https://images.pexels.com/photos/29786116/pexels-photo-29786116.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      cta: { label: heroData.cta_button_text, href: heroData.cta_button_link },
+      secondary: 'Contact Us',
+      secondaryHref: '#contact',
+      stats: [['200+', 'Corporate Clients'], ['50K+', 'Monthly Deliveries'], ['98%', 'On-Time Rate']],
+    },
+    {
+      badge: 'Global Reach',
+      titleA: 'Freight & Customs',
+      titleB: 'Made Effortless',
+      subtitle: 'Import and export across 50+ countries with complete customs clearance handled by our specialists.',
+      image: 'https://images.pexels.com/photos/9806482/pexels-photo-9806482.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      cta: { label: 'Book Freight', href: '#logistics' },
+      secondary: 'See Coverage',
+      secondaryHref: '#coverage',
+      stats: [['50+', 'Countries'], ['24/7', 'Customs Support'], ['98%', 'Clearance Rate']],
+    },
+    {
+      badge: 'Speed & Precision',
+      titleA: 'Same-Day & Express',
+      titleB: 'Door-to-Door Delivery',
+      subtitle: 'Time-critical parcels picked up and delivered within hours — across every state, tracked in real time.',
+      image: 'https://images.pexels.com/photos/6169660/pexels-photo-6169660.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      cta: { label: 'Book Express', href: '#logistics' },
+      secondary: 'Track Order',
+      secondaryHref: '/track',
+      stats: [['4 hrs', 'Express Pickup'], ['36', 'States Covered'], ['99%', 'Parcel Safety']],
+    },
+    {
+      badge: 'Secure Storage',
+      titleA: 'Warehousing &',
+      titleB: 'Fulfillment Done Right',
+      subtitle: 'Climate-controlled storage, modern inventory systems and 24/7 security for your most valuable cargo.',
+      image: 'https://images.pexels.com/photos/18468412/pexels-photo-18468412.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      cta: { label: 'Request Storage', href: '#contact' },
+      secondary: 'Get a Quote',
+      secondaryHref: '#contact',
+      stats: [['10K+', 'sqm Storage'], ['24/7', 'Security'], ['99.9%', 'Accuracy']],
+    },
+  ];
+
+  const goToHeroSlide = useCallback((i: number) => {
+    setHeroIndex(((i % heroSlides.length) + heroSlides.length) % heroSlides.length);
+  }, [heroSlides.length]);
+
+  const restartHeroAuto = useCallback(() => {
+    if (heroAutoRef.current) clearInterval(heroAutoRef.current);
+    heroAutoRef.current = setInterval(() => {
+      setHeroIndex(prev => (prev + 1) % heroSlides.length);
+    }, 6500);
+  }, [heroSlides.length]);
 
   useEffect(() => {
-    const updateVisible = () => {
-      const w = window.innerWidth;
-      if (w < 640) setTeamVisibleCount(1);
-      else if (w < 768) setTeamVisibleCount(2);
-      else if (w < 1024) setTeamVisibleCount(3);
-      else setTeamVisibleCount(4);
-    };
-    updateVisible();
-    window.addEventListener('resize', updateVisible);
-    return () => window.removeEventListener('resize', updateVisible);
-  }, []);
-
-  const maxIndex = Math.max(0, displayTeam.length - teamVisibleCount);
-
-  useEffect(() => {
-    setTeamIndex(prev => Math.min(prev, maxIndex));
-  }, [maxIndex]);
-
-  const stopAuto = useCallback(() => {
-    if (teamAutoRef.current) clearInterval(teamAutoRef.current);
-  }, []);
-
-  const startAuto = useCallback(() => {
-    stopAuto();
-    teamAutoRef.current = setInterval(() => {
-      setTeamIndex(prev => (prev >= maxIndex ? 0 : prev + 1));
-    }, 3500);
-  }, [maxIndex, stopAuto]);
-
-  useEffect(() => {
-    startAuto();
-    return stopAuto;
-  }, [startAuto, stopAuto]);
-
-  const teamPrev = () => {
-    setTeamIndex(prev => Math.max(0, prev - 1));
-    startAuto();
-  };
-
-  const teamNext = () => {
-    setTeamIndex(prev => (prev >= maxIndex ? 0 : prev + 1));
-    startAuto();
-  };
+    restartHeroAuto();
+    return () => { if (heroAutoRef.current) clearInterval(heroAutoRef.current); };
+  }, [restartHeroAuto]);
 
   return (
     <>
       {/* ── HERO ── */}
-      <section id="home" className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white overflow-hidden flex items-center">
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/15 rounded-full blur-3xl animate-floatSlow"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-floatSlow" style={{animationDelay: '2s'}}></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-500/5 rounded-full blur-3xl"></div>
-        </div>
+      <section id="home" className="relative min-h-[640px] lg:min-h-screen bg-slate-950 text-white overflow-hidden">
+        {heroSlides.map((slide, i) => (
+          <div
+            key={i}
+            className={`absolute inset-0 transition-opacity duration-[1200ms] ease-out ${i === heroIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+          >
+            <img src={slide.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/35 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/25" />
 
-        <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px'}}></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 lg:pt-24 lg:pb-0">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div className="animate-slideInLeft">
-              <div className="inline-flex items-center gap-2 bg-orange-500/15 border border-orange-500/40 rounded-full px-4 py-2 mb-6">
-                <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                <span className="text-orange-300 font-semibold text-xs tracking-widest uppercase">Your Trusted Partner</span>
-              </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-[1.1] tracking-tight">
-                <span className="text-white">{heroData.title.split(' ').slice(0, 2).join(' ')}</span>
-                <br />
-                <span className="text-gradient">{heroData.title.split(' ').slice(2).join(' ')}</span>
-              </h1>
-              <p className="text-lg lg:text-xl text-gray-300 mb-10 leading-relaxed max-w-lg animate-slideInLeft delay-100">
-                {heroData.subtitle}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 animate-slideInLeft delay-200">
-                <a
-                  href={heroData.cta_button_link}
-                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/30"
-                >
-                  {heroData.cta_button_text}
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-                <a
-                  href="#contact"
-                  className="inline-flex items-center justify-center gap-2 border-2 border-white/30 hover:border-white hover:bg-white hover:text-slate-900 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300"
-                >
-                  Contact Us
-                </a>
-              </div>
-
-              <div className="grid grid-cols-3 gap-6 mt-12 pt-10 border-t border-white/10 animate-slideInLeft delay-300">
-                {[
-                  { value: '200+', label: 'Corporate Clients' },
-                  { value: '50K+', label: 'Monthly Deliveries' },
-                  { value: '98%', label: 'On-Time Rate' },
-                ].map((stat) => (
-                  <div key={stat.label}>
-                    <div className="text-2xl lg:text-3xl font-bold text-gradient">{stat.value}</div>
-                    <div className="text-gray-400 text-xs mt-1 font-medium">{stat.label}</div>
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+              <div className="max-w-2xl py-20 pb-44 lg:py-28 lg:pb-40">
+                <div className={i === heroIndex ? 'animate-slideInLeft' : ''}>
+                  <div className="inline-flex items-center gap-2 bg-orange-500/15 border border-orange-500/40 rounded-full px-4 py-2 mb-6">
+                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                    <span className="text-orange-300 font-semibold text-xs tracking-widest uppercase">{slide.badge}</span>
                   </div>
-                ))}
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-[1.08] tracking-tight">
+                    <span className="text-white">{slide.titleA}</span>{' '}
+                    <span className="text-gradient">{slide.titleB}</span>
+                  </h1>
+                  <p className="text-lg lg:text-xl text-gray-300 mb-10 leading-relaxed max-w-xl">
+                    {slide.subtitle}
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <a
+                      href={slide.cta.href}
+                      className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/30"
+                    >
+                      {slide.cta.label}
+                      <ArrowRight className="h-4 w-4" />
+                    </a>
+                    {slide.secondaryHref.startsWith('/') ? (
+                      <Link
+                        to={slide.secondaryHref}
+                        className="inline-flex items-center justify-center gap-2 border-2 border-white/30 hover:border-white hover:bg-white hover:text-slate-900 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300"
+                      >
+                        {slide.secondary}
+                      </Link>
+                    ) : (
+                      <a
+                        href={slide.secondaryHref}
+                        className="inline-flex items-center justify-center gap-2 border-2 border-white/30 hover:border-white hover:bg-white hover:text-slate-900 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300"
+                      >
+                        {slide.secondary}
+                      </a>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-6 mt-12 pt-10 border-t border-white/10">
+                    {slide.stats.map(([value, label]) => (
+                      <div key={label}>
+                        <div className="text-2xl lg:text-3xl font-bold text-gradient">{value}</div>
+                        <div className="text-gray-400 text-xs mt-1 font-medium">{label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+        ))}
 
-            <div className="hidden lg:grid grid-cols-2 gap-4 animate-slideInRight delay-200">
-              {[
-                { icon: <Truck className="h-8 w-8 text-orange-400" />, title: 'Fast Delivery', desc: 'Swift & reliable logistics' },
-                { icon: <ShoppingCart className="h-8 w-8 text-orange-400" />, title: 'Marketplace', desc: 'Quality at your fingertips' },
-                { icon: <Shield className="h-8 w-8 text-orange-400" />, title: 'Secure', desc: 'Your trust is our priority' },
-                { icon: <Globe className="h-8 w-8 text-orange-400" />, title: 'Global Reach', desc: 'Connect worldwide' },
-              ].map((card, i) => (
-                <div
-                  key={card.title}
-                  className={`glass rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:-translate-y-1 animate-slideUp delay-${(i + 3) * 100}`}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 to-transparent z-10 pointer-events-none"></div>
+
+        <div className="absolute bottom-10 left-0 right-0 z-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-white/90">
+              <span className="text-2xl font-bold tabular-nums">{String(heroIndex + 1).padStart(2, '0')}</span>
+              <span className="w-10 h-px bg-white/30"></span>
+              <span className="text-sm text-white/50 tracking-widest">/ {String(heroSlides.length).padStart(2, '0')}</span>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              {heroSlides.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => { goToHeroSlide(i); restartHeroAuto(); }}
+                  aria-label={`Go to slide ${i + 1}`}
+                  className={`relative h-2 rounded-full transition-all duration-500 ${i === heroIndex ? 'w-12 bg-orange-500/30' : 'w-2 bg-white/30 hover:bg-white/60'}`}
                 >
-                  <div className="mb-4 p-3 bg-orange-500/20 rounded-xl w-fit">{card.icon}</div>
-                  <h3 className="text-lg font-bold text-white mb-1">{card.title}</h3>
-                  <p className="text-gray-400 text-sm">{card.desc}</p>
-                </div>
+                  {i === heroIndex && (
+                    <span className="absolute inset-y-0 left-0 h-full rounded-full bg-orange-500 animate-slideProgress" />
+                  )}
+                </button>
               ))}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => { goToHeroSlide(heroIndex - 1); restartHeroAuto(); }}
+                className="w-11 h-11 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white hover:text-slate-900 transition-all duration-300"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => { goToHeroSlide(heroIndex + 1); restartHeroAuto(); }}
+                className="w-11 h-11 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white hover:text-slate-900 transition-all duration-300"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
             </div>
           </div>
         </div>
-
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 to-transparent"></div>
       </section>
 
-      {/* ── SERVICES ── */}
+      {/* ── LOGISTICS SOLUTIONS ── */}
       <section id="logistics" className="py-20 lg:py-28 bg-gray-50 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"></div>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
-            <div className="flex justify-center">
+          <div className="grid lg:grid-cols-[1fr_auto] gap-8 items-end mb-14">
+            <div>
               <span className="section-badge bg-orange-100 text-orange-600">Logistics Solutions</span>
+              <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-0">
+                Reliable Delivery <span className="text-gradient">Everywhere</span>
+              </h2>
             </div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
-              Reliable Delivery <span className="text-gradient">Everywhere</span>
-            </h2>
-            <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-              From local deliveries to international freight, we handle your logistics with precision and care.
+            <p className="text-lg text-gray-500 max-w-xl lg:text-right leading-relaxed">
+              From local express runs to international freight, we move your cargo with precision, tracking and care.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {displayServices.map((service, index) => (
-              <div
-                key={service.id}
-                className={`group bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 hover:border-orange-100 transition-all duration-300 hover:-translate-y-2 animate-slideUp delay-${index * 100}`}
-              >
-                <div className="bg-gradient-to-br from-orange-500 to-red-500 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-orange-500/30">
-                  {iconMap[service.icon] ?? <Truck className="h-7 w-7 text-white" />}
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">{service.title}</h3>
-                <p className="text-gray-500 leading-relaxed text-sm">{service.description}</p>
-                <div className="mt-6 flex items-center gap-1 text-orange-500 text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-                  Learn more <ArrowRight className="h-3.5 w-3.5" />
+          {displayServices.length === 4 ? (
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="group relative overflow-hidden rounded-3xl min-h-[400px] lg:min-h-[540px] lg:col-span-2 lg:row-span-2">
+                <img
+                  src={SERVICE_IMAGES[0]}
+                  alt={displayServices[0].title}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1200ms]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/70 to-slate-900/20" />
+                <div className="relative z-10 h-full flex flex-col justify-end p-8 lg:p-12">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center mb-6 shadow-xl shadow-orange-900/40 group-hover:scale-110 transition-transform duration-300">
+                    {getServiceIcon(displayServices[0].icon, 'h-8 w-8 text-white')}
+                  </div>
+                  <span className="text-orange-300 text-xs font-bold uppercase tracking-widest mb-2">Most Popular</span>
+                  <h3 className="text-3xl lg:text-4xl font-bold text-white mb-3">{displayServices[0].title}</h3>
+                  <p className="text-gray-300 max-w-md leading-relaxed mb-6">{displayServices[0].description}</p>
+                  <div className="flex flex-wrap gap-x-8 gap-y-3 mb-8">
+                    {[['98%', 'On-Time'], ['24/7', 'Tracking'], ['3 Days', 'Avg. Delivery']].map(([v, l]) => (
+                      <div key={l}>
+                        <div className="text-xl font-bold text-white">{v}</div>
+                        <div className="text-xs text-gray-400">{l}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-4">
+                    <a href="#contact" className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-6 py-3.5 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/30">
+                      Get a Free Quote <ArrowRight className="h-4 w-4" />
+                    </a>
+                    <a href="#coverage" className="inline-flex items-center gap-2 border border-white/30 hover:bg-white hover:text-slate-900 px-6 py-3.5 rounded-xl font-bold text-sm transition-all duration-300">
+                      See Coverage
+                    </a>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
+
+              {displayServices.slice(1, 4).map((service) => (
+                <ServiceCard key={service.id} service={service} />
+              ))}
+
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white p-8 lg:p-10 flex flex-col justify-center lg:col-span-2">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-red-500/10 rounded-full blur-3xl"></div>
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-5">
+                    <Shield className="h-6 w-6 text-orange-300" />
+                  </div>
+                  <h3 className="text-2xl lg:text-3xl font-bold mb-3">Need a custom logistics plan?</h3>
+                  <p className="text-gray-300 text-sm lg:text-base max-w-xl leading-relaxed mb-7">
+                    Describe your shipment and our specialists will build a tailored, insured solution — usually within a few hours.
+                  </p>
+                  <div className="flex flex-wrap gap-4">
+                    <a href="#contact" className="inline-flex items-center gap-2 bg-white text-slate-900 hover:bg-gray-100 px-6 py-3.5 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-105">
+                      Request a Quote <ArrowRight className="h-4 w-4" />
+                    </a>
+                    <a href="#faq" className="inline-flex items-center gap-2 border border-white/30 hover:bg-white/10 px-6 py-3.5 rounded-xl font-bold text-sm transition-all duration-300">
+                      Read FAQs
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayServices.map((service) => (
+                <ServiceCard key={service.id} service={service} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -656,7 +764,7 @@ export default function HomePage() {
       {/* ── PARTNERS ── */}
       <section id="partners" className="py-20 lg:py-28 bg-gray-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-14">
             <div className="flex justify-center">
               <span className="section-badge bg-blue-100 text-blue-800">Trusted By Industry Leaders</span>
             </div>
@@ -667,69 +775,35 @@ export default function HomePage() {
               Proud to serve leading companies across industries with reliable logistics solutions.
             </p>
           </div>
+        </div>
 
-          <div className="relative mb-16">
-            <div className="overflow-hidden">
-              <div
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(-${partnerIndex * (100 / partnerVisibleCount)}%)` }}
-              >
-                {displayPartners.map((partner) => (
-                  <div
-                    key={partner.id}
-                    className="flex-shrink-0 w-1/2 sm:w-1/3 lg:w-1/5 px-2.5"
-                  >
-                    <div className="group bg-white p-6 rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 hover:border-orange-100 flex items-center justify-center transition-all duration-300 hover:-translate-y-1 h-full">
-                      <div className="text-center">
-                        {partner.logo_url ? (
-                          <img src={partner.logo_url} alt={partner.name} className="w-16 h-16 mx-auto mb-3 object-contain group-hover:scale-110 transition-transform" />
-                        ) : (
-                          <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md shadow-orange-500/20">
-                            <span className="text-white text-lg font-bold">{partner.name.substring(0, 2).toUpperCase()}</span>
-                          </div>
-                        )}
-                        <p className="text-slate-700 font-semibold text-xs">{partner.name}</p>
-                      </div>
+        <div className="relative">
+          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-r from-gray-50 to-transparent z-10"></div>
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-l from-gray-50 to-transparent z-10"></div>
+          <div className="overflow-hidden py-2">
+            <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
+              {[...displayPartners, ...displayPartners].map((partner, i) => (
+                <div
+                  key={`${partner.id}-${i}`}
+                  className="group flex flex-col items-center gap-3 shrink-0 w-44 mx-3 bg-white border border-gray-100 rounded-2xl px-6 py-7 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  {partner.logo_url ? (
+                    <img src={partner.logo_url} alt={partner.name} className="h-12 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-md shadow-orange-500/20 group-hover:scale-110 transition-transform duration-300">
+                      <span className="text-white text-sm font-bold">{partner.name.substring(0, 2).toUpperCase()}</span>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  )}
+                  <p className="text-slate-700 font-bold text-xs text-center leading-tight">{partner.name}</p>
+                </div>
+              ))}
             </div>
-
-            {displayPartners.length > partnerVisibleCount && (
-              <>
-                <button
-                  onClick={partnerPrev}
-                  disabled={partnerIndex === 0}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed z-10"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={partnerNext}
-                  disabled={partnerIndex >= partnerMaxIndex}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed z-10"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </>
-            )}
-
-            {displayPartners.length > partnerVisibleCount && (
-              <div className="flex justify-center gap-2 mt-6">
-                {Array.from({ length: partnerMaxIndex + 1 }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => { setPartnerIndex(i); startPartnerAuto(); }}
-                    className={`h-2 rounded-full transition-all duration-300 ${i === partnerIndex ? 'bg-orange-500 w-6' : 'bg-gray-300 w-2 hover:bg-orange-300'}`}
-                  />
-                ))}
-              </div>
-            )}
           </div>
+        </div>
 
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-14">
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 lg:p-12">
-            <div className="grid md:grid-cols-3 gap-8 text-center">
+            <div className="grid grid-cols-3 gap-6 text-center">
               {[
                 { value: '200+', label: 'Corporate Clients', color: 'text-orange-500' },
                 { value: '50K+', label: 'Deliveries Monthly', color: 'text-blue-700' },
@@ -737,7 +811,7 @@ export default function HomePage() {
               ].map((stat) => (
                 <div key={stat.label} className="group">
                   <div className={`text-3xl sm:text-4xl md:text-5xl font-bold ${stat.color} mb-2 group-hover:scale-110 transition-transform inline-block`}>{stat.value}</div>
-                  <p className="text-gray-500 font-medium">{stat.label}</p>
+                  <p className="text-gray-500 font-medium text-xs sm:text-sm">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -746,8 +820,10 @@ export default function HomePage() {
       </section>
 
       {/* ── TEAM ── */}
-      <section id="team" className="py-20 lg:py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="team" className="py-20 lg:py-28 bg-white relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-50 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16">
             <div className="flex justify-center">
               <span className="section-badge bg-orange-100 text-orange-600">Our Team</span>
@@ -760,69 +836,36 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="relative">
-            <div className="overflow-hidden" ref={teamSlideRef}>
-              <div
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(-${teamIndex * (100 / teamVisibleCount)}%)` }}
-              >
-                {displayTeam.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex-shrink-0 px-3"
-                    style={{ width: `${100 / teamVisibleCount}%` }}
-                  >
-                    <div className="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full">
-                      <div className="bg-gradient-to-br from-slate-800 to-blue-900 p-8 flex items-center justify-center">
-                        {member.image_url ? (
-                          <img src={member.image_url} alt={member.name} className="w-24 h-24 rounded-full object-cover ring-4 ring-white/20 group-hover:ring-orange-400/50 transition-all" />
-                        ) : (
-                          <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center ring-4 ring-white/20 group-hover:ring-orange-400/50 transition-all shadow-lg">
-                            <span className="text-white text-2xl font-bold">{member.name.split(' ').map((n: string) => n[0]).join('')}</span>
-                          </div>
-                        )}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            {displayTeam.map((member, i) => (
+              <div key={member.id} className="animate-slideUp h-full" style={{ animationDelay: `${i * 100}ms` }}>
+                <div className="group relative bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 h-full">
+                  <div className="relative h-60 bg-gradient-to-br from-slate-800 to-blue-900 flex items-center justify-center overflow-hidden">
+                    <div className="absolute -top-10 -right-10 w-36 h-36 bg-orange-500/20 rounded-full blur-2xl"></div>
+                    <div className="absolute -bottom-12 -left-8 w-36 h-36 bg-blue-500/20 rounded-full blur-2xl"></div>
+                    {member.image_url ? (
+                      <img src={member.image_url} alt={member.name} className="relative w-28 h-28 rounded-full object-cover ring-4 ring-white/15 group-hover:ring-orange-400/50 group-hover:scale-105 transition-all duration-500" />
+                    ) : (
+                      <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center ring-4 ring-white/15 group-hover:ring-orange-400/50 group-hover:scale-105 transition-all duration-500 shadow-xl shadow-orange-900/30">
+                        <span className="text-white text-3xl font-bold">{member.name.split(' ').map((n: string) => n[0]).slice(0, 2).join('')}</span>
                       </div>
-                      <div className="p-6 text-center">
-                        <h3 className="text-lg font-bold text-slate-900 mb-1">{member.name}</h3>
-                        <p className="text-orange-500 font-semibold text-sm mb-3">{member.position}</p>
-                        <p className="text-gray-500 text-sm leading-relaxed">{member.bio}</p>
-                      </div>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 flex justify-center gap-2 pb-5 translate-y-12 group-hover:translate-y-0 transition-transform duration-500">
+                      {[Linkedin, Twitter, Facebook].map((Icon, s) => (
+                        <button key={s} aria-label={`${member.name} social profile`} className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center hover:bg-white hover:text-slate-900 transition-all duration-300">
+                          <Icon className="h-4 w-4" />
+                        </button>
+                      ))}
                     </div>
                   </div>
-                ))}
+                  <div className="p-6 text-center">
+                    <h3 className="text-lg font-bold text-slate-900 mb-1">{member.name}</h3>
+                    <p className="text-orange-500 font-semibold text-xs uppercase tracking-wider mb-3">{member.position}</p>
+                    <p className="text-gray-500 text-sm leading-relaxed">{member.bio}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            {displayTeam.length > teamVisibleCount && (
-              <>
-                <button
-                  onClick={teamPrev}
-                  disabled={teamIndex === 0}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed z-10"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={teamNext}
-                  disabled={teamIndex >= maxIndex}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed z-10"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </>
-            )}
-
-            {displayTeam.length > teamVisibleCount && (
-              <div className="flex justify-center gap-2 mt-8">
-                {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => { setTeamIndex(i); startAuto(); }}
-                    className={`h-2 rounded-full transition-all duration-300 ${i === teamIndex ? 'bg-orange-500 w-6' : 'bg-gray-300 w-2 hover:bg-orange-300'}`}
-                  />
-                ))}
-              </div>
-            )}
+            ))}
           </div>
         </div>
       </section>

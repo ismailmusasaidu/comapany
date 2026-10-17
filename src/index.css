@@ -138,6 +138,15 @@
   .delay-600 { animation-delay: 600ms; }
   .delay-700 { animation-delay: 700ms; }
 
+  @keyframes slideProgress {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+
+  .animate-slideProgress {
+    animation: slideProgress 6500ms linear forwards;
+  }
+
   .glass {
     @apply bg-white/10 backdrop-blur-md border border-white/20;
   }

@@ -4,6 +4,8 @@ import { useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
+const LogisticsPage = lazy(() => import('./pages/LogisticsPage'));
+const ServiceDetailPage = lazy(() => import('./pages/ServiceDetailPage'));
 const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'));
@@ -159,6 +161,8 @@ function App() {
               <Layout>
                 <Routes>
                   <Route path="/" element={<HomePage />} />
+                  <Route path="/logistics" element={<LogisticsPage />} />
+                  <Route path="/logistics/:icon" element={<ServiceDetailPage />} />
                   <Route path="/marketplace" element={<MarketplacePage />} />
                   <Route path="/track" element={<OrderTrackingPage />} />
                   <Route path="/shipping-calculator" element={<ShippingCalculatorPage />} />

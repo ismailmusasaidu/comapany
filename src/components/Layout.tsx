@@ -103,7 +103,7 @@ export default function Layout({ children }: LayoutProps) {
             {/* Desktop nav */}
             <div className="hidden lg:flex items-center gap-0.5">
               <NavLink href="/#home" label="Home" />
-              <NavLink href="/#logistics" label="Services" />
+              <NavLink href="/logistics" label="Services" isRouter />
               <NavLink href="/marketplace" label="Marketplace" isRouter />
               <NavLink href="/track" label="Track Order" isRouter />
               <NavLink href="/shipping-calculator" label="Price Calculator" isRouter />
@@ -242,7 +242,7 @@ export default function Layout({ children }: LayoutProps) {
             <div className="px-3 py-2 space-y-0.5">
               {[
                 { href: '/#home', label: 'Home', isRouter: false },
-                { href: '/#logistics', label: 'Services', isRouter: false },
+                { href: '/logistics', label: 'Services', isRouter: true },
                 { href: '/marketplace', label: 'Marketplace', isRouter: true },
                 { href: '/track', label: 'Track Order', isRouter: true },
                 { href: '/shipping-calculator', label: 'Price Calculator', isRouter: true },
@@ -332,8 +332,8 @@ export default function Layout({ children }: LayoutProps) {
             <div>
               <h4 className="font-bold text-base mb-5 text-white">Services</h4>
               <ul className="space-y-3 text-gray-400 text-sm">
-                <li><a href="/#logistics" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Express Shipping</a></li>
-                <li><a href="/#logistics" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Freight Services</a></li>
+                <li><Link to="/logistics" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Express Shipping</Link></li>
+                <li><Link to="/logistics" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Freight Services</Link></li>
                 <li><Link to="/marketplace" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Marketplace</Link></li>
                 <li><Link to="/track" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Track Package</Link></li>
                 <li><Link to="/shipping-calculator" className="hover:text-orange-400 transition-colors hover:translate-x-1 inline-block duration-200">Price Calculator</Link></li>
