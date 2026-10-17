@@ -61,7 +61,7 @@ const SECTIONS: NavSection[] = [
   {
     title: 'Logistics',
     items: [
-      { path: '/admin/agents', label: 'Logistics Requests', desc: 'Review and process logistics service requests', icon: Truck },
+      { path: '/admin/agents?tab=requests', label: 'Logistics Requests', desc: 'Review and process logistics service requests', icon: Truck },
       { path: '/admin/logistics-fees', label: 'Logistics Request Fees', desc: 'Set pricing for all logistics service types', icon: DollarSign },
       { path: '/admin/delivery-fees', label: 'Delivery Fee Settings', desc: 'Configure per-km delivery rates', icon: DollarSign },
     ],
