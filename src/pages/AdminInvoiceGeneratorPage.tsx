@@ -38,6 +38,9 @@ interface DeliveryRow {
   weight_fee?: number | null;
   package_surcharge?: number | null;
   portal: 'individual' | 'agent' | 'business';
+  individual_id?: string | null;
+  agent_id?: string | null;
+  business_id?: string | null;
   owner_name: string;
   owner_email: string;
   owner_phone: string;
@@ -61,6 +64,9 @@ interface LogisticsRow {
   admin_notes?: string;
   vehicle_type?: string | null;
   portal: 'individual' | 'agent' | 'business';
+  individual_id?: string | null;
+  agent_id?: string | null;
+  business_id?: string | null;
   owner_name: string;
   owner_email: string;
   owner_phone: string;
@@ -78,6 +84,10 @@ function cap(s: string) { return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.to
 function fmtDate(d: string) { return new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }); }
 function fmtDateFull(d: string) { return new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' }); }
 function naira(n: number | null | undefined) { return n != null ? `₦${Number(n).toLocaleString('en-NG')}` : '—'; }
+
+function ownerId(r: { portal: string; individual_id?: string | null; agent_id?: string | null; business_id?: string | null }) {
+  return r.portal === 'individual' ? r.individual_id : r.portal === 'agent' ? r.agent_id : r.business_id;
+}
 
 function getDateRange(mode: PeriodMode, customStart: string, customEnd: string, numDays: number): { start: Date; end: Date; label: string } {
   const now = new Date();
@@ -154,6 +164,7 @@ function buildInvoiceHTML(
   recordType: RecordType,
   contact: ContactInfo,
   invoiceNumber: string,
+  customerLabel: string,
 ): string {
   const totalDeclared = deliveries.reduce((s, d) => s + (d.declared_value ?? 0), 0);
   const totalDeliveryFees = deliveries.reduce((s, d) => s + (d.total_amount ?? 0), 0);
@@ -325,7 +336,7 @@ function buildInvoiceHTML(
           </div>
           <div style="background:#f9fafb;border-radius:10px;padding:14px">
             <p style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">Portal / Record Type</p>
-            <p style="font-size:13px;font-weight:700;color:#111827">${portalLabel} · ${typeLabel}</p>
+            <p style="font-size:13px;font-weight:700;color:#111827">${customerLabel !== 'All Customers' ? `${customerLabel}<br/>` : ''}${portalLabel} · ${typeLabel}</p>
           </div>
           <div style="background:#f9fafb;border-radius:10px;padding:14px">
             <p style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">Total Records</p>
@@ -398,6 +409,7 @@ export default function AdminInvoiceGeneratorPage() {
   const [customEnd, setCustomEnd] = useState('');
   const [numDays, setNumDays] = useState(7);
   const [portalFilter, setPortalFilter] = useState<PortalFilter>('all');
+  const [customerFilter, setCustomerFilter] = useState<string>('all');
   const [recordType, setRecordType] = useState<RecordType>('both');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -497,11 +509,15 @@ export default function AdminInvoiceGeneratorPage() {
       deliveries = deliveries.filter(d => d.status === statusFilter);
       logistics = logistics.filter(r => r.status === statusFilter);
     }
+    if (customerFilter !== 'all') {
+      deliveries = deliveries.filter(d => ownerId(d) === customerFilter);
+      logistics = logistics.filter(r => ownerId(r) === customerFilter);
+    }
     if (recordType === 'delivery') logistics = [];
     if (recordType === 'logistics') deliveries = [];
 
     return { deliveries, logistics };
-  }, [allDeliveries, allLogistics, start, end, portalFilter, statusFilter, recordType]);
+  }, [allDeliveries, allLogistics, start, end, portalFilter, customerFilter, statusFilter, recordType]);
 
   const invoiceNumber = useMemo(() => {
     const d = new Date();
@@ -519,10 +535,29 @@ export default function AdminInvoiceGeneratorPage() {
     return Array.from(s).sort();
   }, [allDeliveries, allLogistics]);
 
+  const customers = useMemo(() => {
+    if (portalFilter === 'all') return [];
+    const map = new Map<string, { id: string; name: string; count: number }>();
+    for (const r of [...allDeliveries, ...allLogistics]) {
+      if (r.portal !== portalFilter) continue;
+      const id = ownerId(r);
+      if (!id) continue;
+      const existing = map.get(id);
+      if (existing) existing.count += 1;
+      else map.set(id, { id, name: r.owner_name, count: 1 });
+    }
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [allDeliveries, allLogistics, portalFilter]);
+
+  const customerLabel = useMemo(() => {
+    if (customerFilter === 'all') return 'All Customers';
+    return customers.find(c => c.id === customerFilter)?.name ?? 'All Customers';
+  }, [customerFilter, customers]);
+
   const handlePrint = () => {
     setGenerating(true);
     try {
-      const html = buildInvoiceHTML(filtered.deliveries, filtered.logistics, periodLabel, portalFilter, recordType, contact, invoiceNumber);
+      const html = buildInvoiceHTML(filtered.deliveries, filtered.logistics, periodLabel, portalFilter, recordType, contact, invoiceNumber, customerLabel);
       const win = window.open('', '_blank', 'width=1200,height=800');
       if (!win) return;
       win.document.write(html);
@@ -637,7 +672,7 @@ export default function AdminInvoiceGeneratorPage() {
               </div>
               <div className="p-4 space-y-2">
                 {PORTAL_FILTERS.map(f => (
-                  <button key={f.key} onClick={() => setPortalFilter(f.key)}
+                  <button key={f.key} onClick={() => { setPortalFilter(f.key); setCustomerFilter('all'); }}
                     className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2.5 ${portalFilter === f.key ? 'bg-slate-800 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}>
                     <f.icon className="h-4 w-4 flex-shrink-0" />
                     {f.label}
@@ -645,6 +680,34 @@ export default function AdminInvoiceGeneratorPage() {
                 ))}
               </div>
             </div>
+
+            {/* Customer filter (per-portal) */}
+            {portalFilter !== 'all' && (
+              <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                <div className="px-5 py-4 border-b border-gray-50">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-purple-600" />
+                    <p className="font-bold text-gray-900 text-sm">Customer</p>
+                  </div>
+                </div>
+                <div className="p-4">
+                  {customers.length === 0 ? (
+                    <p className="text-sm text-gray-400">No customers with records in this portal.</p>
+                  ) : (
+                    <select value={customerFilter} onChange={e => setCustomerFilter(e.target.value)}
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500">
+                      <option value="all">All Customers ({customers.reduce((s, c) => s + c.count, 0)} records)</option>
+                      {customers.map(c => (
+                        <option key={c.id} value={c.id}>{c.name} ({c.count})</option>
+                      ))}
+                    </select>
+                  )}
+                  <p className="text-xs text-gray-400 mt-2">
+                    Generate an invoice for one specific {PORTAL_FILTERS.find(f => f.key === portalFilter)?.label.toLowerCase()} or everyone.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Record type */}
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
@@ -696,7 +759,7 @@ export default function AdminInvoiceGeneratorPage() {
               <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
                 <div>
                   <p className="font-bold text-gray-900">Invoice Preview</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{periodLabel}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{customerLabel !== 'All Customers' ? `${customerLabel} · ` : ''}{periodLabel}</p>
                 </div>
                 <button onClick={handlePrint} disabled={generating || loading || (filtered.deliveries.length + filtered.logistics.length === 0)}
                   className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:shadow-orange-500/20 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
