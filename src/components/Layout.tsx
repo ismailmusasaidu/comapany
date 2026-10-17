@@ -15,11 +15,10 @@ interface LayoutProps {
 type MenuKey = 'services' | 'portals' | 'company' | null;
 
 const MAIN_LINKS = [
-  { href: '/', label: 'Home', hash: true, match: '/' },
-  { href: '/logistics', label: 'Services', match: '/logistics' },
-  { href: '/marketplace', label: 'Marketplace', match: '/marketplace' },
-  { href: '/track', label: 'Track Order', match: '/track' },
-  { href: '/shipping-calculator', label: 'Price Calculator', match: '/shipping-calculator' },
+  { href: '/', label: 'Home', hash: true, match: '/', icon: HomeIcon },
+  { href: '/marketplace', label: 'Marketplace', match: '/marketplace', icon: Package },
+  { href: '/track', label: 'Track Order', match: '/track', icon: MapPin },
+  { href: '/shipping-calculator', label: 'Price Calculator', match: '/shipping-calculator', icon: Calculator },
 ];
 
 const SERVICE_MENU: { href: string; label: string; desc: string; icon: typeof Zap; accent: string }[] = [
@@ -112,15 +111,23 @@ export default function Layout({ children }: LayoutProps) {
 
   const DesktopLink = ({ item }: { item: (typeof MAIN_LINKS)[number] }) => {
     const active = isActive(item);
-    const cls = `relative px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap ${
+    const Icon = item.icon;
+    const cls = `relative flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap ${
       active ? 'text-white bg-white/10' : 'text-slate-300 hover:text-white hover:bg-white/5'
     }`;
     const dot = active && (
       <span className="absolute -bottom-[1px] left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.9)]" />
     );
+    const inner = (
+      <>
+        <Icon className={`h-4 w-4 ${active ? 'text-orange-400' : 'text-orange-400/80'}`} />
+        {item.label}
+        {dot}
+      </>
+    );
     return item.hash
-      ? <a href={item.href} className={cls}>{item.label}{dot}</a>
-      : <Link to={item.href} className={cls}>{item.label}{dot}</Link>;
+      ? <a href={item.href} className={cls}>{inner}</a>
+      : <Link to={item.href} className={cls}>{inner}</Link>;
   };
 
   const DropdownShell = ({ menu, children, wide = false }: { menu: Exclude<MenuKey, null>; children: React.ReactNode; wide?: boolean }) => (
