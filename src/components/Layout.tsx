@@ -129,7 +129,7 @@ export default function Layout({ children }: LayoutProps) {
         openMenu === menu ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'
       }`}
     >
-      <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
+      <div className="bg-[#0b1220] border border-white/15 rounded-2xl shadow-2xl shadow-black/70 ring-1 ring-black/50 overflow-hidden">
         <div className="h-1 bg-gradient-to-r from-orange-500 via-red-400 to-orange-500" />
         {children}
       </div>
@@ -141,16 +141,16 @@ export default function Layout({ children }: LayoutProps) {
   }) => {
     const inner = (
       <>
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${accent ?? 'bg-orange-500/15 text-orange-400 group-hover:bg-orange-500/25'}`}>
-          <Icon className="h-4.5 w-4.5" />
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${accent ?? 'bg-orange-500/15 text-orange-400 group-hover:bg-orange-500/30'}`}>
+          <Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0">
-          <p className="font-semibold text-sm text-slate-100 group-hover:text-white leading-tight">{label}</p>
-          <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5 leading-snug">{desc}</p>
+          <p className="font-semibold text-sm text-white leading-tight">{label}</p>
+          <p className="text-xs text-slate-300 group-hover:text-slate-100 mt-0.5 leading-snug">{desc}</p>
         </div>
       </>
     );
-    const cls = 'group flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all hover:bg-white/5 text-left w-full';
+    const cls = 'group flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-150 hover:bg-white/10 text-left w-full';
     return href.startsWith('/#')
       ? <a href={href} onClick={onClick} className={cls}>{inner}</a>
       : <Link to={href} onClick={onClick} className={cls}>{inner}</Link>;
