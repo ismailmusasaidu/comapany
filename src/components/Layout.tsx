@@ -282,12 +282,6 @@ export default function Layout({ children }: LayoutProps) {
             {/* CTA + mobile toggle */}
             <div className="flex items-center gap-2.5">
               <Link
-                to="/track"
-                className="hidden xl:inline-flex items-center gap-2 text-slate-300 hover:text-white text-sm font-medium px-3 py-2 rounded-xl hover:bg-white/5 transition-all"
-              >
-                <MapPin className="h-4 w-4 text-orange-400" /> Track
-              </Link>
-              <Link
                 to={isMarketplacePage ? '/#contact' : '/marketplace'}
                 className="hidden lg:inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30"
               >
