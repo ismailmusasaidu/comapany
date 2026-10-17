@@ -12,10 +12,12 @@ import FreightForwardingWizard from '../components/FreightForwardingWizard';
 import CustomsClearanceWizard from '../components/CustomsClearanceWizard';
 import RelocationWizard from '../components/RelocationWizard';
 import WarehouseWizard from '../components/WarehouseWizard';
+import ColdChainWizard from '../components/ColdChainWizard';
 import { type FreightFormData, SHIPPING_MODES, SERVICE_LEVELS, PACKAGING_OPTIONS } from '../lib/freightData';
 import { type CustomsFormData, TRANSPORT_MODES as CUSTOMS_MODES, SHIPMENT_STATUSES, PACKAGING_OPTIONS as CUSTOMS_PACKAGING, CUSTOMS_SERVICES } from '../lib/customsData';
 import { type RelocationFormData, RELOCATION_TYPES, MOVE_SCOPES, SERVICES_REQUIRED as RELO_SERVICES, ADDITIONAL_MOVING_SERVICES, VEHICLE_OPTIONS } from '../lib/relocationData';
 import { type WarehouseFormData, STORAGE_TYPES, CUSTOMER_TYPES, STORAGE_DURATIONS, GOODS_CATEGORIES, STORAGE_REQUIREMENTS, WAREHOUSE_ADDITIONAL_SERVICES } from '../lib/warehouseData';
+import { type ColdChainFormData, buildColdChainTitle, buildColdChainDescription } from '../lib/coldChainData';
 
 interface RequestForm {
   title: string;
@@ -44,6 +46,7 @@ const SERVICE_TYPES = [
   { value: 'customs', label: 'Customs Clearance', desc: 'Import/export documentation', icon: '🛃' },
   { value: 'last_mile', label: 'Last-Mile Delivery', desc: 'Final destination delivery', icon: '📍' },
   { value: 'relocation', label: 'Relocation Services', desc: 'Residential, office & intercity moves — packing, loading, transport, unloading & setup', icon: '🏠' },
+  { value: 'cold_chain', label: 'Cold Chain Logistics', desc: 'Temperature-controlled transport for sensitive cargo', icon: '🧊' },
 ];
 
 const BUDGET_RANGES = [
@@ -275,6 +278,37 @@ export default function BusinessLogisticsPage() {
     }
   };
 
+  const handleColdChainSubmit = async (data: ColdChainFormData) => {
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const ref = generateRef();
+      const { error: err } = await supabase.from('business_logistics_requests').insert({
+        request_ref: ref,
+        business_id: user.id,
+        service_type: 'cold_chain',
+        title: buildColdChainTitle(data),
+        description: buildColdChainDescription(data),
+        origin: data.pickupAddress,
+        destination: data.deliveryAddress,
+        quantity: '',
+        weight: data.cargoWeightKg ? `${data.cargoWeightKg} kg` : '',
+        preferred_date: data.preferredPickupDate || null,
+        budget_range: '',
+        freight_details: data,
+        status: 'pending',
+      });
+      if (err) throw err;
+      setCreatedRef(ref);
+      setSuccess(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit request.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleWarehouseSubmit = async (whData: WarehouseFormData) => {
     if (!user) return;
     setLoading(true);
@@ -378,8 +412,8 @@ export default function BusinessLogisticsPage() {
         </div>
       </header>
 
-      <div className={`mx-auto px-4 py-8 ${(form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation' || form.service_type === 'warehousing') ? 'max-w-4xl' : 'max-w-3xl'}`}>
-        {error && (form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation' || form.service_type === 'warehousing') && (
+      <div className={`mx-auto px-4 py-8 ${(form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation' || form.service_type === 'warehousing' || form.service_type === 'cold_chain') ? 'max-w-4xl' : 'max-w-3xl'}`}>
+        {error && (form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation' || form.service_type === 'warehousing' || form.service_type === 'cold_chain') && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6">
             {error}
           </div>
@@ -427,6 +461,13 @@ export default function BusinessLogisticsPage() {
         ) : form.service_type === 'warehousing' ? (
           <WarehouseWizard
             onSubmit={handleWarehouseSubmit}
+            loading={loading}
+            accentColor="orange"
+            onCancel={() => navigate('/business/dashboard')}
+          />
+        ) : form.service_type === 'cold_chain' ? (
+          <ColdChainWizard
+            onSubmit={handleColdChainSubmit}
             loading={loading}
             accentColor="orange"
             onCancel={() => navigate('/business/dashboard')}

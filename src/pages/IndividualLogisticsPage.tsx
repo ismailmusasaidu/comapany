@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Truck, MapPin, FileText, CheckCircle, ArrowLeft, ArrowRight, LogOut,
-  Package, Warehouse, Zap, BarChart3, Globe, Navigation, Weight, Calendar, Home
+  Package, Warehouse, Zap, BarChart3, Globe, Navigation, Weight, Calendar, Home, Snowflake
 } from 'lucide-react';
 import { useIndividual } from '../contexts/IndividualContext';
 import { usePersistentState } from '../hooks/usePersistentState';
@@ -12,10 +12,12 @@ import FreightForwardingWizard from '../components/FreightForwardingWizard';
 import CustomsClearanceWizard from '../components/CustomsClearanceWizard';
 import RelocationWizard from '../components/RelocationWizard';
 import WarehouseWizard from '../components/WarehouseWizard';
+import ColdChainWizard from '../components/ColdChainWizard';
 import { type FreightFormData, SHIPPING_MODES, SERVICE_LEVELS, PACKAGING_OPTIONS } from '../lib/freightData';
 import { type CustomsFormData, TRANSPORT_MODES as CUSTOMS_MODES, SHIPMENT_STATUSES, PACKAGING_OPTIONS as CUSTOMS_PACKAGING, CUSTOMS_SERVICES } from '../lib/customsData';
 import { type RelocationFormData, RELOCATION_TYPES, MOVE_SCOPES, SERVICES_REQUIRED as RELO_SERVICES, ADDITIONAL_MOVING_SERVICES, VEHICLE_OPTIONS } from '../lib/relocationData';
 import { type WarehouseFormData, STORAGE_TYPES, CUSTOMER_TYPES, STORAGE_DURATIONS, GOODS_CATEGORIES, STORAGE_REQUIREMENTS, WAREHOUSE_ADDITIONAL_SERVICES } from '../lib/warehouseData';
+import { type ColdChainFormData, buildColdChainTitle, buildColdChainDescription } from '../lib/coldChainData';
 
 interface RequestForm {
   service_type: string;
@@ -44,6 +46,7 @@ const SERVICES = [
   { value: 'customs', label: 'Customs Clearance', desc: 'Import & export documentation', icon: Globe, color: 'text-orange-600', bg: 'bg-orange-50' },
   { value: 'last_mile', label: 'Last Mile Delivery', desc: 'Final delivery to end customer', icon: Navigation, color: 'text-red-600', bg: 'bg-red-50' },
   { value: 'relocation', label: 'Relocation Services', desc: 'Residential, office & intercity moves — packing, loading, transport, unloading & setup', icon: Home, color: 'text-teal-600', bg: 'bg-teal-50' },
+  { value: 'cold_chain', label: 'Cold Chain Logistics', desc: 'Temperature-controlled transport for sensitive cargo', icon: Snowflake, color: 'text-cyan-600', bg: 'bg-cyan-50' },
 ];
 
 const BUDGET_RANGES = ['Under ₦50,000', '₦50,000 – ₦150,000', '₦150,000 – ₦500,000', '₦500,000 – ₦1,000,000', 'Above ₦1,000,000', 'To be discussed'];
@@ -254,6 +257,37 @@ export default function IndividualLogisticsPage() {
     }
   };
 
+  const handleColdChainSubmit = async (data: ColdChainFormData) => {
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const ref = generateRef();
+      const { error: err } = await supabase.from('logistics_requests').insert({
+        request_ref: ref,
+        individual_id: user.id,
+        service_type: 'cold_chain',
+        title: buildColdChainTitle(data),
+        description: buildColdChainDescription(data),
+        origin: data.pickupAddress,
+        destination: data.deliveryAddress,
+        quantity: null,
+        weight_kg: data.cargoWeightKg ? parseFloat(data.cargoWeightKg) : null,
+        preferred_date: data.preferredPickupDate || null,
+        budget_range: '',
+        freight_details: data,
+        status: 'pending',
+      });
+      if (err) throw err;
+      setCreatedRef(ref);
+      setSuccess(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit request.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleWarehouseSubmit = async (whData: WarehouseFormData) => {
     if (!user) return;
     setLoading(true);
@@ -362,8 +396,8 @@ export default function IndividualLogisticsPage() {
         </div>
       </header>
 
-      <div className={`mx-auto px-4 py-8 ${(form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation' || form.service_type === 'warehousing') ? 'max-w-4xl' : 'max-w-3xl'}`}>
-        {error && (form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation' || form.service_type === 'warehousing') && (
+      <div className={`mx-auto px-4 py-8 ${(form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation' || form.service_type === 'warehousing' || form.service_type === 'cold_chain') ? 'max-w-4xl' : 'max-w-3xl'}`}>
+        {error && (form.service_type === 'freight' || form.service_type === 'customs' || form.service_type === 'relocation' || form.service_type === 'warehousing' || form.service_type === 'cold_chain') && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6">
             {error}
           </div>
@@ -421,6 +455,13 @@ export default function IndividualLogisticsPage() {
         ) : form.service_type === 'warehousing' ? (
           <WarehouseWizard
             onSubmit={handleWarehouseSubmit}
+            loading={loading}
+            accentColor="orange"
+            onCancel={() => navigate('/individual/dashboard')}
+          />
+        ) : form.service_type === 'cold_chain' ? (
+          <ColdChainWizard
+            onSubmit={handleColdChainSubmit}
             loading={loading}
             accentColor="orange"
             onCancel={() => navigate('/individual/dashboard')}
