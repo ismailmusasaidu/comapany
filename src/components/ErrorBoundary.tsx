@@ -31,9 +31,14 @@ class ErrorBoundary extends Component<Props, State> {
               </svg>
             </div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Something went wrong</h2>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-gray-500 mb-4">
               An unexpected error occurred. Please refresh the page or contact support if the problem persists.
             </p>
+            {this.state.error && (
+              <pre className="text-xs text-left bg-gray-100 text-red-700 rounded-lg p-3 mb-6 overflow-x-auto whitespace-pre-wrap break-words">
+                {this.state.error.message}
+              </pre>
+            )}
             <button
               onClick={() => window.location.reload()}
               className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
