@@ -75,6 +75,7 @@ const RiderDashboardPage = lazy(() => import('./pages/RiderDashboardPage'));
 const RiderMessagesPage = lazy(() => import('./pages/RiderMessagesPage'));
 const AdminRidersPage = lazy(() => import('./pages/AdminRidersPage'));
 const AdminBookingsPage = lazy(() => import('./pages/AdminBookingsPage'));
+const AdminAuditLogPage = lazy(() => import('./pages/AdminAuditLogPage'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -130,6 +131,7 @@ function App() {
           <Route path="/admin/logistics-fees" element={<ProtectedRoute element={<AdminLogisticsFeesPage />} />} />
           <Route path="/admin/riders" element={<ProtectedRoute element={<AdminRidersPage />} />} />
           <Route path="/admin/bookings" element={<ProtectedRoute element={<AdminBookingsPage />} />} />
+          <Route path="/admin/audit-log" element={<ProtectedRoute element={<AdminAuditLogPage />} />} />
 
           <Route path="/agent/messages" element={<AgentMessagesPage />} />
           <Route path="/business/messages" element={<BusinessMessagesPage />} />

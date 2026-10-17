@@ -6,6 +6,7 @@ import {
   ChevronDown, ChevronUp, Search, AlertCircle
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { logAdminAction } from '../lib/auditLog';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -312,6 +313,14 @@ export default function AdminBookingsPage() {
         }));
       }
       setAssignTarget(null);
+      logAdminAction({
+        action: 'booking.assign_rider',
+        category: 'bookings',
+        entityType: table,
+        entityId: assignTarget.id,
+        entityLabel: assignTarget.booking_ref,
+        details: { rider_id: riderId, rider_name: rider?.full_name ?? null, route: `${assignTarget.pickup_city} → ${assignTarget.delivery_city}` },
+      });
       console.log(`Assigned ${rider?.full_name ?? riderId} to ${assignTarget.booking_ref}`);
     } catch (e) {
       setAssignError(e instanceof Error ? e.message : 'Assignment failed');
@@ -333,6 +342,14 @@ export default function AdminBookingsPage() {
       }, { onConflict: 'booking_id,booking_type' });
       if (error) throw error;
       setRatingDone(rateTarget.booking.id);
+      logAdminAction({
+        action: 'rider.rate',
+        category: 'bookings',
+        entityType: 'rider_ratings',
+        entityId: rateTarget.booking.id,
+        entityLabel: rateTarget.booking.booking_ref,
+        details: { rider_id: rateTarget.rider.id, rider_name: rateTarget.rider.full_name, rating: ratingVal },
+      });
       setRateTarget(null); setRatingVal(0); setRatingComment('');
       load();
     } catch (e) {

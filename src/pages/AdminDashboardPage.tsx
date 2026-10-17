@@ -6,7 +6,7 @@ import NotificationBell from '../components/NotificationBell';
 import {
   LogOut, Inbox, Send, Users, Package, Image, MessageSquare, Settings as SettingsIcon,
   ShoppingCart, Star, Building2, Truck, Plus, DollarSign, MessageCircle, BarChart3,
-  FileText, User, Bike, Search, Menu, X, Home, ClipboardList, ArrowUpRight, Activity,
+  FileText, User, Bike, Search, Menu, X, Home, ClipboardList, ArrowUpRight, Activity, ScrollText,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -91,6 +91,7 @@ const SECTIONS: NavSection[] = [
     title: 'Integrations',
     items: [
       { path: '/admin/whatsapp', label: 'WhatsApp Booking', desc: 'WhatsApp number and booking messages', icon: MessageCircle },
+      { path: '/admin/audit-log', label: 'Audit Log', desc: 'Every admin change and event, recorded', icon: ScrollText },
     ],
   },
 ];

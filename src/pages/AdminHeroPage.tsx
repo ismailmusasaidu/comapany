@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { logAdminAction } from '../lib/auditLog';
 import { ArrowLeft, Loader } from 'lucide-react';
 
 interface HeroData {
@@ -70,6 +71,13 @@ export default function AdminHeroPage() {
         .eq('id', data.id);
 
       if (err) throw err;
+      await logAdminAction({
+        action: 'hero_section.update',
+        category: 'content',
+        entityType: 'hero_section',
+        entityId: String(data.id),
+        details: { title: data.title, subtitle: data.subtitle },
+      });
       alert('Hero section updated successfully!');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save');

@@ -5,6 +5,7 @@ import {
   RefreshCw, Info, Package, Weight, FileText, Tag
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { logAdminAction } from '../lib/auditLog';
 import { useAuth } from '../contexts/AuthContext';
 
 interface FeeSetting {
@@ -136,6 +137,14 @@ export default function AdminDeliveryFeesPage() {
       : await supabase.from('delivery_fee_settings').insert({ delivery_type: dt, ...payload });
     setSavingFee(null);
     if (err) { setError(err.message); return; }
+    logAdminAction({
+      action: existing ? 'delivery_fee.update' : 'delivery_fee.create',
+      category: 'payments',
+      entityType: 'delivery_fee_settings',
+      entityId: dt,
+      entityLabel: dt,
+      details: { fee_per_km: feePerKm, minimum_fee: minFee, weight_fee_per_kg: weightFee },
+    });
     setSavedFee(dt);
     setTimeout(() => setSavedFee(null), 2500);
     await fetchAll();
@@ -157,6 +166,14 @@ export default function AdminDeliveryFeesPage() {
       : await supabase.from('package_type_charges').insert({ package_type: pt, label, ...payload });
     setSavingPkg(null);
     if (err) { setError(err.message); return; }
+    logAdminAction({
+      action: existing ? 'package_charge.update' : 'package_charge.create',
+      category: 'payments',
+      entityType: 'package_type_charges',
+      entityId: pt,
+      entityLabel: label,
+      details: { surcharge },
+    });
     setSavedPkg(pt);
     setTimeout(() => setSavedPkg(null), 2500);
     await fetchAll();
@@ -326,6 +343,14 @@ export default function AdminDeliveryFeesPage() {
                                   .eq('delivery_type', dt);
                                 setSavingFee(null);
                                 if (err) { setError(err.message); return; }
+                                logAdminAction({
+                                  action: 'delivery_fee.update',
+                                  category: 'payments',
+                                  entityType: 'delivery_fee_settings',
+                                  entityId: dt,
+                                  entityLabel: dt,
+                                  details: { weight_fee_per_kg: wfee },
+                                });
                                 setSavedFee(`wt-${dt}`);
                                 setTimeout(() => setSavedFee(null), 2500);
                                 await fetchAll();

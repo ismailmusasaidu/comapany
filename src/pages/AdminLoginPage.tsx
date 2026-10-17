@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { logAdminAction } from '../lib/auditLog';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -32,8 +33,20 @@ export default function AdminLoginPage() {
 
       if (!adminRow) {
         await supabase.auth.signOut();
+        await logAdminAction({
+          action: 'admin.login_denied',
+          category: 'auth',
+          entityType: 'admin_session',
+          details: { attempted_email: email, reason: 'not an admin account' },
+        }).catch(() => {});
         throw new Error('Access denied. This account does not have admin privileges.');
       }
+      await logAdminAction({
+        action: 'admin.login',
+        category: 'auth',
+        entityType: 'admin_session',
+        details: { email },
+      });
       // AuthContext's onAuthStateChange will set isAdmin and the useEffect redirect handles navigation.
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');

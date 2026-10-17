@@ -5,6 +5,7 @@ import {
   Filter, X, MapPin, Package, Calendar, StickyNote, CheckCircle, DollarSign,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { logAdminAction } from '../lib/auditLog';
 
 interface UnifiedRequest {
   id: string;
@@ -241,6 +242,21 @@ export default function AdminLogisticsRequestsPage() {
     const paymentStatus = canSetFee ? (parsedFee == null ? 'unpaid' : editPaymentStatus) : selected.payment_status;
     setRequests(prev => prev.map(r => r.id === selected.id ? { ...r, status: editStatus, admin_notes: editNotes, fee_amount: feeAmount, payment_status: paymentStatus } : r));
     setSelected(prev => prev ? { ...prev, status: editStatus, admin_notes: editNotes, fee_amount: feeAmount, payment_status: paymentStatus } : prev);
+    logAdminAction({
+      action: 'logistics_request.update',
+      category: 'logistics',
+      entityType: selected.table,
+      entityId: selected.id,
+      entityLabel: selected.request_ref,
+      details: {
+        title: selected.title,
+        old_status: selected.status,
+        new_status: editStatus,
+        fee_amount: feeAmount,
+        payment_status: paymentStatus,
+        ...(canSetFee && selected.fee_amount !== feeAmount ? { old_fee_amount: selected.fee_amount } : {}),
+      },
+    });
     setSaving(false);
   };
 
@@ -248,7 +264,18 @@ export default function AdminLogisticsRequestsPage() {
     setRequests(prev => prev.map(x => x.id === r.id ? { ...x, status } : x));
     if (selected?.id === r.id) setSelected(prev => prev ? { ...prev, status } : prev);
     const { error } = await supabase.from(r.table).update({ status, updated_at: new Date().toISOString() }).eq('id', r.id);
-    if (error) setRequests(prev => prev.map(x => x.id === r.id ? { ...x, status: r.status } : x));
+    if (error) {
+      setRequests(prev => prev.map(x => x.id === r.id ? { ...x, status: r.status } : x));
+      return;
+    }
+    logAdminAction({
+      action: 'logistics_request.status_change',
+      category: 'logistics',
+      entityType: r.table,
+      entityId: r.id,
+      entityLabel: r.request_ref,
+      details: { title: r.title, old_status: r.status, new_status: status },
+    });
   };
 
   return (
