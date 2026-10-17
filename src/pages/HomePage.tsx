@@ -336,8 +336,8 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/35 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/25" />
 
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-              <div className="max-w-2xl py-20 pb-44 lg:py-28 lg:pb-40">
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center pt-[4.5rem] pb-36 lg:pt-28 lg:pb-40">
+              <div className="max-w-2xl py-16 pb-40 lg:py-24 lg:pb-36">
                 <div className={i === heroIndex ? 'animate-slideInLeft' : ''}>
                   <div className="inline-flex items-center gap-2 bg-orange-500/15 border border-orange-500/40 rounded-full px-4 py-2 mb-6">
                     <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
