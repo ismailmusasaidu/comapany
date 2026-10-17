@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import NotificationBell from '../components/NotificationBell';
 import {
   LogOut, Inbox, Send, Users, Package, Image, MessageSquare, Settings as SettingsIcon,
   ShoppingCart, Star, Building2, Truck, Plus, DollarSign, MessageCircle, BarChart3,
@@ -283,6 +284,7 @@ export default function AdminDashboardPage() {
               <p className="text-sm font-semibold text-slate-800 truncate">Administrator</p>
               <p className="text-xs text-slate-500 truncate">{user?.email}</p>
             </div>
+            <NotificationBell />
             <button
               onClick={handleLogout}
               disabled={isLoading}
