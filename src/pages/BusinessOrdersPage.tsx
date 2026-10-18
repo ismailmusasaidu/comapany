@@ -9,6 +9,8 @@ import {
 import { useBusiness } from '../contexts/BusinessContext';
 import { supabase } from '../lib/supabase';
 import BookingDetailModal from '../components/BookingDetailModal';
+import QuotationDetailModal from '../components/QuotationDetailModal';
+import { fetchQuotations, Quotation } from '../lib/quotations';
 import InvoiceModal, { type InvoiceData } from '../components/InvoiceModal';
 
 interface Booking {
@@ -103,6 +105,8 @@ export default function BusinessOrdersPage() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [quotationView, setQuotationView] = useState<{ request: LogisticsRequest; quotations: Quotation[] } | null>(null);
+  const [quoteNotice, setQuoteNotice] = useState('');
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
 
   // Filters
@@ -180,6 +184,16 @@ export default function BusinessOrdersPage() {
     setDateFrom(''); setDateTo('');
   };
   const hasActiveFilters = search || statusFilter || typeFilter || dateFrom || dateTo;
+
+  const openQuotation = async (r: LogisticsRequest) => {
+    setQuoteNotice('');
+    const quotations = await fetchQuotations('business_logistics_requests', r.id);
+    if (quotations.length === 0) {
+      setQuoteNotice(`No quotation has been issued yet for ${r.request_ref}. Our team will send one after reviewing your request.`);
+      return;
+    }
+    setQuotationView({ request: r, quotations });
+  };
 
   const filteredBookings = useMemo(() => {
     let list = bookings.filter(b => {
@@ -650,13 +664,16 @@ export default function BusinessOrdersPage() {
                                   </div>
                                 </td>
                                 <td className="px-4 py-3.5 text-right">
-                                  <button
-                                    onClick={() => setInvoiceData({ type: 'request', ...r, business_name: profile?.company_name, business_contact: profile?.contact_person, business_phone: profile?.phone, business_email: profile?.email })}
-                                    className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
-                                    title="Generate invoice"
-                                  >
-                                    <FileDown className="h-3.5 w-3.5" />
-                                  </button>
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <button onClick={() => openQuotation(r)} className="px-2.5 py-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 rounded-lg transition-colors" title="View quotation">Quotation</button>
+                                    <button
+                                      onClick={() => setInvoiceData({ type: 'request', ...r, business_name: profile?.company_name, business_contact: profile?.contact_person, business_phone: profile?.phone, business_email: profile?.email })}
+                                      className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
+                                      title="Generate invoice"
+                                    >
+                                      <FileDown className="h-3.5 w-3.5" />
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             ))}
@@ -715,6 +732,23 @@ export default function BusinessOrdersPage() {
           isAdmin={false}
           onClose={() => setSelectedBooking(null)}
         />
+      )}
+
+      {quotationView && (
+        <QuotationDetailModal
+          quotation={quotationView.quotations[0]}
+          requestRef={quotationView.request.request_ref}
+          serviceType={cap(quotationView.request.service_type)}
+          onClose={() => setQuotationView(null)}
+          onDecided={() => { setQuotationView(null); fetchAll(); }}
+        />
+      )}
+
+      {quoteNotice && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-blue-50 border border-blue-100 text-blue-700 px-4 py-3 rounded-xl text-sm shadow-lg max-w-md">
+          {quoteNotice}
+          <button onClick={() => setQuoteNotice('')} className="ml-3 font-semibold hover:text-blue-900">Dismiss</button>
+        </div>
       )}
 
       {invoiceData && <InvoiceModal data={invoiceData} onClose={() => setInvoiceData(null)} />}

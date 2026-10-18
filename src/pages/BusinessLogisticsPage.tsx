@@ -380,7 +380,7 @@ export default function BusinessLogisticsPage() {
             <CheckCircle className="h-10 w-10 text-green-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Request Submitted!</h2>
-          <p className="text-gray-500 mb-2">Your logistics request has been submitted. Our team will review and respond shortly.</p>
+          <p className="text-gray-500 mb-2">Your logistics request has been submitted successfully. Our team will review your requirements and send you a quotation. Your booking will only be confirmed after you accept the quotation.</p>
           <div className="bg-orange-50 border border-orange-100 rounded-xl px-6 py-3 inline-block mb-8">
             <p className="text-xs text-orange-600 font-medium">Request Reference</p>
             <p className="text-xl font-bold text-orange-700">{createdRef}</p>

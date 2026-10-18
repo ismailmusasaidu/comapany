@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, RefreshCw, Search, Truck, User, Building2, Users,
   Filter, X, MapPin, Package, Calendar, StickyNote, CheckCircle, DollarSign, FileText,
+  History, ClipboardList, Quote, Eye, Plus,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { logAdminAction } from '../lib/auditLog';
 import { getDocumentViewUrl, StoredDocument } from '../lib/logisticsDocuments';
+import { fetchQuotations, fetchWorkflowHistory, Quotation, updateReviewStatus, sendInformationRequest } from '../lib/quotations';
+import QuotationBuilderModal from '../components/QuotationBuilderModal';
 
 interface UnifiedRequest {
   id: string;
@@ -32,6 +35,10 @@ interface UnifiedRequest {
   requester_phone: string;
   requester_email: string;
   documents: StoredDocument[];
+  request_status: string;
+  quotation_status: string;
+  operational_status: string;
+  booking_reference: string | null;
 }
 
 const STATUS_OPTIONS = ['pending', 'reviewing', 'approved', 'in_progress', 'completed', 'rejected'];
@@ -144,6 +151,9 @@ export default function AdminLogisticsRequestsPage() {
   const [editPaymentStatus, setEditPaymentStatus] = useState('unpaid');
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState('');
+  const [requestQuotes, setRequestQuotes] = useState<Quotation[]>([]);
+  const [workflowLog, setWorkflowLog] = useState<Array<Record<string, unknown>>>([]);
+  const [buildingQuotation, setBuildingQuotation] = useState(false);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -173,6 +183,10 @@ export default function AdminLogisticsRequestsPage() {
         requester_name: p.full_name ?? 'Unknown', requester_phone: p.phone ?? '',
         requester_email: p.email ?? '',
         documents: (r.documents as StoredDocument[] | null) ?? [],
+        request_status: (r.request_status as string) ?? 'submitted',
+        quotation_status: (r.quotation_status as string) ?? 'none',
+        operational_status: (r.operational_status as string) ?? 'not_scheduled',
+        booking_reference: (r.booking_reference as string | null) ?? null,
       });
     });
     (agentRes.data ?? []).forEach((r: Record<string, unknown>) => {
@@ -194,6 +208,10 @@ export default function AdminLogisticsRequestsPage() {
         requester_name: p.full_name ?? p.company_name ?? 'Unknown', requester_phone: '',
         requester_email: '',
         documents: (r.documents as StoredDocument[] | null) ?? [],
+        request_status: (r.request_status as string) ?? 'submitted',
+        quotation_status: (r.quotation_status as string) ?? 'none',
+        operational_status: (r.operational_status as string) ?? 'not_scheduled',
+        booking_reference: (r.booking_reference as string | null) ?? null,
       });
     });
     (bizRes.data ?? []).forEach((r: Record<string, unknown>) => {
@@ -214,6 +232,10 @@ export default function AdminLogisticsRequestsPage() {
         requester_name: p.company_name ?? p.contact_person ?? 'Unknown',
         requester_phone: p.phone ?? '', requester_email: p.email ?? '',
         documents: (r.documents as StoredDocument[] | null) ?? [],
+        request_status: (r.request_status as string) ?? 'submitted',
+        quotation_status: (r.quotation_status as string) ?? 'none',
+        operational_status: (r.operational_status as string) ?? 'not_scheduled',
+        booking_reference: (r.booking_reference as string | null) ?? null,
       });
     });
 
@@ -242,13 +264,17 @@ export default function AdminLogisticsRequestsPage() {
     business: requests.filter(r => r.source === 'business').length,
   }), [requests]);
 
-  const openDetail = (r: UnifiedRequest) => {
+  const openDetail = async (r: UnifiedRequest) => {
     setSelected(r);
     setEditStatus(r.status);
     setEditNotes(r.admin_notes);
     setEditFee(r.fee_amount != null ? String(r.fee_amount) : '');
     setEditPaymentStatus(r.payment_status || 'unpaid');
     setActionError('');
+    setRequestQuotes([]);
+    setWorkflowLog([]);
+    fetchQuotations(r.table, r.id).then(qs => setRequestQuotes(qs)).catch(() => setRequestQuotes([]));
+    fetchWorkflowHistory(r.table, r.id).then(log => setWorkflowLog(log)).catch(() => setWorkflowLog([]));
   };
 
   const feeEditable = FEE_EDITABLE_STATUSES.includes(editStatus);
@@ -319,6 +345,38 @@ export default function AdminLogisticsRequestsPage() {
       entityLabel: r.request_ref,
       details: { title: r.title, old_status: r.status, new_status: status },
     });
+  };
+
+  const setReviewState = async (state: 'under_review' | 'awaiting_quotation') => {
+    if (!selected) return;
+    setSaving(true);
+    setActionError('');
+    try {
+      await updateReviewStatus(selected.table, selected.id, state);
+      await fetchAll();
+      setSelected(null);
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : 'Could not update the review status.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const requestInfo = async () => {
+    if (!selected) return;
+    const msg = window.prompt('What information do you need from the requester?');
+    if (msg == null || msg.trim() === '') return;
+    setSaving(true);
+    setActionError('');
+    try {
+      await sendInformationRequest(selected.table, selected.id, msg.trim());
+      await fetchAll();
+      setSelected(null);
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : 'Could not send the information request.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -402,6 +460,12 @@ export default function AdminLogisticsRequestsPage() {
                             <p className="font-semibold text-gray-900 truncate">{r.title}</p>
                             <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${meta.chip}`}>{meta.label}</span>
                             <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_BADGE[r.status] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>{cap(r.status)}</span>
+                            {r.quotation_status !== 'none' && (
+                              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full border bg-green-50 text-green-700 border-green-200">Quotation: {cap(r.quotation_status)}</span>
+                            )}
+                            {r.booking_reference && (
+                              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200">{r.booking_reference}</span>
+                            )}
                             {r.fee_amount != null && (
                               <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${r.payment_status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-600 border-red-200'}`}>
                                 {naira(r.fee_amount)} · {cap(r.payment_status)}
@@ -508,6 +572,87 @@ export default function AdminLogisticsRequestsPage() {
 
               {selected.description && <DescriptionBlock text={selected.description} />}
 
+              {/* Review workflow actions */}
+              <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4 space-y-3">
+                <p className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 uppercase tracking-wide">
+                  <ClipboardList className="h-3.5 w-3.5" /> Review workflow
+                </p>
+                <div className="grid sm:grid-cols-3 gap-2">
+                  <button onClick={() => setReviewState('under_review')} disabled={saving}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 border border-blue-200 bg-white text-blue-700 rounded-xl text-xs font-semibold hover:bg-blue-50 transition-colors disabled:opacity-60">
+                    <Eye className="h-3.5 w-3.5" /> Under Review
+                  </button>
+                  <button onClick={() => setReviewState('awaiting_quotation')} disabled={saving}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 border border-blue-200 bg-white text-blue-700 rounded-xl text-xs font-semibold hover:bg-blue-50 transition-colors disabled:opacity-60">
+                    <Quote className="h-3.5 w-3.5" /> Awaiting Quotation
+                  </button>
+                  <button onClick={requestInfo} disabled={saving}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 border border-blue-200 bg-white text-blue-700 rounded-xl text-xs font-semibold hover:bg-blue-50 transition-colors disabled:opacity-60">
+                    <StickyNote className="h-3.5 w-3.5" /> More Info Required
+                  </button>
+                </div>
+                <p className="text-[11px] text-gray-400">
+                  Bookings are only created when the customer accepts a quotation — submitting a request never confirms a booking.
+                </p>
+              </div>
+
+              {/* Quotations */}
+              <div className="rounded-2xl border border-gray-100 overflow-hidden">
+                <div className="flex items-center justify-between px-4 pt-3 pb-2">
+                  <p className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                    <FileText className="h-3.5 w-3.5" /> Quotations
+                  </p>
+                  <button onClick={() => setBuildingQuotation(true)}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-semibold transition-colors">
+                    <Plus className="h-3 w-3" /> New / Draft
+                  </button>
+                </div>
+                {requestQuotes.length === 0 ? (
+                  <p className="px-4 pb-4 text-sm text-gray-400">No quotations yet. Build one to send the requester a price.</p>
+                ) : (
+                  <div className="divide-y divide-gray-50 px-2 pb-2">
+                    {requestQuotes.map(q => {
+                      const expired = q.status === 'sent' && q.valid_until && new Date(q.valid_until) <= new Date();
+                      return (
+                        <div key={q.id} className="px-2 py-2.5 flex items-center justify-between gap-3 text-sm">
+                          <div className="min-w-0">
+                            <p className="font-medium text-gray-900 flex items-center gap-2">
+                              v{q.version_number}
+                              <span className="text-xs font-semibold px-2 py-0.5 rounded-full border bg-gray-50 text-gray-600 border-gray-200">{cap(q.status)}</span>
+                              {expired && <span className="text-[11px] font-semibold text-red-500">expired</span>}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5">{q.quotation_ref} · sent {q.sent_at ? fmtDate(q.sent_at) : '—'}</p>
+                          </div>
+                          <span className="font-semibold text-gray-900 whitespace-nowrap">₦{Number(q.total_amount).toLocaleString('en-NG')}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Workflow history */}
+              {workflowLog.length > 0 && (
+                <div className="rounded-2xl border border-gray-100 overflow-hidden">
+                  <p className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 pt-3 pb-1">
+                    <History className="h-3.5 w-3.5" /> Workflow history
+                  </p>
+                  <div className="divide-y divide-gray-50 px-4 pb-3">
+                    {workflowLog.map((h, i) => (
+                      <div key={(h.id as string) ?? i} className="py-2 text-xs">
+                        <p className="text-gray-700 font-medium">
+                          {cap(String(h.action_type ?? 'event'))}
+                          {h.version_number != null ? <span className="text-gray-400"> · v{h.version_number as number}</span> : null}
+                        </p>
+                        <p className="text-gray-400 mt-0.5">
+                          {h.created_at ? fmtDate(h.created_at as string) : ''} · {h.actor_type === 'admin' ? 'Admin' : 'Customer'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {selected.documents.length > 0 && (
                 <div className="rounded-2xl border border-gray-100 overflow-hidden">
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 pt-3 pb-1">Attached Documents</p>
@@ -584,6 +729,23 @@ export default function AdminLogisticsRequestsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {selected && buildingQuotation && (
+        <QuotationBuilderModal
+          requestTable={selected.table}
+          requestId={selected.id}
+          requestRef={selected.request_ref}
+          quotations={requestQuotes}
+          onClose={() => setBuildingQuotation(false)}
+          onSaved={async () => {
+            setBuildingQuotation(false);
+            const updated = await fetchQuotations(selected.table, selected.id);
+            setRequestQuotes(updated);
+            fetchWorkflowHistory(selected.table, selected.id).then(log => setWorkflowLog(log)).catch(() => {});
+            await fetchAll();
+          }}
+        />
       )}
     </div>
   );
